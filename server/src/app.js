@@ -44,6 +44,7 @@ import deliveryRoutes from './routes/delivery.routes.js';
 import budgetingRoutes from './routes/budgeting.routes.js';
 import campaignRoutes from './routes/campaigns.routes.js';
 import dashboardBuilderRoutes from './routes/dashboardBuilder.routes.js';
+import securityRoutes from './routes/security.routes.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 
 export const app = express();
@@ -52,7 +53,7 @@ app.use(helmet());
 app.use(cors({ origin: process.env.CORS_ORIGIN?.split(',') || '*', credentials: true }));
 app.use(express.json({ limit: '2mb' }));
 
-app.get('/', (req, res) => res.json({ message: 'SmartLedger SaaS API is running', version: '4.5.0' }));
+app.get('/', (req, res) => res.json({ message: 'SmartLedger SaaS API is running', version: '5.4.0-selected' }));
 app.get('/api/health', (req, res) => res.json({ ok: true, service: 'smartledger-api', time: new Date().toISOString() }));
 
 app.use('/api/auth', authRoutes);
@@ -97,6 +98,7 @@ app.use('/api/deliveries', deliveryRoutes);
 app.use('/api/budgeting', budgetingRoutes);
 app.use('/api/campaigns', campaignRoutes);
 app.use('/api/dashboard-builder', dashboardBuilderRoutes);
+app.use('/api/security', securityRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

@@ -45,6 +45,8 @@ import Deliveries from './pages/Deliveries.jsx';
 import BudgetingForecasting from './pages/BudgetingForecasting.jsx';
 import Campaigns from './pages/Campaigns.jsx';
 import DashboardBuilder from './pages/DashboardBuilder.jsx';
+import BranchTransfers from './pages/BranchTransfers.jsx';
+import SecurityCenter from './pages/SecurityCenter.jsx';
 
 function PrivateRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
@@ -97,6 +99,8 @@ export default function App() {
         <Route path="settings" element={<Settings />} />
         <Route path="documents" element={<Documents />} />
         <Route path="branches" element={<Branches />} />
+        <Route path="branch-transfers" element={<BranchTransfers />} />
+        <Route path="security-center" element={<SecurityCenter />} />
         <Route path="barcode-labels" element={<BarcodeLabels />} />
         <Route path="approvals" element={<Approvals />} />
         <Route path="notifications" element={<Notifications />} />

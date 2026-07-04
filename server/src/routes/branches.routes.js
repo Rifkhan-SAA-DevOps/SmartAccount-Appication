@@ -271,4 +271,167 @@ router.post('/transfers', requirePermission('branch:create'), async (req, res, n
   } catch (e) { next(e); }
 });
 
+
+router.get('/transfer-dashboard', requirePermission('branch:read'), async (req, res, next) => {
+  try {
+    await ensureBootstrap(req.user.tenantId);
+    const [warehouses, stocks, transfers, movements] = await Promise.all([
+      prisma.warehouse.findMany({ where: { tenantId: req.user.tenantId, isActive: true }, include: { branch: true }, orderBy: { name: 'asc' } }),
+      prisma.productStock.findMany({ where: { tenantId: req.user.tenantId }, include: { product: true, warehouse: { include: { branch: true } } }, take: 1000 }),
+      prisma.stockTransfer.findMany({ where: { tenantId: req.user.tenantId }, include: { fromWarehouse: true, toWarehouse: true, items: { include: { product: true } } }, orderBy: { createdAt: 'desc' }, take: 50 }),
+      prisma.stockMovement.findMany({ where: { tenantId: req.user.tenantId, type: 'TRANSFER' }, orderBy: { createdAt: 'desc' }, take: 20 })
+    ]);
+
+    const warehouseCards = warehouses.map((warehouse) => {
+      const warehouseStocks = stocks.filter((stock) => stock.warehouseId === warehouse.id);
+      const totalQty = warehouseStocks.reduce((total, stock) => total + Number(stock.quantity || 0), 0);
+      const stockValue = warehouseStocks.reduce((total, stock) => total + Number(stock.quantity || 0) * Number(stock.product?.costPrice || 0), 0);
+      const lowStockCount = warehouseStocks.filter((stock) => Number(stock.reorderLevel || 0) > 0 && Number(stock.quantity || 0) <= Number(stock.reorderLevel || 0)).length;
+      return {
+        id: warehouse.id,
+        name: warehouse.name,
+        code: warehouse.code,
+        branch: warehouse.branch?.name || 'No branch',
+        totalQty,
+        stockValue,
+        productCount: warehouseStocks.length,
+        lowStockCount
+      };
+    });
+
+    const postedTransfers = transfers.filter((transfer) => transfer.status === 'POSTED');
+    const cancelledTransfers = transfers.filter((transfer) => transfer.status === 'CANCELLED');
+    const transferValue = postedTransfers.reduce((total, transfer) => total + transfer.items.reduce((sum, item) => sum + Number(item.qty || 0) * Number(item.unitCost || item.product?.costPrice || 0), 0), 0);
+
+    res.json({
+      warehouses: warehouseCards,
+      totals: {
+        warehouses: warehouses.length,
+        stockRows: stocks.length,
+        totalQty: warehouseCards.reduce((total, card) => total + card.totalQty, 0),
+        stockValue: warehouseCards.reduce((total, card) => total + card.stockValue, 0),
+        transfers: transfers.length,
+        postedTransfers: postedTransfers.length,
+        cancelledTransfers: cancelledTransfers.length,
+        transferValue
+      },
+      lowStock: stocks
+        .filter((stock) => Number(stock.reorderLevel || 0) > 0 && Number(stock.quantity || 0) <= Number(stock.reorderLevel || 0))
+        .map((stock) => ({
+          id: stock.id,
+          productId: stock.productId,
+          product: stock.product?.name,
+          sku: stock.product?.sku,
+          warehouse: stock.warehouse?.name,
+          branch: stock.warehouse?.branch?.name,
+          quantity: Number(stock.quantity || 0),
+          reorderLevel: Number(stock.reorderLevel || 0)
+        }))
+        .slice(0, 25),
+      recentTransfers: transfers,
+      recentMovements: movements
+    });
+  } catch (e) { next(e); }
+});
+
+router.post('/transfers/preview', requirePermission('branch:create'), async (req, res, next) => {
+  try {
+    const data = transferSchema.parse(req.body);
+    if (data.fromWarehouseId === data.toWarehouseId) {
+      return res.status(400).json({ message: 'From and To warehouses cannot be the same' });
+    }
+
+    const [fromWarehouse, toWarehouse] = await Promise.all([
+      assertWarehouseBelongsToTenant(prisma, { tenantId: req.user.tenantId, warehouseId: data.fromWarehouseId }),
+      assertWarehouseBelongsToTenant(prisma, { tenantId: req.user.tenantId, warehouseId: data.toWarehouseId })
+    ]);
+
+    const rows = [];
+    for (const item of data.items) {
+      const [product, fromStock, toStock] = await Promise.all([
+        prisma.product.findFirst({ where: { id: item.productId, tenantId: req.user.tenantId, isActive: true } }),
+        prisma.productStock.findUnique({ where: { tenantId_productId_warehouseId: { tenantId: req.user.tenantId, productId: item.productId, warehouseId: fromWarehouse.id } } }),
+        prisma.productStock.findUnique({ where: { tenantId_productId_warehouseId: { tenantId: req.user.tenantId, productId: item.productId, warehouseId: toWarehouse.id } } })
+      ]);
+      if (!product) throw Object.assign(new Error('Product not found'), { status: 404 });
+      const available = Number(fromStock?.quantity || 0);
+      const qty = Number(item.qty || 0);
+      rows.push({
+        productId: product.id,
+        product: product.name,
+        sku: product.sku,
+        requestedQty: qty,
+        fromAvailable: available,
+        toCurrentQty: Number(toStock?.quantity || 0),
+        unitCost: Number(product.costPrice || 0),
+        lineValue: qty * Number(product.costPrice || 0),
+        ok: available >= qty,
+        message: available >= qty ? 'Ready' : `Only ${available} available in ${fromWarehouse.name}`
+      });
+    }
+
+    res.json({
+      fromWarehouse,
+      toWarehouse,
+      totalQty: rows.reduce((total, row) => total + row.requestedQty, 0),
+      totalValue: rows.reduce((total, row) => total + row.lineValue, 0),
+      canPost: rows.every((row) => row.ok),
+      rows
+    });
+  } catch (e) { next(e); }
+});
+
+router.post('/transfers/:id/cancel', requirePermission('branch:update'), async (req, res, next) => {
+  try {
+    const before = await prisma.stockTransfer.findFirst({
+      where: { id: req.params.id, tenantId: req.user.tenantId },
+      include: { fromWarehouse: true, toWarehouse: true, items: { include: { product: true } } }
+    });
+    if (!before) return res.status(404).json({ message: 'Transfer not found' });
+    if (before.status === 'CANCELLED') return res.status(400).json({ message: 'Transfer is already cancelled' });
+    if (before.status !== 'POSTED') return res.status(400).json({ message: 'Only posted transfers can be cancelled' });
+
+    const result = await prisma.$transaction(async (tx) => {
+      for (const item of before.items) {
+        await ensureProductStock(tx, { tenantId: req.user.tenantId, productId: item.productId, warehouseId: before.toWarehouseId });
+        await ensureProductStock(tx, { tenantId: req.user.tenantId, productId: item.productId, warehouseId: before.fromWarehouseId });
+        const toStock = await tx.productStock.findUnique({
+          where: { tenantId_productId_warehouseId: { tenantId: req.user.tenantId, productId: item.productId, warehouseId: before.toWarehouseId } }
+        });
+        if (Number(toStock?.quantity || 0) < Number(item.qty || 0)) {
+          throw Object.assign(new Error(`Cannot cancel. ${before.toWarehouse.name} no longer has enough ${item.product.name}.`), { status: 400 });
+        }
+      }
+
+      for (const item of before.items) {
+        await addWarehouseStock(tx, { tenantId: req.user.tenantId, productId: item.productId, warehouseId: before.toWarehouseId, quantity: -Number(item.qty) });
+        await addWarehouseStock(tx, { tenantId: req.user.tenantId, productId: item.productId, warehouseId: before.fromWarehouseId, quantity: Number(item.qty) });
+        await tx.stockMovement.create({
+          data: {
+            tenantId: req.user.tenantId,
+            productId: item.productId,
+            fromWarehouseId: before.toWarehouseId,
+            toWarehouseId: before.fromWarehouseId,
+            type: 'TRANSFER',
+            quantity: item.qty,
+            unitCost: item.unitCost || item.product?.costPrice || 0,
+            refType: 'StockTransferCancel',
+            refId: before.id,
+            notes: `Cancellation of ${before.transferNo}: ${before.toWarehouse.name} back to ${before.fromWarehouse.name}`
+          }
+        });
+      }
+
+      return tx.stockTransfer.update({
+        where: { id: before.id },
+        data: { status: 'CANCELLED', notes: `${before.notes || ''}\nCancelled: ${new Date().toISOString()}`.trim() },
+        include: { fromWarehouse: true, toWarehouse: true, items: { include: { product: true } } }
+      });
+    });
+
+    await audit(req, 'CANCEL', 'StockTransfer', result.id, before, result);
+    res.json(result);
+  } catch (e) { next(e); }
+});
+
 export default router;

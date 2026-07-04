@@ -398,3 +398,69 @@ textarea{width:100%;border:1px solid var(--line);border-radius:13px;padding:13px
   .dashboard-source-grid,
   .dashboard-metric-preview { grid-template-columns: 1fr; }
 }
+
+
+/* v4.8 Document Attachment Center */
+.document-center-page .document-hero,
+.branch-transfer-page .transfer-hero,
+.security-center-page .security-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  padding: 28px;
+  background: radial-gradient(circle at top left, rgba(124,58,237,.20), transparent 36%), linear-gradient(135deg, rgba(15,23,42,.98), rgba(30,64,175,.88));
+  color: #fff;
+  box-shadow: 0 24px 70px rgba(15,23,42,.26);
+}
+.document-center-page .document-hero p,
+.branch-transfer-page .transfer-hero p,
+.security-center-page .security-hero p,
+.document-center-page .document-hero .eyebrow,
+.branch-transfer-page .transfer-hero .eyebrow,
+.security-center-page .security-hero .eyebrow { color: rgba(255,255,255,.78); }
+.document-stat-grid,.transfer-stat-grid,.security-stat-grid { margin-top: 22px; }
+.document-filter-panel { margin-top: 18px; }
+.document-center-grid { margin-top: 18px; }
+.document-manage-panel { margin-top: 18px; border: 1px solid rgba(124,58,237,.18); }
+.compact-actions { display: flex; gap: 7px; flex-wrap: wrap; }
+.truncate-text { display: inline-block; max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.badge.uploaded { background: #dbeafe; color: #1d4ed8; }
+.badge.archived { background: #f1f5f9; color: #475569; }
+
+/* v5.0 Branch Transfer Pro */
+.transfer-layout { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(340px,.65fr); gap: 18px; align-items: start; margin-top: 18px; }
+.transfer-main-panel,.transfer-side-panel,.low-stock-panel { position: relative; overflow: hidden; }
+.transfer-route-card { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 16px; border-radius: 18px; background: linear-gradient(135deg,#f8fafc,#eef2ff); border: 1px solid rgba(99,102,241,.18); font-size: 1.05rem; }
+.transfer-route-card span { width: 42px; height: 42px; display: inline-grid; place-items: center; border-radius: 999px; background: #fff; color: #4f46e5; box-shadow: 0 10px 30px rgba(79,70,229,.12); }
+.transfer-items { display: grid; gap: 10px; }
+.transfer-item-row { display: grid; grid-template-columns: minmax(0,1fr) 140px auto; gap: 10px; align-items: end; }
+.transfer-preview { margin-top: 16px; padding: 16px; border-radius: 18px; border: 1px solid rgba(148,163,184,.22); }
+.transfer-preview.ok { background: #f0fdf4; border-color: #bbf7d0; }
+.transfer-preview.bad { background: #fef2f2; border-color: #fecaca; }
+.preview-row-list,.warehouse-card-list,.low-stock-chip-row { display: grid; gap: 10px; }
+.preview-row,.warehouse-health-card,.low-stock-chip { padding: 12px; border-radius: 16px; background: #fff; border: 1px solid rgba(148,163,184,.22); }
+.preview-row { display: grid; grid-template-columns: minmax(0,1fr) auto auto; gap: 10px; align-items: center; }
+.warehouse-health-card { display: grid; gap: 6px; }
+.warehouse-health-card > span,.preview-row small,.low-stock-chip span { color: #64748b; font-size: 12px; }
+.warehouse-health-card div { display: grid; grid-template-columns: auto 1fr auto 1fr; gap: 6px; align-items: center; }
+.warehouse-health-card em { color: #b45309; font-weight: 800; font-style: normal; }
+.low-stock-panel { margin-top: 18px; }
+.low-stock-chip-row { grid-template-columns: repeat(3, minmax(200px,1fr)); }
+.badge.posted { background: #dcfce7; color: #166534; }
+.badge.cancelled { background: #fee2e2; color: #991b1b; }
+
+/* v5.4 Security Center */
+.security-tabs { margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; }
+.security-user-grid { display: grid; grid-template-columns: repeat(4, minmax(190px, 1fr)); gap: 14px; }
+.security-user-card { padding: 16px; border-radius: 18px; border: 1px solid rgba(148,163,184,.24); background: linear-gradient(135deg,#fff,#f8fafc); display: grid; gap: 6px; }
+.security-user-card span,.security-user-card small { color: #64748b; }
+.security-user-card em { font-style: normal; font-weight: 900; }
+.security-user-card em.good { color: #15803d; }
+.security-user-card em.bad { color: #dc2626; }
+.badge.success { background: #dcfce7; color: #166534; }
+.badge.failed,.badge.critical { background: #fee2e2; color: #991b1b; }
+.badge.high { background: #ffedd5; color: #9a3412; }
+.badge.medium { background: #fef9c3; color: #854d0e; }
+.badge.low,.badge.info { background: #dbeafe; color: #1d4ed8; }
+@media (max-width: 1150px) { .transfer-layout { grid-template-columns: 1fr; } .low-stock-chip-row,.security-user-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+@media (max-width: 700px) { .transfer-item-row,.preview-row,.low-stock-chip-row,.security-user-grid { grid-template-columns: 1fr; } }

@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
 import { signToken } from '../lib/jwt.js';
@@ -15,6 +16,76 @@ const registerSchema = z.object({
   phone: z.string().optional(),
   password: z.string().min(8)
 });
+
+function getClientIp(req) {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string') return forwarded.split(',')[0].trim();
+  return req.ip || req.socket?.remoteAddress || null;
+}
+
+function getUserAgent(req) {
+  return req.headers['user-agent'] || 'Unknown device';
+}
+
+function deviceNameFromAgent(agent = '') {
+  const text = String(agent || 'Unknown device');
+  const browser = text.includes('Edg/') ? 'Edge' : text.includes('Chrome/') ? 'Chrome' : text.includes('Firefox/') ? 'Firefox' : text.includes('Safari/') ? 'Safari' : 'Browser';
+  const os = text.includes('Windows') ? 'Windows' : text.includes('Mac OS') ? 'macOS' : text.includes('Android') ? 'Android' : text.includes('iPhone') ? 'iPhone' : text.includes('Linux') ? 'Linux' : 'Device';
+  return `${browser} on ${os}`;
+}
+
+function deviceHashFromRequest(req) {
+  const source = `${getUserAgent(req)}|${getClientIp(req) || ''}`;
+  return crypto.createHash('sha256').update(source).digest('hex').slice(0, 48);
+}
+
+async function recordLoginAttempt(req, { user, email, status, reason }) {
+  if (!user?.tenantId) return;
+  const ip = getClientIp(req);
+  const userAgent = getUserAgent(req);
+  const deviceHash = deviceHashFromRequest(req);
+  const deviceName = deviceNameFromAgent(userAgent);
+
+  await prisma.$transaction(async (tx) => {
+    await tx.loginHistory.create({
+      data: {
+        tenantId: user.tenantId,
+        userId: user.id,
+        email: email || user.email,
+        status,
+        reason: reason || null,
+        ip,
+        userAgent,
+        deviceHash,
+        deviceName
+      }
+    });
+
+    if (status === 'SUCCESS') {
+      await tx.trustedDevice.upsert({
+        where: { tenantId_userId_deviceHash: { tenantId: user.tenantId, userId: user.id, deviceHash } },
+        update: { lastSeenAt: new Date(), ipAddress: ip, userAgent, deviceName, revokedAt: null },
+        create: { tenantId: user.tenantId, userId: user.id, deviceHash, deviceName, userAgent, ipAddress: ip }
+      });
+    }
+
+    if (status !== 'SUCCESS') {
+      await tx.securityEvent.create({
+        data: {
+          tenantId: user.tenantId,
+          userId: user.id,
+          severity: reason === 'DISABLED_USER' ? 'HIGH' : 'MEDIUM',
+          type: 'LOGIN_FAILED',
+          title: 'Failed login attempt',
+          description: `${email || user.email} failed to log in. Reason: ${reason || 'UNKNOWN'}`,
+          ip,
+          userAgent,
+          metadata: { email: email || user.email, reason, deviceName }
+        }
+      });
+    }
+  }).catch(() => null);
+}
 
 router.post('/register-company', async (req, res, next) => {
   try {
@@ -82,10 +153,17 @@ router.post('/login', async (req, res, next) => {
     if (!user) return res.status(401).json({ message: 'Invalid email or password' });
 
     const ok = await bcrypt.compare(password, user.passwordHash);
-    if (!ok) return res.status(401).json({ message: 'Invalid email or password' });
-    if (!user.isActive) return res.status(403).json({ message: 'User account disabled' });
+    if (!ok) {
+      await recordLoginAttempt(req, { user, email, status: 'FAILED', reason: 'BAD_PASSWORD' });
+      return res.status(401).json({ message: 'Invalid email or password' });
+    }
+    if (!user.isActive) {
+      await recordLoginAttempt(req, { user, email, status: 'FAILED', reason: 'DISABLED_USER' });
+      return res.status(403).json({ message: 'User account disabled' });
+    }
 
     await prisma.user.update({ where: { id: user.id }, data: { lastLoginAt: new Date() } });
+    await recordLoginAttempt(req, { user, email, status: 'SUCCESS', reason: null });
     const token = signToken({ userId: user.id, tenantId: user.tenantId, role: user.role });
     res.json({ token, user: { id: user.id, name: user.name, email: user.email, role: user.role }, tenant: user.tenant });
   } catch (error) {
