@@ -1,0 +1,18 @@
+{
+  "name": "SmartLedger ERP POS",
+  "short_name": "SmartLedger",
+  "description": "Accounting, inventory and offline-ready POS for shops and companies.",
+  "start_url": "/pos",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#6d28d9",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
