@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, BarChart3, CalendarDays, LineChart, Plus, RefreshCw, TrendingUp } from 'lucide-react';
 import { api } from '../api/http.js';
 import DataTable from '../components/ui/DataTable.jsx';
+import ModalDrawer from '../components/ui/ModalDrawer.jsx';
 import StatCard from '../components/ui/StatCard.jsx';
 
 const currentYear = new Date().getFullYear();
@@ -13,13 +14,7 @@ const emptyForecast = { months: 12, monthlySales: 0, monthlyOtherInflows: 0, mon
 function money(v) { return `LKR ${Number(v || 0).toLocaleString()}`; }
 function d(v) { return v ? new Date(v).toLocaleDateString() : '-'; }
 function pct(v) { return `${Number(v || 0).toFixed(1)}%`; }
-function statusClass(status) {
-  const s = String(status || '').toLowerCase();
-  if (s === 'approved' || s === 'active') return 'paid';
-  if (s === 'closed') return 'partial';
-  if (s === 'cancelled') return 'cancelled';
-  return 'unpaid';
-}
+function statusClass(status) { const s = String(status || '').toLowerCase(); if (s === 'approved' || s === 'active') return 'paid'; if (s === 'closed') return 'partial'; if (s === 'cancelled') return 'cancelled'; return 'unpaid'; }
 
 export default function BudgetingForecasting() {
   const [summary, setSummary] = useState(null);
@@ -33,6 +28,9 @@ export default function BudgetingForecasting() {
   const [lineForm, setLineForm] = useState(emptyLine);
   const [scenarioForm, setScenarioForm] = useState(emptyScenario);
   const [forecastForm, setForecastForm] = useState(emptyForecast);
+  const [drawer, setDrawer] = useState('');
+  const [selectedBudgetRow, setSelectedBudgetRow] = useState(null);
+  const [selectedScenarioRow, setSelectedScenarioRow] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [saving, setSaving] = useState(false);
@@ -40,10 +38,7 @@ export default function BudgetingForecasting() {
   async function load() {
     setError('');
     const [summaryRes, budgetRes, scenarioRes, accountRes] = await Promise.all([
-      api.get('/budgeting/summary'),
-      api.get('/budgeting/budgets'),
-      api.get('/budgeting/scenarios'),
-      api.get('/budgeting/accounts')
+      api.get('/budgeting/summary'), api.get('/budgeting/budgets'), api.get('/budgeting/scenarios'), api.get('/budgeting/accounts')
     ]);
     const budgetRows = budgetRes.data || [];
     const scenarioRows = scenarioRes.data || [];
@@ -68,73 +63,48 @@ export default function BudgetingForecasting() {
   useEffect(() => { if (selectedBudgetId) loadVariance(selectedBudgetId).catch(() => {}); }, [selectedBudgetId]);
 
   function flash(message) { setSuccess(message); setTimeout(() => setSuccess(''), 3500); }
-
   const selectedScenario = useMemo(() => scenarios.find((s) => s.id === selectedScenarioId), [scenarios, selectedScenarioId]);
 
   async function createBudget(e) {
-    e.preventDefault();
-    setSaving(true); setError('');
-    try {
-      const { data } = await api.post('/budgeting/budgets', budgetForm);
-      setBudgetForm(emptyBudget);
-      setSelectedBudgetId(data.id);
-      flash('Budget created');
-      await load();
-    } catch (e) { setError(e.response?.data?.message || 'Failed to create budget'); }
+    e.preventDefault(); setSaving(true); setError('');
+    try { const { data } = await api.post('/budgeting/budgets', budgetForm); setBudgetForm(emptyBudget); setSelectedBudgetId(data.id); setDrawer(''); flash('Budget created'); await load(); }
+    catch (e) { setError(e.response?.data?.message || 'Failed to create budget'); }
     finally { setSaving(false); }
   }
 
   async function changeBudgetStatus(row, status) {
     setError('');
-    try {
-      await api.patch(`/budgeting/budgets/${row.id}/status`, { status, notes: `Changed to ${status}` });
-      flash(`${row.budgetNo} changed to ${status}`);
-      await load();
-    } catch (e) { setError(e.response?.data?.message || 'Failed to change budget status'); }
+    try { await api.patch(`/budgeting/budgets/${row.id}/status`, { status, notes: `Changed to ${status}` }); flash(`${row.budgetNo} changed to ${status}`); await load(); }
+    catch (e) { setError(e.response?.data?.message || 'Failed to change budget status'); }
   }
 
   async function addLine(e) {
     e.preventDefault();
     if (!selectedBudgetId) return setError('Create or select a budget first');
     setSaving(true); setError('');
-    try {
-      await api.post(`/budgeting/budgets/${selectedBudgetId}/lines`, { ...lineForm, ledgerAccountId: lineForm.ledgerAccountId || null, periodMonth: lineForm.periodMonth || null, budgetAmount: Number(lineForm.budgetAmount || 0), alertPercent: Number(lineForm.alertPercent || 100) });
-      setLineForm(emptyLine);
-      flash('Budget line added');
-      await load();
-    } catch (e) { setError(e.response?.data?.message || 'Failed to add budget line'); }
+    try { await api.post(`/budgeting/budgets/${selectedBudgetId}/lines`, { ...lineForm, ledgerAccountId: lineForm.ledgerAccountId || null, periodMonth: lineForm.periodMonth || null, budgetAmount: Number(lineForm.budgetAmount || 0), alertPercent: Number(lineForm.alertPercent || 100) }); setLineForm(emptyLine); setDrawer(''); flash('Budget line added'); await load(); }
+    catch (e) { setError(e.response?.data?.message || 'Failed to add budget line'); }
     finally { setSaving(false); }
   }
 
   async function deleteLine(lineId) {
     if (!window.confirm('Remove this budget line?')) return;
     setError('');
-    try {
-      await api.delete(`/budgeting/budget-lines/${lineId}`);
-      flash('Budget line removed');
-      await load();
-    } catch (e) { setError(e.response?.data?.message || 'Failed to remove budget line'); }
+    try { await api.delete(`/budgeting/budget-lines/${lineId}`); flash('Budget line removed'); await load(); }
+    catch (e) { setError(e.response?.data?.message || 'Failed to remove budget line'); }
   }
 
   async function generateAlerts() {
     if (!selectedBudgetId) return;
     setError('');
-    try {
-      const { data } = await api.post(`/budgeting/budgets/${selectedBudgetId}/alerts`);
-      flash(`${data.created} budget alert(s) created`);
-    } catch (e) { setError(e.response?.data?.message || 'Failed to create budget alerts'); }
+    try { const { data } = await api.post(`/budgeting/budgets/${selectedBudgetId}/alerts`); flash(`${data.created} budget alert(s) created`); }
+    catch (e) { setError(e.response?.data?.message || 'Failed to create budget alerts'); }
   }
 
   async function createScenario(e) {
-    e.preventDefault();
-    setSaving(true); setError('');
-    try {
-      const { data } = await api.post('/budgeting/scenarios', scenarioForm);
-      setScenarioForm(emptyScenario);
-      setSelectedScenarioId(data.id);
-      flash('Forecast scenario created');
-      await load();
-    } catch (e) { setError(e.response?.data?.message || 'Failed to create forecast scenario'); }
+    e.preventDefault(); setSaving(true); setError('');
+    try { const { data } = await api.post('/budgeting/scenarios', scenarioForm); setScenarioForm(emptyScenario); setSelectedScenarioId(data.id); setDrawer(''); flash('Forecast scenario created'); await load(); }
+    catch (e) { setError(e.response?.data?.message || 'Failed to create forecast scenario'); }
     finally { setSaving(false); }
   }
 
@@ -142,11 +112,8 @@ export default function BudgetingForecasting() {
     e.preventDefault();
     if (!selectedScenarioId) return setError('Create or select a forecast scenario first');
     setSaving(true); setError('');
-    try {
-      await api.post(`/budgeting/scenarios/${selectedScenarioId}/generate-cash-flow`, forecastForm);
-      flash('Cash-flow forecast generated');
-      await load();
-    } catch (e) { setError(e.response?.data?.message || 'Failed to generate cash-flow forecast'); }
+    try { await api.post(`/budgeting/scenarios/${selectedScenarioId}/generate-cash-flow`, forecastForm); setDrawer(''); flash('Cash-flow forecast generated'); await load(); }
+    catch (e) { setError(e.response?.data?.message || 'Failed to generate cash-flow forecast'); }
     finally { setSaving(false); }
   }
 
@@ -156,7 +123,7 @@ export default function BudgetingForecasting() {
     { key: 'status', label: 'Status', render: (r) => <span className={`badge ${statusClass(r.status)}`}>{r.status}</span> },
     { key: 'income', label: 'Income Budget', render: (r) => money(r.totalIncomeBudget) },
     { key: 'expense', label: 'Expense Budget', render: (r) => money(r.totalExpenseBudget) },
-    { key: 'actions', label: 'Actions', render: (r) => <div className="actions-row compact-actions"><button className="mini-action" onClick={() => setSelectedBudgetId(r.id)}>View</button>{r.status === 'DRAFT' && <button className="mini-action" onClick={() => changeBudgetStatus(r, 'ACTIVE')}>Activate</button>}{['DRAFT','ACTIVE'].includes(r.status) && <button className="mini-action" onClick={() => changeBudgetStatus(r, 'APPROVED')}>Approve</button>}{!['CLOSED','CANCELLED'].includes(r.status) && <button className="mini-danger" onClick={() => changeBudgetStatus(r, 'CLOSED')}>Close</button>}</div> }
+    { key: 'actions', label: 'Actions', render: (r) => <div className="actions-row compact-actions" onClick={(e) => e.stopPropagation()}><button className="mini-action" onClick={() => { setSelectedBudgetId(r.id); setSelectedBudgetRow(r); }}>View</button>{r.status === 'DRAFT' && <button className="mini-action" onClick={() => changeBudgetStatus(r, 'ACTIVE')}>Activate</button>}{['DRAFT','ACTIVE'].includes(r.status) && <button className="mini-action" onClick={() => changeBudgetStatus(r, 'APPROVED')}>Approve</button>}{!['CLOSED','CANCELLED'].includes(r.status) && <button className="mini-danger" onClick={() => changeBudgetStatus(r, 'CLOSED')}>Close</button>}</div> }
   ];
 
   const varianceColumns = [
@@ -172,8 +139,7 @@ export default function BudgetingForecasting() {
     { key: 'scenario', label: 'Scenario', render: (r) => <><strong>{r.scenarioNo}</strong><span className="table-subtext">{r.name}</span></> },
     { key: 'period', label: 'Period', render: (r) => <>{d(r.startDate)} - {d(r.endDate)}<span className="table-subtext">Growth {pct(r.growthRate)}</span></> },
     { key: 'cash', label: 'Cash', render: (r) => <>{money(r.finalClosingCash)}<span className="table-subtext">Opening {money(r.openingCash)}</span></> },
-    { key: 'lines', label: 'Lines', render: (r) => `${r.lineCount || 0} month(s)` },
-    { key: 'actions', label: 'Actions', render: (r) => <button className="mini-action" onClick={() => setSelectedScenarioId(r.id)}>Use</button> }
+    { key: 'lines', label: 'Lines', render: (r) => `${r.lineCount || 0} month(s)` }
   ];
 
   const forecastLineColumns = [
@@ -184,83 +150,84 @@ export default function BudgetingForecasting() {
     { key: 'closing', label: 'Closing Cash', render: (r) => <strong>{money(r.closingCash)}</strong> }
   ];
 
-  return <div className="page budgeting-page">
-    <div className="page-header">
-      <div><span className="eyebrow">Budgeting / forecasting</span><h1>Budgeting & Forecasting</h1><p>Plan income and expenses, compare budget vs actual ledger results, and create cash-flow forecasts before cash problems happen.</p></div>
-      <div className="head-actions"><button className="ghost-btn" onClick={load}><RefreshCw size={16}/> Refresh</button><button className="primary-btn" onClick={generateAlerts}><AlertTriangle size={16}/> Budget alerts</button></div>
-    </div>
+  return (
+    <div className="page stage6-list-page budgeting-page">
+      <div className="stage6-hero">
+        <div><span className="eyebrow">Budgeting / forecasting</span><h1>Budgeting & Forecasting</h1><p>Budgets and forecast creation forms are now opened only when needed, so the report tables stay readable and professional.</p></div>
+        <div className="stage6-actions"><button className="secondary-btn" onClick={load}><RefreshCw size={16}/> Refresh</button><button className="secondary-btn" onClick={generateAlerts}><AlertTriangle size={16}/> Budget alerts</button><button className="primary-btn" onClick={() => setDrawer('budget')}><Plus size={16}/> Create Plan</button></div>
+      </div>
 
-    {error && <div className="error-box">{error}</div>}
-    {success && <div className="success-box">{success}</div>}
+      {error && <div className="error-box">{error}</div>}
+      {success && <div className="success-box">{success}</div>}
 
-    <div className="stat-grid budgeting-stat-grid">
-      <StatCard title="Active Budgets" value={summary?.activeBudgets || 0} subtitle={`${summary?.draftBudgets || 0} draft`} />
-      <StatCard title="Current Expense Budget" value={money(summary?.currentBudget?.totalExpenseBudget)} subtitle={summary?.currentBudget?.name || 'No active budget'} tone="orange" />
-      <StatCard title="Over Budget Lines" value={summary?.currentBudget?.overBudgetCount || 0} subtitle={`Variance ${money(summary?.currentBudget?.totalVariance)}`} tone="red" />
-      <StatCard title="Forecast Closing Cash" value={money(summary?.recentForecast?.closingCash)} subtitle={summary?.recentForecast?.name || 'No forecast'} tone="green" />
-    </div>
+      <div className="stat-grid budgeting-stat-grid">
+        <StatCard title="Active Budgets" value={summary?.activeBudgets || 0} subtitle={`${summary?.draftBudgets || 0} draft`} />
+        <StatCard title="Current Expense Budget" value={money(summary?.currentBudget?.totalExpenseBudget)} subtitle={summary?.currentBudget?.name || 'No active budget'} tone="orange" />
+        <StatCard title="Over Budget Lines" value={summary?.currentBudget?.overBudgetCount || 0} subtitle={`Variance ${money(summary?.currentBudget?.totalVariance)}`} tone="red" />
+        <StatCard title="Forecast Closing Cash" value={money(summary?.recentForecast?.closingCash)} subtitle={summary?.recentForecast?.name || 'No forecast'} tone="green" />
+      </div>
 
-    <div className="budgeting-grid">
-      <section className="panel budget-main-panel">
-        <div className="section-title-row"><h2><BarChart3 size={20}/> Budget Register</h2><select value={selectedBudgetId} onChange={(e)=>setSelectedBudgetId(e.target.value)}><option value="">Select budget</option>{budgets.map((b)=><option key={b.id} value={b.id}>{b.budgetNo} · {b.name}</option>)}</select></div>
-        <DataTable columns={budgetColumns} rows={budgets} empty="No budgets found" />
+      <section className="panel stage6-table-panel">
+        <div className="section-title-row"><h2><BarChart3 size={20}/> Budget Register</h2><div className="stage6-actions"><select value={selectedBudgetId} onChange={(e) => setSelectedBudgetId(e.target.value)}><option value="">Select budget</option>{budgets.map((b) => <option key={b.id} value={b.id}>{b.budgetNo} · {b.name}</option>)}</select><button className="secondary-btn" onClick={() => setDrawer('line')}><TrendingUp size={16}/> Add Budget Line</button></div></div>
+        <DataTable columns={budgetColumns} rows={budgets} pageSize={10} onRowClick={(row) => { setSelectedBudgetId(row.id); setSelectedBudgetRow(row); }} empty="No budgets found" />
       </section>
 
-      <aside className="panel budget-side-panel">
-        <h2><Plus size={20}/> Create Budget</h2>
+      <section className="panel budget-variance-panel">
+        <div className="section-title-row"><h2><AlertTriangle size={20}/> Budget vs Actual</h2><div className="budget-variance-total"><span>Budget {money(variance?.totalBudget)}</span><span>Actual {money(variance?.totalActual)}</span><span>Variance {money(variance?.totalVariance)}</span></div></div>
+        <DataTable columns={varianceColumns} rows={variance?.rows || []} pageSize={10} empty="No budget lines yet" />
+      </section>
+
+      <section className="panel stage6-table-panel">
+        <div className="section-title-row"><h2><LineChart size={20}/> Forecast Scenarios</h2><div className="stage6-actions"><select value={selectedScenarioId} onChange={(e) => setSelectedScenarioId(e.target.value)}><option value="">Select scenario</option>{scenarios.map((s) => <option key={s.id} value={s.id}>{s.scenarioNo} · {s.name}</option>)}</select><button className="secondary-btn" onClick={() => setDrawer('scenario')}><Plus size={16}/> Create Forecast</button><button className="primary-btn" onClick={() => setDrawer('forecast')}><LineChart size={16}/> Generate Cash Flow</button></div></div>
+        <DataTable columns={scenarioColumns} rows={scenarios} pageSize={10} onRowClick={(row) => { setSelectedScenarioId(row.id); setSelectedScenarioRow(row); }} empty="No forecast scenarios found" />
+        {selectedScenario && <div className="forecast-lines"><h3>{selectedScenario.name} lines</h3><DataTable columns={forecastLineColumns} rows={selectedScenario.lines || []} pageSize={10} empty="Generate forecast lines to see monthly cash flow" /></div>}
+      </section>
+
+      <ModalDrawer open={drawer === 'budget'} title="Create Budget Plan" description="Create the plan first, then add budget lines after selecting it." onClose={() => setDrawer('')}>
         <form className="form-grid compact" onSubmit={createBudget}>
-          <label>Name<input value={budgetForm.name} onChange={(e)=>setBudgetForm({...budgetForm,name:e.target.value})} required /></label>
-          <div className="form-grid two"><label>Fiscal year<input type="number" value={budgetForm.fiscalYear} onChange={(e)=>setBudgetForm({...budgetForm,fiscalYear:e.target.value})} /></label><label>Type<select value={budgetForm.periodType} onChange={(e)=>setBudgetForm({...budgetForm,periodType:e.target.value})}>{['MONTHLY','QUARTERLY','YEARLY'].map((s)=><option key={s}>{s}</option>)}</select></label></div>
-          <div className="form-grid two"><label>Start<input type="date" value={budgetForm.startDate} onChange={(e)=>setBudgetForm({...budgetForm,startDate:e.target.value})} required /></label><label>End<input type="date" value={budgetForm.endDate} onChange={(e)=>setBudgetForm({...budgetForm,endDate:e.target.value})} required /></label></div>
-          <label>Notes<input value={budgetForm.notes} onChange={(e)=>setBudgetForm({...budgetForm,notes:e.target.value})} /></label>
-          <button className="primary-btn" disabled={saving}><CalendarDays size={18}/> Save Budget</button>
+          <label>Name<input value={budgetForm.name} onChange={(e) => setBudgetForm({ ...budgetForm, name: e.target.value })} required /></label>
+          <div className="form-grid two"><label>Fiscal year<input type="number" value={budgetForm.fiscalYear} onChange={(e) => setBudgetForm({ ...budgetForm, fiscalYear: e.target.value })} /></label><label>Type<select value={budgetForm.periodType} onChange={(e) => setBudgetForm({ ...budgetForm, periodType: e.target.value })}>{['MONTHLY','QUARTERLY','YEARLY'].map((s) => <option key={s}>{s}</option>)}</select></label></div>
+          <div className="form-grid two"><label>Start<input type="date" value={budgetForm.startDate} onChange={(e) => setBudgetForm({ ...budgetForm, startDate: e.target.value })} required /></label><label>End<input type="date" value={budgetForm.endDate} onChange={(e) => setBudgetForm({ ...budgetForm, endDate: e.target.value })} required /></label></div>
+          <label>Notes<input value={budgetForm.notes} onChange={(e) => setBudgetForm({ ...budgetForm, notes: e.target.value })} /></label>
+          <div className="stage6-form-actions"><button type="button" className="secondary-btn" onClick={() => setDrawer('')}>Cancel</button><button className="primary-btn" disabled={saving}><CalendarDays size={18}/> Save Budget</button></div>
         </form>
+      </ModalDrawer>
 
-        <h2><TrendingUp size={20}/> Add Budget Line</h2>
+      <ModalDrawer open={drawer === 'line'} title="Add Budget Line" description="Add income or expense budget lines to the selected plan." onClose={() => setDrawer('')}>
         <form className="form-grid compact" onSubmit={addLine}>
-          <label>Budget<select value={selectedBudgetId} onChange={(e)=>setSelectedBudgetId(e.target.value)} required><option value="">Select budget</option>{budgets.map((b)=><option key={b.id} value={b.id}>{b.budgetNo} · {b.name}</option>)}</select></label>
-          <label>Ledger account<select value={lineForm.ledgerAccountId} onChange={(e)=>setLineForm({...lineForm,ledgerAccountId:e.target.value, description: accounts.find(a=>a.id===e.target.value)?.name || lineForm.description})}><option value="">Manual / no account</option>{accounts.map((a)=><option key={a.id} value={a.id}>{a.code} · {a.name} · {a.type}</option>)}</select></label>
-          <div className="form-grid two"><label>Type<select value={lineForm.lineType} onChange={(e)=>setLineForm({...lineForm,lineType:e.target.value})}>{['INCOME','EXPENSE','CASH_INFLOW','CASH_OUTFLOW','OTHER'].map((s)=><option key={s}>{s}</option>)}</select></label><label>Month<input type="number" min="1" max="12" value={lineForm.periodMonth} onChange={(e)=>setLineForm({...lineForm,periodMonth:e.target.value})} /></label></div>
-          <label>Description<input value={lineForm.description} onChange={(e)=>setLineForm({...lineForm,description:e.target.value})} required /></label>
-          <div className="form-grid two"><label>Budget amount<input type="number" min="0" value={lineForm.budgetAmount} onChange={(e)=>setLineForm({...lineForm,budgetAmount:e.target.value})} /></label><label>Alert %<input type="number" min="1" value={lineForm.alertPercent} onChange={(e)=>setLineForm({...lineForm,alertPercent:e.target.value})} /></label></div>
-          <button className="secondary-btn" disabled={saving || !selectedBudgetId}>Add Line</button>
+          <label>Budget<select value={selectedBudgetId} onChange={(e) => setSelectedBudgetId(e.target.value)} required><option value="">Select budget</option>{budgets.map((b) => <option key={b.id} value={b.id}>{b.budgetNo} · {b.name}</option>)}</select></label>
+          <label>Ledger account<select value={lineForm.ledgerAccountId} onChange={(e) => setLineForm({ ...lineForm, ledgerAccountId: e.target.value, description: accounts.find((a) => a.id === e.target.value)?.name || lineForm.description })}><option value="">Manual / no account</option>{accounts.map((a) => <option key={a.id} value={a.id}>{a.code} · {a.name} · {a.type}</option>)}</select></label>
+          <div className="form-grid two"><label>Type<select value={lineForm.lineType} onChange={(e) => setLineForm({ ...lineForm, lineType: e.target.value })}>{['INCOME','EXPENSE','CASH_INFLOW','CASH_OUTFLOW','OTHER'].map((s) => <option key={s}>{s}</option>)}</select></label><label>Month<input type="number" min="1" max="12" value={lineForm.periodMonth} onChange={(e) => setLineForm({ ...lineForm, periodMonth: e.target.value })} /></label></div>
+          <label>Description<input value={lineForm.description} onChange={(e) => setLineForm({ ...lineForm, description: e.target.value })} required /></label>
+          <div className="form-grid two"><label>Budget amount<input type="number" min="0" value={lineForm.budgetAmount} onChange={(e) => setLineForm({ ...lineForm, budgetAmount: e.target.value })} /></label><label>Alert %<input type="number" min="1" value={lineForm.alertPercent} onChange={(e) => setLineForm({ ...lineForm, alertPercent: e.target.value })} /></label></div>
+          <div className="stage6-form-actions"><button type="button" className="secondary-btn" onClick={() => setDrawer('')}>Cancel</button><button className="primary-btn" disabled={saving || !selectedBudgetId}>Add Line</button></div>
         </form>
-      </aside>
-    </div>
+      </ModalDrawer>
 
-    <section className="panel budget-variance-panel">
-      <div className="section-title-row"><h2><AlertTriangle size={20}/> Budget vs Actual</h2><div className="budget-variance-total"><span>Budget {money(variance?.totalBudget)}</span><span>Actual {money(variance?.totalActual)}</span><span>Variance {money(variance?.totalVariance)}</span></div></div>
-      <DataTable columns={varianceColumns} rows={variance?.rows || []} empty="No budget lines yet" />
-    </section>
-
-    <div className="forecast-grid">
-      <section className="panel">
-        <div className="section-title-row"><h2><LineChart size={20}/> Forecast Scenarios</h2><select value={selectedScenarioId} onChange={(e)=>setSelectedScenarioId(e.target.value)}><option value="">Select scenario</option>{scenarios.map((s)=><option key={s.id} value={s.id}>{s.scenarioNo} · {s.name}</option>)}</select></div>
-        <DataTable columns={scenarioColumns} rows={scenarios} empty="No forecast scenarios found" />
-        {selectedScenario && <div className="forecast-lines"><h3>{selectedScenario.name} lines</h3><DataTable columns={forecastLineColumns} rows={selectedScenario.lines || []} empty="Generate forecast lines to see monthly cash flow" /></div>}
-      </section>
-
-      <aside className="panel forecast-side-panel">
-        <h2><Plus size={20}/> Create Forecast Scenario</h2>
+      <ModalDrawer open={drawer === 'scenario'} title="Create Forecast Scenario" onClose={() => setDrawer('')}>
         <form className="form-grid compact" onSubmit={createScenario}>
-          <label>Name<input value={scenarioForm.name} onChange={(e)=>setScenarioForm({...scenarioForm,name:e.target.value})} required /></label>
-          <div className="form-grid two"><label>Start<input type="date" value={scenarioForm.startDate} onChange={(e)=>setScenarioForm({...scenarioForm,startDate:e.target.value})} required /></label><label>End<input type="date" value={scenarioForm.endDate} onChange={(e)=>setScenarioForm({...scenarioForm,endDate:e.target.value})} required /></label></div>
-          <div className="form-grid two"><label>Opening cash<input type="number" value={scenarioForm.openingCash} onChange={(e)=>setScenarioForm({...scenarioForm,openingCash:e.target.value})} /></label><label>Growth %<input type="number" value={scenarioForm.growthRate} onChange={(e)=>setScenarioForm({...scenarioForm,growthRate:e.target.value})} /></label></div>
-          <button className="primary-btn" disabled={saving}>Save Scenario</button>
+          <label>Name<input value={scenarioForm.name} onChange={(e) => setScenarioForm({ ...scenarioForm, name: e.target.value })} required /></label>
+          <div className="form-grid two"><label>Start<input type="date" value={scenarioForm.startDate} onChange={(e) => setScenarioForm({ ...scenarioForm, startDate: e.target.value })} required /></label><label>End<input type="date" value={scenarioForm.endDate} onChange={(e) => setScenarioForm({ ...scenarioForm, endDate: e.target.value })} required /></label></div>
+          <div className="form-grid two"><label>Opening cash<input type="number" value={scenarioForm.openingCash} onChange={(e) => setScenarioForm({ ...scenarioForm, openingCash: e.target.value })} /></label><label>Growth %<input type="number" value={scenarioForm.growthRate} onChange={(e) => setScenarioForm({ ...scenarioForm, growthRate: e.target.value })} /></label></div>
+          <div className="stage6-form-actions"><button type="button" className="secondary-btn" onClick={() => setDrawer('')}>Cancel</button><button className="primary-btn" disabled={saving}>Save Scenario</button></div>
         </form>
+      </ModalDrawer>
 
-        <h2><LineChart size={20}/> Generate Cash Flow</h2>
+      <ModalDrawer open={drawer === 'forecast'} title="Generate Cash Flow" onClose={() => setDrawer('')}>
         <form className="form-grid compact" onSubmit={generateForecast}>
-          <label>Scenario<select value={selectedScenarioId} onChange={(e)=>setSelectedScenarioId(e.target.value)} required><option value="">Select scenario</option>{scenarios.map((s)=><option key={s.id} value={s.id}>{s.scenarioNo} · {s.name}</option>)}</select></label>
-          <div className="form-grid two"><label>Months<input type="number" min="1" max="36" value={forecastForm.months} onChange={(e)=>setForecastForm({...forecastForm,months:e.target.value})} /></label><label>Growth %<input type="number" value={forecastForm.growthRate} onChange={(e)=>setForecastForm({...forecastForm,growthRate:e.target.value})} /></label></div>
-          <label>Monthly sales inflow<input type="number" min="0" value={forecastForm.monthlySales} onChange={(e)=>setForecastForm({...forecastForm,monthlySales:e.target.value})} /></label>
-          <label>Other monthly inflows<input type="number" min="0" value={forecastForm.monthlyOtherInflows} onChange={(e)=>setForecastForm({...forecastForm,monthlyOtherInflows:e.target.value})} /></label>
-          <label>Monthly purchases<input type="number" min="0" value={forecastForm.monthlyPurchases} onChange={(e)=>setForecastForm({...forecastForm,monthlyPurchases:e.target.value})} /></label>
-          <label>Monthly payroll<input type="number" min="0" value={forecastForm.monthlyPayroll} onChange={(e)=>setForecastForm({...forecastForm,monthlyPayroll:e.target.value})} /></label>
-          <label>Other monthly expenses<input type="number" min="0" value={forecastForm.monthlyExpenses} onChange={(e)=>setForecastForm({...forecastForm,monthlyExpenses:e.target.value})} /></label>
-          <button className="secondary-btn" disabled={saving || !selectedScenarioId}>Generate Forecast</button>
+          <label>Scenario<select value={selectedScenarioId} onChange={(e) => setSelectedScenarioId(e.target.value)} required><option value="">Select scenario</option>{scenarios.map((s) => <option key={s.id} value={s.id}>{s.scenarioNo} · {s.name}</option>)}</select></label>
+          <div className="form-grid two"><label>Months<input type="number" min="1" max="36" value={forecastForm.months} onChange={(e) => setForecastForm({ ...forecastForm, months: e.target.value })} /></label><label>Growth %<input type="number" value={forecastForm.growthRate} onChange={(e) => setForecastForm({ ...forecastForm, growthRate: e.target.value })} /></label></div>
+          <label>Monthly sales inflow<input type="number" min="0" value={forecastForm.monthlySales} onChange={(e) => setForecastForm({ ...forecastForm, monthlySales: e.target.value })} /></label>
+          <label>Other monthly inflows<input type="number" min="0" value={forecastForm.monthlyOtherInflows} onChange={(e) => setForecastForm({ ...forecastForm, monthlyOtherInflows: e.target.value })} /></label>
+          <label>Monthly purchases<input type="number" min="0" value={forecastForm.monthlyPurchases} onChange={(e) => setForecastForm({ ...forecastForm, monthlyPurchases: e.target.value })} /></label>
+          <label>Monthly payroll<input type="number" min="0" value={forecastForm.monthlyPayroll} onChange={(e) => setForecastForm({ ...forecastForm, monthlyPayroll: e.target.value })} /></label>
+          <label>Other monthly expenses<input type="number" min="0" value={forecastForm.monthlyExpenses} onChange={(e) => setForecastForm({ ...forecastForm, monthlyExpenses: e.target.value })} /></label>
+          <div className="stage6-form-actions"><button type="button" className="secondary-btn" onClick={() => setDrawer('')}>Cancel</button><button className="primary-btn" disabled={saving}>Generate Forecast</button></div>
         </form>
-      </aside>
+      </ModalDrawer>
+
+      <ModalDrawer open={!!selectedBudgetRow} mode="modal" size="lg" title="Budget Plan Details" onClose={() => setSelectedBudgetRow(null)}>{selectedBudgetRow && <div className="stage6-detail-grid"><div className="stage6-detail-item"><span>Budget</span><strong>{selectedBudgetRow.budgetNo}</strong></div><div className="stage6-detail-item"><span>Name</span><strong>{selectedBudgetRow.name}</strong></div><div className="stage6-detail-item"><span>Status</span><strong>{selectedBudgetRow.status}</strong></div><div className="stage6-detail-item"><span>Expense Budget</span><strong>{money(selectedBudgetRow.totalExpenseBudget)}</strong></div></div>}</ModalDrawer>
+      <ModalDrawer open={!!selectedScenarioRow} mode="modal" size="lg" title="Forecast Scenario Details" onClose={() => setSelectedScenarioRow(null)}>{selectedScenarioRow && <div className="stage6-detail-grid"><div className="stage6-detail-item"><span>Scenario</span><strong>{selectedScenarioRow.scenarioNo}</strong></div><div className="stage6-detail-item"><span>Name</span><strong>{selectedScenarioRow.name}</strong></div><div className="stage6-detail-item"><span>Period</span><strong>{d(selectedScenarioRow.startDate)} - {d(selectedScenarioRow.endDate)}</strong></div><div className="stage6-detail-item"><span>Closing Cash</span><strong>{money(selectedScenarioRow.finalClosingCash)}</strong></div></div>}</ModalDrawer>
     </div>
-  </div>;
+  );
 }

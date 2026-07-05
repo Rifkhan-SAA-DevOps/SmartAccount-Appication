@@ -4,6 +4,8 @@ import { BrowserRouter } from 'react-router-dom';
 import App from './App.jsx';
 import { AuthProvider } from './state/AuthContext.jsx';
 import './styles.css';
+import './styles/form-drawer-workflow.css';
+import './styles/modal-drawer-responsive-fix.css';
 import './styles/asip-sidebar.css';
 import './styles/finance-reports-modern.css';
 import './styles/cheques-sidebar-scroll-fix.css';

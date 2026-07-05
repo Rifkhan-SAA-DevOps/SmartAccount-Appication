@@ -1,64 +1,57 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useClientPagination } from './Pagination.jsx';
 import Pagination from './Pagination.jsx';
+
+function cellValue(row, column) {
+  if (column.render) return column.render(row);
+  const value = row?.[column.key];
+  if (value === null || value === undefined || value === '') return '-';
+  return value;
+}
 
 export default function DataTable({
   columns = [],
   rows = [],
   empty = 'No data found',
+  onRowClick,
+  rowKey = 'id',
   pageSize = 10,
-  pagination = true
+  enablePagination = true,
+  className = ''
 }) {
   const safeRows = Array.isArray(rows) ? rows : [];
-  const safePageSize = Math.max(1, Number(pageSize || 10));
-  const [page, setPage] = useState(1);
-
-  const totalPages = Math.max(1, Math.ceil(safeRows.length / safePageSize));
-
-  useEffect(() => {
-    setPage(1);
-  }, [safeRows.length, safePageSize]);
-
-  useEffect(() => {
-    if (page > totalPages) setPage(totalPages);
-  }, [page, totalPages]);
-
-  const visibleRows = useMemo(() => {
-    if (!pagination || safeRows.length <= safePageSize) return safeRows;
-    const start = (page - 1) * safePageSize;
-    return safeRows.slice(start, start + safePageSize);
-  }, [pagination, safeRows, safePageSize, page]);
+  const pager = useClientPagination(safeRows, pageSize);
+  const visibleRows = enablePagination ? pager.pageRows : safeRows;
 
   return (
-    <div className="table-card">
-      <div className="table-scroll">
-        <table>
+    <div className={`table-card smart-table-card ${className}`}>
+      <div className="smart-table-wrap">
+        <table className="smart-data-table">
           <thead>
-            <tr>{columns.map((column) => <th key={column.key}>{column.label}</th>)}</tr>
+            <tr>{columns.map((c) => <th key={c.key}>{c.label}</th>)}</tr>
           </thead>
           <tbody>
-            {visibleRows.length ? visibleRows.map((row, index) => (
-              <tr key={row.id || `${page}-${index}`}>
-                {columns.map((column) => (
-                  <td key={column.key} data-label={column.label}>
-                    {column.render ? column.render(row, index) : row[column.key]}
-                  </td>
-                ))}
+            {visibleRows.length ? visibleRows.map((row, i) => (
+              <tr
+                key={row?.[rowKey] || row?.id || i}
+                className={onRowClick ? 'clickable-row' : ''}
+                onClick={onRowClick ? () => onRowClick(row) : undefined}
+                tabIndex={onRowClick ? 0 : undefined}
+                onKeyDown={onRowClick ? (e) => { if (e.key === 'Enter') onRowClick(row); } : undefined}
+              >
+                {columns.map((c) => <td key={c.key} data-label={c.label}>{cellValue(row, c)}</td>)}
               </tr>
-            )) : (
-              <tr>
-                <td colSpan={Math.max(1, columns.length)} className="empty-cell">{empty}</td>
-              </tr>
-            )}
+            )) : <tr><td colSpan={Math.max(columns.length, 1)} className="empty-cell">{empty}</td></tr>}
           </tbody>
         </table>
       </div>
-      {pagination && safeRows.length > safePageSize && (
+      {enablePagination && safeRows.length > pageSize && (
         <Pagination
-          page={page}
-          totalPages={totalPages}
-          totalItems={safeRows.length}
-          pageSize={safePageSize}
-          onPageChange={setPage}
+          page={pager.page}
+          totalPages={pager.totalPages}
+          totalRows={pager.totalRows}
+          pageSize={pager.pageSize}
+          onPageChange={pager.goToPage}
+          onPageSizeChange={pager.changePageSize}
         />
       )}
     </div>

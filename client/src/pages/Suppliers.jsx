@@ -1,127 +1,105 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Mail, Phone, Search, Truck, UserPlus, Wallet } from 'lucide-react';
+import { Plus, RefreshCw } from 'lucide-react';
 import { api } from '../api/http.js';
 import DataTable from '../components/ui/DataTable.jsx';
+import ModalDrawer from '../components/ui/ModalDrawer.jsx';
 
-const money = (value) => `LKR ${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 const blankSupplier = { name: '', phone: '', email: '' };
+const money = (value) => `LKR ${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 export default function Suppliers() {
   const [rows, setRows] = useState([]);
   const [form, setForm] = useState(blankSupplier);
   const [query, setQuery] = useState('');
+  const [selected, setSelected] = useState(null);
+  const [createOpen, setCreateOpen] = useState(false);
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
 
   async function load() {
+    setError('');
     const { data } = await api.get('/suppliers');
-    setRows(Array.isArray(data) ? data : data?.items || []);
+    setRows(data || []);
   }
 
-  useEffect(() => {
-    load().catch((e) => setError(e.response?.data?.message || 'Failed to load suppliers'));
-  }, []);
+  useEffect(() => { load().catch((e) => setError(e.response?.data?.message || 'Failed to load suppliers')); }, []);
 
-  function update(e) {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  }
+  const filteredRows = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return rows;
+    return rows.filter((r) => [r.name, r.phone, r.email].some((v) => String(v || '').toLowerCase().includes(q)));
+  }, [rows, query]);
+
+  const payable = rows.reduce((sum, r) => sum + Number(r.balance || 0), 0);
+  const activeSuppliers = rows.filter((r) => Number(r.balance || 0) !== 0).length;
+
+  function update(e) { setForm({ ...form, [e.target.name]: e.target.value }); }
 
   async function submit(e) {
     e.preventDefault();
-    setSaving(true);
-    setError('');
+    setSaving(true); setError('');
     try {
       await api.post('/suppliers', form);
       setForm(blankSupplier);
+      setCreateOpen(false);
       await load();
-    } catch (e) {
-      setError(e.response?.data?.message || 'Failed to save supplier');
-    } finally {
-      setSaving(false);
-    }
+    } catch (e) { setError(e.response?.data?.message || 'Failed to save supplier'); }
+    finally { setSaving(false); }
   }
 
-  const filteredRows = useMemo(() => {
-    const term = query.trim().toLowerCase();
-    if (!term) return rows;
-    return rows.filter((row) => [row.name, row.phone, row.email].some((value) => String(value || '').toLowerCase().includes(term)));
-  }, [query, rows]);
-
-  const stats = useMemo(() => {
-    const payable = rows.reduce((sum, row) => sum + Number(row.balance || 0), 0);
-    const withPhone = rows.filter((row) => row.phone).length;
-    const withEmail = rows.filter((row) => row.email).length;
-    return { payable, withPhone, withEmail };
-  }, [rows]);
+  const columns = [
+    { key: 'name', label: 'Supplier', render: (r) => <><strong>{r.name}</strong><span className="table-subtext">{r.email || 'No email'}</span></> },
+    { key: 'phone', label: 'Phone', render: (r) => r.phone || '-' },
+    { key: 'balance', label: 'Payable Balance', render: (r) => <strong>{money(r.balance)}</strong> }
+  ];
 
   return (
-    <div className="page ui-master-page suppliers-page">
-      <header className="page-header ui-page-hero supplier-hero">
+    <div className="page stage6-list-page suppliers-page">
+      <div className="stage6-hero">
         <div>
-          <span className="ui-eyebrow">People / Supplier Management</span>
           <h1>Suppliers</h1>
-          <p>Manage vendors, supplier balances and contact details for purchases, GRNs and payments.</p>
+          <p>Manage supplier profiles without making the page crowded. Purchases, supplier ledgers, payments and statements can use these saved supplier records.</p>
         </div>
-        <div className="ui-hero-badge"><Truck size={18} /> {rows.length} suppliers</div>
-      </header>
-
-      <section className="ui-stat-grid">
-        <div className="ui-stat-card tone-purple"><span>Total Suppliers</span><strong>{rows.length}</strong><small>Active vendor accounts</small></div>
-        <div className="ui-stat-card tone-orange"><span>Total Payable</span><strong>{money(stats.payable)}</strong><small>Money owed to suppliers</small></div>
-        <div className="ui-stat-card tone-blue"><span>Phone Contacts</span><strong>{stats.withPhone}</strong><small>Suppliers with phone numbers</small></div>
-        <div className="ui-stat-card tone-green"><span>Email Contacts</span><strong>{stats.withEmail}</strong><small>Suppliers with email addresses</small></div>
-      </section>
+        <div className="stage6-actions">
+          <button className="secondary-btn" type="button" onClick={load}><RefreshCw size={18} /> Refresh</button>
+          <button className="primary-btn" type="button" onClick={() => setCreateOpen(true)}><Plus size={18} /> Add Supplier</button>
+        </div>
+      </div>
 
       {error && <div className="error-box">{error}</div>}
 
-      <div className="ui-master-layout">
-        <section className="panel ui-table-panel">
-          <div className="section-title-row ui-section-title-row">
-            <div>
-              <h2>Supplier List</h2>
-              <p>Use this list before purchase orders, GRNs, supplier payments and statements.</p>
-            </div>
-            <label className="ui-search-field">
-              <Search size={17} />
-              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search supplier, phone or email" />
-            </label>
-          </div>
-
-          <DataTable
-            columns={[
-              { key: 'name', label: 'Supplier', render: (row) => <strong>{row.name}</strong> },
-              { key: 'phone', label: 'Phone', render: (row) => row.phone ? <span className="ui-inline"><Phone size={14} /> {row.phone}</span> : '—' },
-              { key: 'email', label: 'Email', render: (row) => row.email ? <span className="ui-inline"><Mail size={14} /> {row.email}</span> : '—' },
-              { key: 'balance', label: 'Payable Balance', render: (row) => <b className={Number(row.balance || 0) > 0 ? 'ui-warning-text' : 'ui-ok-text'}>{money(row.balance)}</b> }
-            ]}
-            rows={filteredRows}
-            emptyTitle="No suppliers found"
-            emptyDescription="Add a supplier to start recording purchases and GRNs."
-          />
-        </section>
-
-        <aside className="panel ui-form-panel">
-          <div className="ui-form-heading">
-            <div className="ui-form-icon"><UserPlus size={20} /></div>
-            <div>
-              <h2>Add Supplier</h2>
-              <p>Create vendor details for purchases, supplier ledger and payable tracking.</p>
-            </div>
-          </div>
-
-          <form onSubmit={submit} className="form-grid">
-            <label>Name<input name="name" value={form.name} onChange={update} placeholder="Example: ABC Distributors" required /></label>
-            <label>Phone<input name="phone" value={form.phone} onChange={update} placeholder="Example: 0771234567" /></label>
-            <label>Email<input name="email" type="email" value={form.email} onChange={update} placeholder="supplier@email.com" /></label>
-            <button className="primary-btn full-width" disabled={saving}>{saving ? 'Saving...' : 'Save Supplier'}</button>
-          </form>
-
-          <div className="ui-helper-card">
-            <Wallet size={18} />
-            <span>Supplier balances update when purchases, purchase returns and payments are posted.</span>
-          </div>
-        </aside>
+      <div className="stage6-kpi-grid">
+        <div className="stage6-kpi-card"><span>Total Suppliers</span><strong>{rows.length}</strong><small>Saved purchase contacts</small></div>
+        <div className="stage6-kpi-card"><span>With Balance</span><strong>{activeSuppliers}</strong><small>Suppliers with payable/credit activity</small></div>
+        <div className="stage6-kpi-card"><span>Total Payable</span><strong>{money(payable)}</strong><small>Money owed to suppliers</small></div>
+        <div className="stage6-kpi-card"><span>Clean Register</span><strong>List First</strong><small>Add form opens only when needed</small></div>
       </div>
+
+      <section className="panel stage6-table-panel">
+        <div className="stage6-toolbar">
+          <div className="stage6-search"><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search supplier name, phone or email..." /></div>
+          <span className="muted">Click a row to view supplier details</span>
+        </div>
+        <DataTable columns={columns} rows={filteredRows} pageSize={10} onRowClick={setSelected} empty="No suppliers found" />
+      </section>
+
+      <ModalDrawer open={createOpen} title="Add Supplier" description="Create supplier details once. Purchases, GRNs, supplier payments and statements can use this profile." onClose={() => setCreateOpen(false)}>
+        <form onSubmit={submit} className="form-grid">
+          <label>Name<input name="name" value={form.name} onChange={update} required /></label>
+          <label>Phone<input name="phone" value={form.phone} onChange={update} /></label>
+          <label>Email<input name="email" type="email" value={form.email} onChange={update} /></label>
+          <div className="stage6-form-actions"><button type="button" className="secondary-btn" onClick={() => setCreateOpen(false)}>Cancel</button><button className="primary-btn" disabled={saving}>Save Supplier</button></div>
+        </form>
+      </ModalDrawer>
+
+      <ModalDrawer open={!!selected} mode="modal" size="sm" title="Supplier Details" onClose={() => setSelected(null)}>
+        {selected && <div className="stage6-detail-grid">
+          <div className="stage6-detail-item"><span>Name</span><strong>{selected.name}</strong></div>
+          <div className="stage6-detail-item"><span>Phone</span><strong>{selected.phone || '-'}</strong></div>
+          <div className="stage6-detail-item"><span>Email</span><strong>{selected.email || '-'}</strong></div>
+          <div className="stage6-detail-item"><span>Balance</span><strong>{money(selected.balance)}</strong></div>
+        </div>}
+      </ModalDrawer>
     </div>
   );
 }

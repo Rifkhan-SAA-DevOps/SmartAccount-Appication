@@ -1,0 +1,365 @@
+/* SmartLedger Stage 6.1: Modal / Drawer alignment and responsive field fix
+   This file intentionally loads AFTER form-drawer-workflow.css and overrides only drawer/modal behavior. */
+
+.modal-drawer-open {
+  overflow: hidden;
+}
+
+.modal-drawer-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 2400;
+  display: flex;
+  justify-content: flex-end;
+  align-items: stretch;
+  pointer-events: none;
+  isolation: isolate;
+}
+
+.modal-drawer-layer.modal {
+  justify-content: center;
+  align-items: center;
+  padding: clamp(10px, 2vw, 24px);
+}
+
+.modal-drawer-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: rgba(15, 23, 42, 0.44);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.modal-drawer-panel {
+  position: relative;
+  z-index: 1;
+  width: min(680px, calc(100vw - 18px));
+  max-width: calc(100vw - 18px);
+  height: calc(100dvh - 18px);
+  max-height: calc(100dvh - 18px);
+  margin: 9px;
+  border-radius: 28px;
+  background: #ffffff;
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  box-shadow: 0 28px 90px rgba(15, 23, 42, 0.32);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  pointer-events: auto;
+  min-width: 0;
+}
+
+.modal-drawer-panel.sm { width: min(520px, calc(100vw - 18px)); }
+.modal-drawer-panel.md { width: min(680px, calc(100vw - 18px)); }
+.modal-drawer-panel.lg { width: min(860px, calc(100vw - 18px)); }
+.modal-drawer-panel.xl { width: min(1080px, calc(100vw - 18px)); }
+
+.modal-drawer-layer.modal .modal-drawer-panel {
+  width: min(820px, calc(100vw - 24px));
+  height: auto;
+  min-height: 0;
+  max-height: calc(100dvh - 28px);
+  margin: 0;
+}
+
+.modal-drawer-layer.modal .modal-drawer-panel.sm { width: min(560px, calc(100vw - 24px)); }
+.modal-drawer-layer.modal .modal-drawer-panel.lg { width: min(920px, calc(100vw - 24px)); }
+.modal-drawer-layer.modal .modal-drawer-panel.xl { width: min(1120px, calc(100vw - 24px)); }
+
+.modal-drawer-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: start;
+  padding: clamp(16px, 2vw, 24px);
+  border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+  background:
+    radial-gradient(circle at top left, rgba(124, 58, 237, 0.14), transparent 34%),
+    linear-gradient(135deg, #ffffff, #f8fafc);
+  min-width: 0;
+}
+
+.modal-drawer-title-block {
+  min-width: 0;
+}
+
+.modal-drawer-title-block h2,
+.modal-drawer-head h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: clamp(1.08rem, 1.6vw, 1.42rem);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.modal-drawer-title-block p,
+.modal-drawer-head p {
+  margin: 7px 0 0;
+  color: #64748b;
+  font-size: 0.94rem;
+  line-height: 1.45;
+  max-width: 72ch;
+  overflow-wrap: anywhere;
+}
+
+.drawer-close-btn {
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.92);
+  color: #334155;
+  display: inline-grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+}
+
+.modal-drawer-body {
+  padding: clamp(16px, 2vw, 24px);
+  overflow: auto;
+  min-width: 0;
+  min-height: 0;
+  background: #ffffff;
+}
+
+.modal-drawer-body > * {
+  min-width: 0;
+}
+
+.modal-drawer-footer {
+  padding: 14px clamp(16px, 2vw, 24px);
+  border-top: 1px solid rgba(226, 232, 240, 0.9);
+  background: rgba(248, 250, 252, 0.98);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+/* Form alignment inside all Stage 6 drawers/modals */
+.modal-drawer-panel form,
+.modal-drawer-body form {
+  width: 100%;
+  min-width: 0;
+}
+
+.modal-drawer-body .form-grid,
+.modal-drawer-body form.form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+  min-width: 0;
+}
+
+.modal-drawer-body .form-grid.two,
+.modal-drawer-body form.form-grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.modal-drawer-body .form-grid.three,
+.modal-drawer-body form.form-grid.three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.modal-drawer-body .form-grid.compact,
+.modal-drawer-body form.form-grid.compact {
+  gap: 12px;
+}
+
+.modal-drawer-body .span-two,
+.modal-drawer-body .stage6-form-actions.span-two {
+  grid-column: 1 / -1;
+}
+
+.modal-drawer-body label {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  width: 100%;
+  margin: 0;
+  color: #475569;
+  font-weight: 800;
+  font-size: 0.88rem;
+  line-height: 1.25;
+}
+
+.modal-drawer-body input,
+.modal-drawer-body select,
+.modal-drawer-body textarea {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  margin: 0;
+  border-radius: 14px;
+  border: 1px solid rgba(203, 213, 225, 0.9);
+  background: #ffffff;
+}
+
+.modal-drawer-body input,
+.modal-drawer-body select {
+  height: 46px;
+  padding: 0 13px;
+}
+
+.modal-drawer-body textarea {
+  min-height: 96px;
+  padding: 12px 13px;
+  resize: vertical;
+}
+
+.modal-drawer-body input:focus,
+.modal-drawer-body select:focus,
+.modal-drawer-body textarea:focus {
+  border-color: #7c3aed;
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.12);
+  outline: 0;
+}
+
+.modal-drawer-body .stage6-form-note {
+  grid-column: 1 / -1;
+  margin: 0 0 4px;
+}
+
+.modal-drawer-body .stage6-form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(226, 232, 240, 0.85);
+  min-width: 0;
+}
+
+.modal-drawer-body .stage6-form-actions .primary-btn,
+.modal-drawer-body .stage6-form-actions .secondary-btn,
+.modal-drawer-body .stage6-form-actions .danger-btn,
+.modal-drawer-footer .primary-btn,
+.modal-drawer-footer .secondary-btn,
+.modal-drawer-footer .danger-btn {
+  min-height: 44px;
+  border-radius: 14px;
+  white-space: normal;
+  text-align: center;
+  gap: 8px;
+}
+
+.modal-drawer-body .stage6-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  min-width: 0;
+}
+
+.modal-drawer-body .stage6-detail-item {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Cheque/product/manufacturing nested rows should never squeeze beyond drawer width */
+.modal-drawer-body .items-list,
+.modal-drawer-body .delivery-lines,
+.modal-drawer-body .quick-invoice-box,
+.modal-drawer-body .cheque-filter-grid,
+.modal-drawer-body .item-row,
+.modal-drawer-body .purchase-item-row,
+.modal-drawer-body .delivery-line-row {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Large drawer: 3-column forms should become 2 columns before they become cramped. */
+@media (max-width: 980px) {
+  .modal-drawer-body .form-grid.three,
+  .modal-drawer-body form.form-grid.three {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Tablet / small laptop: drawer stays usable and buttons stop crowding. */
+@media (max-width: 760px) {
+  .modal-drawer-layer,
+  .modal-drawer-layer.modal {
+    justify-content: center;
+    align-items: stretch;
+    padding: 0;
+  }
+
+  .modal-drawer-panel,
+  .modal-drawer-panel.sm,
+  .modal-drawer-panel.md,
+  .modal-drawer-panel.lg,
+  .modal-drawer-panel.xl,
+  .modal-drawer-layer.modal .modal-drawer-panel,
+  .modal-drawer-layer.modal .modal-drawer-panel.sm,
+  .modal-drawer-layer.modal .modal-drawer-panel.lg,
+  .modal-drawer-layer.modal .modal-drawer-panel.xl {
+    width: calc(100vw - 12px);
+    max-width: calc(100vw - 12px);
+    height: calc(100dvh - 12px);
+    max-height: calc(100dvh - 12px);
+    margin: 6px;
+    border-radius: 22px;
+  }
+
+  .modal-drawer-body .form-grid.two,
+  .modal-drawer-body form.form-grid.two,
+  .modal-drawer-body .form-grid.three,
+  .modal-drawer-body form.form-grid.three,
+  .modal-drawer-body .stage6-detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .modal-drawer-body .stage6-form-actions,
+  .modal-drawer-footer {
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+  }
+
+  .modal-drawer-body .stage6-form-actions .primary-btn,
+  .modal-drawer-body .stage6-form-actions .secondary-btn,
+  .modal-drawer-body .stage6-form-actions .danger-btn,
+  .modal-drawer-footer .primary-btn,
+  .modal-drawer-footer .secondary-btn,
+  .modal-drawer-footer .danger-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 420px) {
+  .modal-drawer-head {
+    grid-template-columns: minmax(0, 1fr) 38px;
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .drawer-close-btn {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 13px;
+  }
+
+  .modal-drawer-body {
+    padding: 14px;
+  }
+
+  .modal-drawer-footer {
+    padding: 12px 14px;
+  }
+}
