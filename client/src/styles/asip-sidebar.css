@@ -115,6 +115,40 @@ body { overflow-x: hidden; background: #f7f8fb; }
 .smart-brand-copy { min-width: 0; white-space: nowrap; overflow: hidden; }
 .smart-sidebar.is-collapsed .smart-brand-copy { display: none; }
 
+/* Brand/collapse overlap fix
+   When the desktop sidebar is collapsed, hide the brand link completely.
+   This leaves only the open-sidebar button, so the logo/title will not overlap.
+   On mobile drawer, the brand link is shown again.
+*/
+.smart-sidebar.is-collapsed:not(.is-mobile-open) .smart-brand-link,
+.sidebar.is-collapsed:not(.is-mobile-open) .smart-brand-link {
+  display: none !important;
+}
+
+.smart-sidebar.is-collapsed:not(.is-mobile-open) .smart-brand,
+.sidebar.is-collapsed:not(.is-mobile-open) .smart-brand,
+.smart-sidebar.is-collapsed:not(.is-mobile-open).brand,
+.sidebar.is-collapsed:not(.is-mobile-open).brand {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.smart-sidebar.is-collapsed:not(.is-mobile-open) .sidebar-brand-actions,
+.sidebar.is-collapsed:not(.is-mobile-open) .sidebar-brand-actions {
+  width: 100%;
+  margin-left: 0 !important;
+  justify-content: center;
+}
+
+.smart-sidebar.is-collapsed:not(.is-mobile-open) .sidebar-collapse-btn,
+.sidebar.is-collapsed:not(.is-mobile-open) .sidebar-collapse-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+}
+
+
 .sidebar-brand-actions { display: flex; align-items: center; gap: 6px; }
 .sidebar-collapse-btn,
 .sidebar-close-btn {
@@ -619,5 +653,927 @@ body { overflow-x: hidden; background: #f7f8fb; }
 
   .mobile-inline-flyout {
     padding-left: 8px !important;
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   Creative hidden-scroll sidebar polish
+   Goal: remove ugly visible scrollbar but keep smooth scrolling.
+   Instead of a scrollbar, the user gets soft fade shadows + a small glow rail.
+-------------------------------------------------------------------------- */
+.sidebar-nav-shell {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+  border-radius: 18px;
+}
+
+.sidebar-nav-shell .sidebar-main-nav {
+  height: 100%;
+  flex: none !important;
+  min-height: 0 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  padding-right: 2px !important;
+  scroll-behavior: smooth;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 18px,
+    #000 calc(100% - 24px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 18px,
+    #000 calc(100% - 24px),
+    transparent 100%
+  );
+}
+
+.sidebar-nav-shell .sidebar-main-nav::-webkit-scrollbar,
+.sidebar-flyout::-webkit-scrollbar,
+.mobile-inline-flyout::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+.sidebar-flyout,
+.mobile-inline-flyout {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+.sidebar-flyout.desktop-flyout {
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 18px,
+    #000 calc(100% - 24px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 18px,
+    #000 calc(100% - 24px),
+    transparent 100%
+  );
+}
+
+.sidebar-scroll-cue {
+  pointer-events: none;
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 30px;
+  z-index: 12;
+  opacity: .96;
+}
+
+.sidebar-scroll-cue-top {
+  top: 0;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.72), rgba(255,255,255,0));
+}
+
+.sidebar-scroll-cue-bottom {
+  bottom: 0;
+  background:
+    linear-gradient(0deg, rgba(255,255,255,.98), rgba(255,255,255,.72), rgba(255,255,255,0));
+}
+
+.sidebar-nav-shell::after {
+  content: '';
+  position: absolute;
+  top: 42px;
+  bottom: 42px;
+  right: 2px;
+  width: 3px;
+  border-radius: 999px;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      180deg,
+      transparent 0%,
+      rgba(124, 58, 237, .12) 18%,
+      rgba(124, 58, 237, .30) 50%,
+      rgba(34, 197, 94, .18) 78%,
+      transparent 100%
+    );
+  box-shadow: 0 0 16px rgba(124, 58, 237, .16);
+}
+
+.smart-sidebar.is-collapsed .sidebar-nav-shell::after,
+.sidebar.is-collapsed .sidebar-nav-shell::after {
+  right: 0;
+  width: 2px;
+  opacity: .65;
+}
+
+.smart-sidebar.is-collapsed .sidebar-scroll-cue,
+.sidebar.is-collapsed .sidebar-scroll-cue {
+  left: 4px;
+  right: 4px;
+}
+
+@media (max-width: 900px) {
+  .sidebar-nav-shell {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    border-radius: 18px;
+  }
+
+  .sidebar-nav-shell .sidebar-main-nav {
+    height: 100% !important;
+    padding-right: 0 !important;
+  }
+
+  .sidebar-nav-shell::after {
+    right: 0;
+    width: 3px;
+  }
+}
+
+@media (max-width: 700px) {
+  .sidebar-nav-shell {
+    width: 100% !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .sidebar-nav-shell .sidebar-main-nav {
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   Fast content focus blur + remove submenu top/bottom fade
+   - Removes flyout/submenu mask fade at top and bottom.
+   - Uses one lightweight overlay over the main content when the sidebar menu is
+     hovered/opened. This avoids applying CSS filter directly to every dashboard
+     card/table, so the application stays fast.
+-------------------------------------------------------------------------- */
+.smart-main-shell,
+.main-shell {
+  isolation: isolate;
+  overflow: visible;
+}
+
+.smart-nav-focus-overlay {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 70;
+  opacity: 0;
+  visibility: hidden;
+  background:
+    radial-gradient(circle at 8% 16%, rgba(124, 58, 237, .08), transparent 28%),
+    rgba(248, 250, 252, .42);
+  -webkit-backdrop-filter: blur(2.5px) saturate(1.02);
+  backdrop-filter: blur(2.5px) saturate(1.02);
+  transition: opacity .16s ease, visibility .16s ease;
+  will-change: opacity;
+}
+
+.smart-app-shell.nav-focus-active .smart-nav-focus-overlay,
+.app-shell.nav-focus-active .smart-nav-focus-overlay {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Keep the sidebar and flyout above the lightweight content overlay. */
+.smart-sidebar,
+.sidebar { z-index: 90; }
+.sidebar-flyout.desktop-flyout { z-index: 9999; }
+
+/* Remove only the flyout/submenu top and bottom blur/fade mask. */
+.sidebar-flyout.desktop-flyout {
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+}
+
+/* The flyout still scrolls smoothly, but no ugly scrollbar and no faded edges. */
+.sidebar-flyout,
+.mobile-inline-flyout {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+.sidebar-flyout::-webkit-scrollbar,
+.mobile-inline-flyout::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  .smart-nav-focus-overlay { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .smart-nav-focus-overlay { transition: none; }
+}
+
+/* --------------------------------------------------------------------------
+   Submenu dropdown closed-by-default fix
+   - Flyout sections like Sales > Billing are buttons now.
+   - Sections are initially closed.
+   - No item numbers / counters are shown.
+-------------------------------------------------------------------------- */
+.flyout-sections,
+.flyout-section,
+.flyout-link-list,
+.mobile-inline-flyout .flyout-sections,
+.mobile-inline-flyout .flyout-section,
+.mobile-inline-flyout .flyout-link-list {
+  list-style: none !important;
+  counter-reset: none !important;
+}
+
+.flyout-section,
+.mobile-inline-flyout .flyout-section {
+  overflow: hidden;
+  border: 1px solid rgba(226, 232, 240, .88);
+  border-radius: 15px;
+  background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(248,250,252,.86));
+  box-shadow: 0 10px 24px rgba(15, 23, 42, .035);
+}
+
+.flyout-section h4 { display: none !important; }
+
+.flyout-section-toggle {
+  width: 100%;
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  border: 0;
+  outline: 0;
+  cursor: pointer;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 14px;
+  color: #374151;
+  background:
+    radial-gradient(circle at 96% 10%, rgba(124, 58, 237, .08), transparent 34%),
+    linear-gradient(135deg, #ffffff, #fbfbff);
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+  transition: background .16s ease, color .16s ease, box-shadow .16s ease;
+}
+
+.flyout-section-toggle:hover,
+.flyout-section.is-open .flyout-section-toggle {
+  color: var(--smart-purple);
+  background:
+    radial-gradient(circle at 96% 10%, rgba(124, 58, 237, .14), transparent 38%),
+    linear-gradient(135deg, #ffffff, #f7f2ff);
+  box-shadow: inset 0 0 0 1px rgba(124, 58, 237, .09);
+}
+
+.flyout-section-chevron {
+  flex: 0 0 auto;
+  color: #9ca3af;
+  transition: transform .18s ease, color .18s ease;
+}
+
+.flyout-section.is-open .flyout-section-chevron {
+  transform: rotate(90deg);
+  color: var(--smart-purple);
+}
+
+.flyout-link-list,
+.mobile-inline-flyout .flyout-link-list {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  display: grid;
+  gap: 6px;
+  padding: 0 8px;
+  transform: translateY(-4px);
+  transition:
+    max-height .22s ease,
+    opacity .16s ease,
+    padding .18s ease,
+    transform .18s ease;
+}
+
+.flyout-section.is-open .flyout-link-list,
+.mobile-inline-flyout .flyout-section.is-open .flyout-link-list {
+  max-height: 520px;
+  opacity: 1;
+  padding: 8px 8px 10px;
+  transform: translateY(0);
+}
+
+.flyout-link,
+.flyout-link::before,
+.flyout-link::after,
+.flyout-link-icon::before,
+.flyout-link-copy::before {
+  counter-increment: none !important;
+}
+
+.flyout-link::before,
+.flyout-link::after,
+.flyout-link-icon::before,
+.flyout-link-copy::before {
+  content: none !important;
+  display: none !important;
+}
+
+.flyout-link {
+  list-style: none !important;
+}
+
+@media (max-width: 900px) {
+  .mobile-inline-flyout .flyout-section-toggle {
+    min-height: 42px;
+    padding: 9px 10px;
+    font-size: 11px;
+  }
+
+  .mobile-inline-flyout .flyout-section.is-open .flyout-link-list {
+    max-height: 650px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Same-level flyout positioning fix
+   - Parent menu and submenu align by level.
+   - If the submenu would overflow below the viewport, its bottom aligns with
+     the parent row instead of jumping to the screen center.
+   - Gap between sidebar and flyout is tighter.
+-------------------------------------------------------------------------- */
+.sidebar-flyout.desktop-flyout {
+  max-height: calc(100vh - 28px) !important;
+  margin-left: 0 !important;
+  transform-origin: left var(--flyout-pointer-top, 38px) !important;
+}
+
+.sidebar-flyout.desktop-flyout::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: var(--flyout-pointer-top, 38px);
+  width: 4px;
+  height: 38px;
+  transform: translateY(-50%);
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(124, 58, 237, .1), rgba(124, 58, 237, .85), rgba(34, 197, 94, .45));
+  box-shadow: 0 0 18px rgba(124, 58, 237, .28);
+  pointer-events: none;
+}
+
+.sidebar-flyout.desktop-flyout::after {
+  content: '';
+  position: absolute;
+  left: -5px;
+  top: var(--flyout-pointer-top, 38px);
+  width: 10px;
+  height: 10px;
+  transform: translateY(-50%) rotate(45deg);
+  border-radius: 3px;
+  background: #ffffff;
+  border-left: 1px solid rgba(226, 232, 240, .95);
+  border-bottom: 1px solid rgba(226, 232, 240, .95);
+  box-shadow: -5px 5px 12px rgba(124, 58, 237, .08);
+  pointer-events: none;
+}
+
+@media (max-width: 900px) {
+  .sidebar-flyout.desktop-flyout::before,
+  .sidebar-flyout.desktop-flyout::after {
+    display: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Dynamic flyout overflow fix
+   - Parent menu item never moves.
+   - Flyout can move upward only when opened dropdowns make it too tall.
+   - Connector stays aligned to the original parent menu item.
+   - If the flyout is taller than the viewport, only the flyout scrolls.
+-------------------------------------------------------------------------- */
+.sidebar-flyout.desktop-flyout {
+  max-height: var(--flyout-max-height, calc(100vh - 28px)) !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain;
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  scroll-behavior: smooth;
+}
+
+.sidebar-flyout.desktop-flyout::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+.sidebar-flyout.desktop-flyout::before,
+.sidebar-flyout.desktop-flyout::after {
+  top: var(--flyout-pointer-top, 38px) !important;
+}
+
+.flyout-section.is-open .flyout-link-list,
+.mobile-inline-flyout .flyout-section.is-open .flyout-link-list {
+  max-height: 720px;
+}
+
+@media (max-height: 680px) {
+  .sidebar-flyout.desktop-flyout {
+    padding: 10px !important;
+    border-radius: 18px !important;
+  }
+
+  .flyout-header {
+    padding: 10px 11px !important;
+    margin-bottom: 9px !important;
+  }
+
+  .flyout-sections {
+    gap: 9px !important;
+  }
+
+  .flyout-section-toggle {
+    min-height: 42px !important;
+    padding: 8px 11px !important;
+  }
+
+  .flyout-link {
+    min-height: 44px !important;
+  }
+
+  .flyout-link-copy small {
+    display: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Better flyout dropdown polish + first dropdown open by default
+   - First section is visible when a submenu opens.
+   - Other sections stay closed until clicked.
+   - Accordion is cleaner, compact, and less heavy.
+   - No item numbers, no submenu top/bottom fade.
+-------------------------------------------------------------------------- */
+.sidebar-flyout.desktop-flyout {
+  width: clamp(298px, 22vw, 342px) !important;
+  padding: 12px !important;
+  border-radius: 18px !important;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.99), rgba(250,250,255,.97)) !important;
+  border: 1px solid rgba(226, 232, 240, .92) !important;
+  box-shadow:
+    0 24px 54px rgba(15, 23, 42, .13),
+    0 8px 18px rgba(124, 58, 237, .08) !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+}
+
+.flyout-header {
+  padding: 11px 12px !important;
+  margin-bottom: 10px !important;
+  border-radius: 15px !important;
+  background:
+    radial-gradient(circle at 96% 8%, rgba(124, 58, 237, .13), transparent 36%),
+    linear-gradient(135deg, #ffffff, #faf7ff) !important;
+}
+
+.flyout-header span {
+  font-size: 14px !important;
+  letter-spacing: -.01em !important;
+}
+
+.flyout-header strong {
+  font-size: 10.5px !important;
+}
+
+.flyout-sections {
+  gap: 9px !important;
+}
+
+.flyout-section,
+.mobile-inline-flyout .flyout-section {
+  border-radius: 14px !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(229, 231, 235, .95) !important;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, .035) !important;
+}
+
+.flyout-section-toggle {
+  min-height: 43px !important;
+  padding: 9px 11px !important;
+  border-radius: 13px !important;
+  font-size: 11px !important;
+  letter-spacing: .06em !important;
+  color: #4b5563 !important;
+  background:
+    linear-gradient(135deg, #ffffff, #fbfbfd) !important;
+}
+
+.flyout-section-toggle:hover,
+.flyout-section.is-open .flyout-section-toggle {
+  color: var(--smart-purple) !important;
+  background:
+    radial-gradient(circle at 96% 10%, rgba(124, 58, 237, .11), transparent 38%),
+    linear-gradient(135deg, #ffffff, #f7f2ff) !important;
+  box-shadow: inset 3px 0 rgba(124, 58, 237, .78) !important;
+}
+
+.flyout-section.is-open {
+  border-color: rgba(196, 181, 253, .74) !important;
+}
+
+.flyout-section-chevron {
+  color: #9ca3af !important;
+}
+
+.flyout-section.is-open .flyout-section-chevron {
+  color: var(--smart-purple) !important;
+}
+
+.flyout-section.is-open .flyout-link-list,
+.mobile-inline-flyout .flyout-section.is-open .flyout-link-list {
+  max-height: 680px !important;
+  padding: 7px 7px 9px !important;
+  gap: 5px !important;
+}
+
+.flyout-link {
+  min-height: 44px !important;
+  grid-template-columns: 31px minmax(0, 1fr) !important;
+  gap: 8px !important;
+  padding: 6px 7px !important;
+  border-radius: 12px !important;
+}
+
+.flyout-link-icon {
+  width: 31px !important;
+  height: 31px !important;
+  border-radius: 10px !important;
+}
+
+.flyout-link-copy b {
+  font-size: 12.5px !important;
+  line-height: 1.1 !important;
+}
+
+.flyout-link-copy small {
+  font-size: 10.5px !important;
+  margin-top: 2px !important;
+  line-height: 1.25 !important;
+}
+
+.flyout-link:hover,
+.flyout-link.active {
+  background: linear-gradient(90deg, rgba(124, 58, 237, .10), rgba(124, 58, 237, .018)) !important;
+  border-color: rgba(196, 181, 253, .48) !important;
+  transform: translateX(2px) !important;
+}
+
+.sidebar-flyout.desktop-flyout::before {
+  height: 34px !important;
+  left: -1px !important;
+}
+
+.sidebar-flyout.desktop-flyout::after {
+  left: -5px !important;
+}
+
+@media (max-height: 680px) {
+  .flyout-section.is-open .flyout-link-list,
+  .mobile-inline-flyout .flyout-section.is-open .flyout-link-list {
+    max-height: 520px !important;
+  }
+
+  .flyout-link-copy small {
+    display: none !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .mobile-inline-flyout .flyout-section.is-open .flyout-link-list {
+    max-height: 760px !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Flyout hover shake fix
+   - The flyout is positioned before it becomes visible.
+   - No top/bottom submenu blur is added.
+   - No heavy animation that can fight with dynamic top positioning.
+-------------------------------------------------------------------------- */
+.sidebar-flyout.desktop-flyout {
+  animation: none !important;
+  transition: opacity .11s ease, transform .11s ease, box-shadow .14s ease !important;
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+  contain: layout paint;
+}
+
+.sidebar-flyout.desktop-flyout.is-positioning {
+  opacity: 0 !important;
+  transform: translateX(-4px) scale(.992) !important;
+  pointer-events: none !important;
+}
+
+.sidebar-flyout.desktop-flyout.is-position-ready {
+  opacity: 1 !important;
+  transform: translateX(0) scale(1) !important;
+  pointer-events: auto !important;
+}
+
+.sidebar-flyout.desktop-flyout::before,
+.sidebar-flyout.desktop-flyout::after {
+  transition: top .08s ease !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-flyout.desktop-flyout,
+  .sidebar-flyout.desktop-flyout::before,
+  .sidebar-flyout.desktop-flyout::after {
+    transition: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   Stable top/bottom anchored flyout fix
+   - Top-half menu: flyout TOP aligns with the parent menu row.
+   - Bottom-half menu: flyout BOTTOM aligns with the parent menu row.
+   - The parent menu never moves.
+   - Opening/closing dropdown sections does not re-position the flyout, so it
+     avoids the up/down shake.
+-------------------------------------------------------------------------- */
+.sidebar-flyout.desktop-flyout.is-top-anchored.is-positioning {
+  opacity: 0 !important;
+  transform: translateX(-4px) scale(.992) !important;
+  pointer-events: none !important;
+}
+
+.sidebar-flyout.desktop-flyout.is-top-anchored.is-position-ready {
+  opacity: 1 !important;
+  transform: translateX(0) scale(1) !important;
+  pointer-events: auto !important;
+}
+
+.sidebar-flyout.desktop-flyout.is-bottom-anchored {
+  transform-origin: left bottom !important;
+}
+
+.sidebar-flyout.desktop-flyout.is-bottom-anchored.is-positioning {
+  opacity: 0 !important;
+  transform: translateY(-100%) translateX(-4px) scale(.992) !important;
+  pointer-events: none !important;
+}
+
+.sidebar-flyout.desktop-flyout.is-bottom-anchored.is-position-ready {
+  opacity: 1 !important;
+  transform: translateY(-100%) translateX(0) scale(1) !important;
+  pointer-events: auto !important;
+}
+
+.sidebar-flyout.desktop-flyout.is-top-anchored::before,
+.sidebar-flyout.desktop-flyout.is-top-anchored::after,
+.sidebar-flyout.desktop-flyout.is-bottom-anchored::before,
+.sidebar-flyout.desktop-flyout.is-bottom-anchored::after {
+  top: var(--flyout-pointer-top, 24px) !important;
+}
+
+.sidebar-flyout.desktop-flyout {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  overscroll-behavior: contain !important;
+  contain: paint !important;
+}
+
+/* Do not animate top/max-height. Only fade/slide the panel in.
+   This prevents shaking while dropdown content changes height. */
+.sidebar-flyout.desktop-flyout,
+.sidebar-flyout.desktop-flyout::before,
+.sidebar-flyout.desktop-flyout::after {
+  transition-property: opacity, transform, box-shadow !important;
+}
+
+/* --------------------------------------------------------------------------
+   Flyout first-section-open + creative submenu scrollbar
+   - First submenu section opens initially.
+   - Other sections are closed initially.
+   - Multiple sections can be open at the same time after clicking.
+   - Shows a slim creative scrollbar for the submenu/flyout instead of hiding it.
+-------------------------------------------------------------------------- */
+.sidebar-flyout.desktop-flyout {
+  /* Make submenu scrolling visible but elegant. */
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(124, 58, 237, .55) rgba(241, 245, 249, .72) !important;
+  padding-right: 10px !important;
+}
+
+.sidebar-flyout.desktop-flyout::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important;
+  display: block !important;
+}
+
+.sidebar-flyout.desktop-flyout::-webkit-scrollbar-track {
+  background: linear-gradient(180deg, rgba(248, 250, 252, .25), rgba(241, 245, 249, .88), rgba(248, 250, 252, .25)) !important;
+  border-radius: 999px !important;
+  margin: 14px 0 !important;
+}
+
+.sidebar-flyout.desktop-flyout::-webkit-scrollbar-thumb {
+  border-radius: 999px !important;
+  border: 2px solid rgba(255, 255, 255, .96) !important;
+  background:
+    linear-gradient(180deg, rgba(124, 58, 237, .92), rgba(159, 103, 255, .78), rgba(34, 197, 94, .58)) !important;
+  box-shadow: 0 0 12px rgba(124, 58, 237, .22) !important;
+}
+
+.sidebar-flyout.desktop-flyout::-webkit-scrollbar-thumb:hover {
+  background:
+    linear-gradient(180deg, rgba(109, 40, 217, .98), rgba(124, 58, 237, .88), rgba(34, 197, 94, .68)) !important;
+}
+
+.sidebar-flyout.desktop-flyout .flyout-sections {
+  padding-right: 2px !important;
+}
+
+.flyout-section:not(.is-open) .flyout-section-toggle {
+  box-shadow: none !important;
+}
+
+.flyout-section:not(.is-open) .flyout-link-list,
+.mobile-inline-flyout .flyout-section:not(.is-open) .flyout-link-list {
+  max-height: 0 !important;
+  opacity: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  pointer-events: none !important;
+}
+
+.flyout-section.is-open .flyout-link-list,
+.mobile-inline-flyout .flyout-section.is-open .flyout-link-list {
+  pointer-events: auto !important;
+}
+
+@media (max-width: 900px) {
+  .mobile-inline-flyout {
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(124, 58, 237, .45) rgba(241, 245, 249, .75) !important;
+  }
+
+  .mobile-inline-flyout::-webkit-scrollbar {
+    width: 6px !important;
+    display: block !important;
+  }
+
+  .mobile-inline-flyout::-webkit-scrollbar-track {
+    background: rgba(241, 245, 249, .75) !important;
+    border-radius: 999px !important;
+  }
+
+  .mobile-inline-flyout::-webkit-scrollbar-thumb {
+    border-radius: 999px !important;
+    background: linear-gradient(180deg, rgba(124, 58, 237, .72), rgba(34, 197, 94, .5)) !important;
+  }
+}
+
+
+/* SmartLedger hamburger double-sidebar and blur safety fix */
+.sidebar-backdrop {
+  display: none;
+}
+
+.smart-nav-focus-overlay {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+.smart-app-shell.nav-focus-active .smart-nav-focus-overlay,
+.app-shell.nav-focus-active .smart-nav-focus-overlay {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+@media (min-width: 901px) {
+  .sidebar-backdrop {
+    display: none !important;
+  }
+
+  .smart-sidebar.is-mobile-open,
+  .sidebar.is-mobile-open {
+    transform: none !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    border: 0;
+    background: rgba(15, 23, 42, .42);
+    -webkit-backdrop-filter: blur(2px);
+    backdrop-filter: blur(2px);
+  }
+
+  .desktop-flyout,
+  .sidebar-flyout.desktop-flyout {
+    display: none !important;
+  }
+}
+
+
+/* --------------------------------------------------------------------------
+   FINAL FIX: hamburger drawer double-sidebar / full blur issue
+   Exact cause found in current project:
+   a later global .smart-sidebar { z-index: 90 } rule was overriding the mobile
+   drawer z-index, so the backdrop sat above the sidebar and blurred the
+   sidebar itself. This makes it look like two sidebars.
+-------------------------------------------------------------------------- */
+.smart-app-shell.mobile-drawer-active .smart-nav-focus-overlay,
+.app-shell.mobile-drawer-active .smart-nav-focus-overlay,
+.smart-app-shell.mobile-drawer-active.nav-focus-active .smart-nav-focus-overlay,
+.app-shell.mobile-drawer-active.nav-focus-active .smart-nav-focus-overlay {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+
+@media (min-width: 901px) {
+  .sidebar-backdrop {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .smart-sidebar.is-mobile-open,
+  .sidebar.is-mobile-open {
+    transform: none !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .smart-app-shell.mobile-drawer-active .smart-sidebar,
+  .smart-app-shell.mobile-drawer-active .sidebar,
+  .smart-sidebar.is-mobile-open,
+  .sidebar.is-mobile-open {
+    position: fixed !important;
+    z-index: 1201 !important;
+    filter: none !important;
+    opacity: 1 !important;
+    -webkit-backdrop-filter: blur(18px) !important;
+    backdrop-filter: blur(18px) !important;
+    transform: translateX(0) !important;
+  }
+
+  .sidebar-backdrop {
+    display: block !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 1200 !important;
+    border: 0 !important;
+    background: rgba(15, 23, 42, .34) !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  .smart-app-shell.mobile-drawer-active .sidebar-flyout,
+  .smart-app-shell.mobile-drawer-active .desktop-flyout,
+  .smart-app-shell.mobile-drawer-active .sidebar-flyout.desktop-flyout {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
   }
 }

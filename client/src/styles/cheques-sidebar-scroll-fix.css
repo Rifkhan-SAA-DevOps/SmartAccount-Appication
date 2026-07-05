@@ -1,0 +1,447 @@
+/* SmartLedger Cheques + fixed sidebar scroll isolation fix
+   Goal:
+   1) Right-side page content scrolls independently.
+   2) Sidebar stays fixed in place.
+   3) Only the sidebar menu list scrolls when the cursor is inside the sidebar.
+   4) Cheque page becomes responsive with paginated, safe tables.
+*/
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  min-height: 100%;
+}
+
+/* Desktop/tablet app scrolling: the main content is the scroll container, not the whole body. */
+@media (min-width: 901px) {
+  html,
+  body,
+  #root {
+    height: 100%;
+    overflow: hidden !important;
+  }
+
+  .smart-app-shell,
+  .app-shell {
+    height: 100dvh !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    align-items: stretch !important;
+  }
+
+  .smart-sidebar,
+  .sidebar {
+    flex: 0 0 var(--smart-sidebar-width) !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    min-height: 0 !important;
+    position: relative !important;
+    top: auto !important;
+    overflow: hidden !important;
+  }
+
+  .smart-sidebar.is-collapsed,
+  .sidebar.is-collapsed {
+    flex-basis: var(--smart-sidebar-collapsed-width) !important;
+  }
+
+  .smart-main-shell,
+  .main-shell {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+
+  .smart-topbar,
+  .topbar.smart-topbar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 60 !important;
+  }
+
+  .sidebar-nav-shell {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 150px) !important;
+    overflow: hidden !important;
+  }
+
+  .sidebar-nav-shell .sidebar-main-nav,
+  .sidebar-main-nav {
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+  }
+
+  .sidebar-footer-card {
+    flex: 0 0 auto !important;
+  }
+}
+
+/* Mobile: keep drawer fixed; content still scrolls normally inside main shell. */
+@media (max-width: 900px) {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+    overflow-x: hidden !important;
+  }
+
+  .smart-main-shell,
+  .main-shell {
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+  }
+
+  .smart-sidebar,
+  .sidebar,
+  .smart-sidebar.is-collapsed,
+  .sidebar.is-collapsed {
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    overflow: hidden !important;
+  }
+
+  .sidebar-nav-shell {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 145px) !important;
+    overflow: hidden !important;
+  }
+
+  .sidebar-nav-shell .sidebar-main-nav,
+  .sidebar-main-nav {
+    height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+  }
+}
+
+/* Make the sidebar scrollbar usable but still clean. */
+.sidebar-nav-shell .sidebar-main-nav {
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(124, 58, 237, .42) rgba(241, 245, 249, .8) !important;
+}
+
+.sidebar-nav-shell .sidebar-main-nav::-webkit-scrollbar {
+  width: 7px !important;
+  display: block !important;
+}
+
+.sidebar-nav-shell .sidebar-main-nav::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, .72) !important;
+  border-radius: 999px !important;
+}
+
+.sidebar-nav-shell .sidebar-main-nav::-webkit-scrollbar-thumb {
+  border-radius: 999px !important;
+  background: linear-gradient(180deg, rgba(124, 58, 237, .72), rgba(34, 197, 94, .5)) !important;
+  border: 2px solid rgba(255,255,255,.92) !important;
+}
+
+/* ---------------- Cheques page hard responsive fix ---------------- */
+.cheques-page,
+.cheques-page * {
+  min-width: 0;
+}
+
+.cheques-page {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.cheques-page .page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+}
+
+.cheques-page .page-head > div:first-child {
+  min-width: 0;
+}
+
+.cheques-page .page-head p,
+.cheques-page .panel p,
+.cheques-page .table-subtext,
+.cheques-page .muted {
+  overflow-wrap: anywhere;
+}
+
+.cheques-page .head-actions,
+.cheques-page .actions-row,
+.cheques-page .compact-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.cheques-page .cheque-stat-grid,
+.cheques-page .stat-grid.cheque-stat-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important;
+  gap: 14px !important;
+}
+
+.cheques-page .stat-card {
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.cheques-page .stat-card strong,
+.cheques-page .stat-card small {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.cheques-page .cheque-filter-panel {
+  overflow: hidden;
+}
+
+.cheques-page .cheque-filter-grid,
+.cheques-page .form-grid.cheque-filter-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(185px, 1fr)) !important;
+  gap: 12px !important;
+  align-items: end !important;
+}
+
+.cheques-page .filter-apply {
+  min-height: 46px;
+  align-self: end;
+}
+
+.cheques-page .cheque-layout,
+.cheques-page .two-col-page.cheque-layout {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 380px) !important;
+  gap: 18px !important;
+  align-items: start !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.cheques-page .cheque-layout > .panel,
+.cheques-page .cheque-form-panel,
+.cheques-page .cheque-layout .table-card {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+/* Important: with the sidebar visible, laptop content width is smaller.
+   Collapse the cheque register and form earlier to stop overlap completely. */
+@media (max-width: 1540px) {
+  .cheques-page .cheque-layout,
+  .cheques-page .two-col-page.cheque-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .cheques-page .cheque-form-panel {
+    max-width: 860px;
+  }
+}
+
+.cheques-page .cheque-form-panel .form-grid.two,
+.cheques-page .form-grid.two {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+.cheques-page input,
+.cheques-page select,
+.cheques-page textarea {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.cheques-page .table-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+.cheques-page .table-scroll {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cheques-page .table-card table {
+  width: 100% !important;
+  min-width: 820px;
+}
+
+.cheques-page .table-card th,
+.cheques-page .table-card td {
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+  vertical-align: top !important;
+}
+
+.cheques-page .compact-actions .mini-action,
+.cheques-page .compact-actions .mini-danger {
+  min-height: 32px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  white-space: nowrap;
+}
+
+.cheques-page .cheque-bottom-grid,
+.cheques-page .report-grid.two.cheque-bottom-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+  gap: 18px !important;
+  width: 100% !important;
+}
+
+.cheques-page .cheque-mini-row {
+  display: grid;
+  grid-template-columns: minmax(80px, 120px) minmax(0, 1fr) minmax(95px, auto);
+  gap: 8px 12px;
+  align-items: center;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(226, 232, 240, .8);
+}
+
+.cheques-page .cheque-mini-row:last-child {
+  border-bottom: 0;
+}
+
+.cheques-page .cheque-mini-row > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.cheques-page .cheque-mini-row small {
+  grid-column: 1 / -1;
+  color: #64748b;
+}
+
+@media (max-width: 900px) {
+  .cheques-page .page-head {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .cheques-page .head-actions {
+    width: 100%;
+  }
+}
+
+@media (max-width: 760px) {
+  .cheques-page .cheque-stat-grid,
+  .cheques-page .stat-grid.cheque-stat-grid,
+  .cheques-page .cheque-filter-grid,
+  .cheques-page .form-grid.cheque-filter-grid,
+  .cheques-page .cheque-form-panel .form-grid.two,
+  .cheques-page .form-grid.two,
+  .cheques-page .cheque-bottom-grid,
+  .cheques-page .report-grid.two.cheque-bottom-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .cheques-page .head-actions,
+  .cheques-page .compact-actions {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+  }
+
+  .cheques-page .head-actions > *,
+  .cheques-page .compact-actions > *,
+  .cheques-page .primary-btn,
+  .cheques-page .secondary-btn,
+  .cheques-page .mini-action,
+  .cheques-page .mini-danger {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .cheques-page .table-card table {
+    min-width: 0 !important;
+  }
+
+  .cheques-page .table-card thead {
+    display: none !important;
+  }
+
+  .cheques-page .table-card tbody,
+  .cheques-page .table-card tr,
+  .cheques-page .table-card td {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .cheques-page .table-card tr {
+    margin: 10px;
+    border: 1px solid rgba(226, 232, 240, .95);
+    border-radius: 18px;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .cheques-page .table-card td {
+    display: grid !important;
+    grid-template-columns: minmax(96px, 38%) minmax(0, 1fr) !important;
+    gap: 10px !important;
+    padding: 11px 12px !important;
+    border-bottom: 1px solid rgba(226, 232, 240, .72) !important;
+  }
+
+  .cheques-page .table-card td:last-child {
+    border-bottom: 0 !important;
+  }
+
+  .cheques-page .table-card td::before {
+    content: attr(data-label);
+    color: #64748b;
+    font-weight: 850;
+    font-size: .76rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+
+  .cheques-page .empty-cell {
+    display: block !important;
+  }
+
+  .cheques-page .empty-cell::before {
+    content: none !important;
+  }
+
+  .cheques-page .cheque-mini-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+    padding: 12px;
+    border: 1px solid rgba(226, 232, 240, .9);
+    border-radius: 16px;
+    margin-bottom: 10px;
+  }
+}
+
+@media (max-width: 430px) {
+  .cheques-page .table-card td {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}

@@ -1,0 +1,322 @@
+.shop-supply-page .split-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 18px;
+}
+
+.shop-supply-page .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(124, 58, 237, 0.12);
+  color: #6d28d9;
+  font-size: 12px;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.supply-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.75fr) minmax(280px, 0.75fr);
+  gap: 18px;
+  align-items: start;
+  margin: 18px 0;
+}
+
+.supply-form {
+  overflow: hidden;
+}
+
+.card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.card-title-row h2 {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 0;
+}
+
+.form-grid.three {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.shop-credit-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0;
+  padding: 13px 14px;
+  border: 1px solid rgba(124, 58, 237, 0.16);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(14, 165, 233, 0.08));
+  border-radius: 16px;
+}
+
+.shop-credit-card span {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  margin-top: 3px;
+}
+
+.supply-lines {
+  margin: 18px 0 10px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  border-radius: 18px;
+  padding: 10px;
+  background: rgba(248, 250, 252, 0.72);
+}
+
+.line-head,
+.supply-line {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.8fr) 90px 90px 110px 100px 44px;
+  gap: 8px;
+  align-items: center;
+}
+
+.line-head {
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 4px 8px;
+}
+
+.supply-line {
+  margin-bottom: 8px;
+}
+
+.supply-line .description-input {
+  grid-column: 1 / -1;
+  background: #fff;
+}
+
+.checkbox-row {
+  min-height: 44px;
+  display: flex !important;
+  align-items: center;
+  flex-direction: row !important;
+  gap: 10px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: #fff;
+}
+
+.checkbox-row input {
+  width: auto !important;
+}
+
+.totals-grid {
+  margin-top: 14px;
+}
+
+.supply-total-card {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.supply-total-card span {
+  padding: 13px;
+  border-radius: 14px;
+  background: #0f172a;
+  color: rgba(255,255,255,0.72);
+  font-size: 12px;
+}
+
+.supply-total-card b {
+  display: block;
+  margin-top: 4px;
+  color: #fff;
+  font-size: 18px;
+}
+
+.form-actions,
+.row-actions,
+.filter-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.supply-side-panel p {
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.mini-timeline {
+  display: grid;
+  gap: 10px;
+  margin: 14px 0 18px;
+}
+
+.mini-timeline span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 13px;
+  background: rgba(16, 185, 129, 0.09);
+  color: #047857;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+.watch-list {
+  display: grid;
+  gap: 9px;
+}
+
+.watch-list div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  background: rgba(248, 250, 252, 0.9);
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.watch-list span {
+  color: #be123c;
+  font-weight: 800;
+}
+
+@media (max-width: 1100px) {
+  .supply-grid,
+  .form-grid.three {
+    grid-template-columns: 1fr;
+  }
+
+  .line-head {
+    display: none;
+  }
+
+  .supply-line {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .shop-supply-page .split-header,
+  .card-title-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .supply-line,
+  .supply-total-card {
+    grid-template-columns: 1fr;
+  }
+
+  .row-actions button,
+  .filter-row select,
+  .filter-row button {
+    width: 100%;
+  }
+}
+
+/* === SmartLedger UI friendly responsive polish: Shop supply invoice === */
+.shop-supply-page {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+.shop-supply-page *,
+.shop-supply-page *::before,
+.shop-supply-page *::after {
+  box-sizing: border-box;
+}
+.shop-supply-page input,
+.shop-supply-page select,
+.shop-supply-page textarea,
+.shop-supply-page button {
+  max-width: 100%;
+}
+.shop-supply-page .page-header,
+.shop-supply-page .card,
+.shop-supply-page .supply-form,
+.shop-supply-page .supply-side-panel {
+  border-radius: clamp(18px, 2vw, 26px);
+}
+.shop-supply-page .split-header,
+.shop-supply-page .card-title-row,
+.shop-supply-page .filter-row,
+.shop-supply-page .form-actions,
+.shop-supply-page .row-actions {
+  flex-wrap: wrap;
+}
+.supply-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+}
+.supply-lines {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.line-head,
+.supply-line {
+  min-width: 760px;
+}
+.shop-supply-page .stats-grid,
+.shop-supply-page .totals-grid {
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+.shop-supply-page .watch-list,
+.shop-supply-page .mini-timeline {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 1180px) {
+  .supply-grid {
+    grid-template-columns: 1fr;
+  }
+  .supply-side-panel {
+    order: 2;
+  }
+}
+@media (max-width: 900px) {
+  .form-grid.three {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 680px) {
+  .shop-supply-page .split-header,
+  .shop-supply-page .card-title-row,
+  .shop-supply-page .filter-row,
+  .shop-supply-page .form-actions,
+  .shop-supply-page .row-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .shop-supply-page .split-header > *,
+  .shop-supply-page .card-title-row > *,
+  .shop-supply-page .filter-row > *,
+  .shop-supply-page .form-actions > *,
+  .shop-supply-page .row-actions > * {
+    width: 100%;
+  }
+  .form-grid.three,
+  .shop-supply-page .stats-grid,
+  .shop-supply-page .totals-grid {
+    grid-template-columns: 1fr;
+  }
+  .shop-credit-card {
+    align-items: flex-start;
+  }
+  .line-head,
+  .supply-line {
+    min-width: 690px;
+  }
+}

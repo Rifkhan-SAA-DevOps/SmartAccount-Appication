@@ -1,0 +1,962 @@
+/* === SmartLedger UI hardening stage 4: overlap guards + pagination + readable responsive pages === */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  text-rendering: geometricPrecision;
+}
+
+/* Every page/panel/card should shrink inside the app content area instead of pushing sideways. */
+.main-shell,
+.main-content,
+.app-content,
+.page-wrap,
+.page-shell,
+.page,
+.card,
+.panel,
+.content-card,
+.form-card,
+.table-card,
+.workflow-card,
+.workflow-panel,
+.dash-panel,
+.dd-panel,
+.dist-report-panel,
+.van-panel,
+.sr-panel,
+.rm-panel,
+.rep-offline-card,
+.smart-alert-card-body,
+.document-manage-panel,
+.document-filter-panel,
+.cheque-form-panel,
+.cheque-filter-panel,
+.report-filter-panel,
+.statement-filter-panel,
+.audit-filter-panel,
+.approval-help-panel,
+.crm-filter-panel,
+.loyalty-filter-panel,
+.fixed-asset-filter-panel,
+.quotation-filter-panel,
+.budget-main-panel,
+.budget-side-panel,
+.campaign-main-panel,
+.campaign-log-panel,
+.service-form-panel,
+.hr-form-panel,
+.installment-form-panel,
+.installment-list-panel,
+.branch-transfer-page,
+.accounting-page,
+.cash-bank-page,
+.cheques-page,
+.ledgers-page,
+.returns-page,
+.reports-page,
+.documents-page,
+.approvals-page,
+.audit-page,
+.security-center-page,
+.notifications-page,
+.service-jobs-page,
+.crm-page,
+.projects-page,
+.hr-page,
+.budgeting-page,
+.fixed-assets-page,
+.warranty-page,
+.batches-page,
+.manufacturing-page,
+.deliveries-page,
+.campaigns-page,
+.distribution-page,
+.shop-supply-page,
+.shop-collections-page,
+.van-stock-page,
+.shop-returns-page,
+.trade-page,
+.dist-reports-page,
+.distributor-dashboard-page,
+.rep-mobile-page,
+.rep-offline-page,
+.executive-dashboard {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+img,
+svg,
+canvas,
+video {
+  max-width: 100%;
+}
+
+input,
+select,
+textarea,
+button {
+  min-width: 0;
+  max-width: 100%;
+}
+
+textarea {
+  width: 100%;
+  resize: vertical;
+}
+
+button,
+.btn,
+.primary-btn,
+.secondary-btn,
+.ghost-btn,
+.link-btn,
+.mini-action,
+.compact-link {
+  white-space: normal;
+}
+
+/* Safe professional page spacing. */
+.page-wrap,
+.page-shell,
+.page {
+  width: 100%;
+}
+
+@media (max-width: 720px) {
+  .page-wrap,
+  .page-shell,
+  .page {
+    padding-inline: 12px !important;
+  }
+}
+
+/* Headers should never force two columns when there is not enough width. */
+.page-head,
+.page-header,
+.page-header-panel,
+.split-header,
+.page-hero,
+.workflow-hero,
+.distribution-hero,
+.trade-hero,
+.dist-hero,
+.dd-hero,
+.rm-hero,
+.rep-offline-hero,
+.sr-hero,
+.van-stock-hero,
+.document-hero,
+.security-hero,
+.transfer-hero,
+.dashboard-builder-hero,
+.assistant-hero,
+.smart-alerts-hero,
+.dash-hero-card {
+  min-width: 0 !important;
+}
+
+@media (max-width: 1200px) {
+  .page-head,
+  .page-header,
+  .page-header-panel,
+  .split-header,
+  .page-hero,
+  .workflow-hero,
+  .distribution-hero,
+  .trade-hero,
+  .dist-hero,
+  .dd-hero,
+  .rm-hero,
+  .rep-offline-hero,
+  .sr-hero,
+  .van-stock-hero,
+  .document-hero,
+  .security-hero,
+  .transfer-hero,
+  .dashboard-builder-hero,
+  .assistant-hero,
+  .smart-alerts-hero,
+  .dash-hero-card {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    align-items: stretch !important;
+  }
+
+  .head-actions,
+  .dash-hero-actions,
+  .dist-hero-actions,
+  .dd-controls,
+  .rm-actions,
+  .rep-offline-hero-actions,
+  .sr-actions,
+  .invoice-actions,
+  .statement-actions,
+  .compact-actions,
+  .row-actions,
+  .form-actions {
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+  }
+}
+
+/* Modern auto-fit stat cards. */
+.stats-grid,
+.stat-grid,
+.stat-orb,
+.report-stat-grid,
+.document-stat-grid,
+.security-stat-grid,
+.transfer-stat-grid,
+.batch-stat-grid,
+.currency-stat-grid,
+.budgeting-stat-grid,
+.campaign-stat-grid,
+.cheque-stat-grid,
+.delivery-stat-grid,
+.fixed-asset-stat-grid,
+.hr-stat-grid,
+.installment-stat-grid,
+.loyalty-tier-grid,
+.manufacturing-stat-grid,
+.project-stat-grid,
+.quotation-stat-grid,
+.service-stat-grid,
+.statement-stat-grid,
+.warranty-stat-grid,
+.collection-stat-grid,
+.van-stat-grid,
+.sr-cards,
+.trade-summary-grid,
+.dist-card-grid,
+.dd-card-grid,
+.rm-cards,
+.rep-offline-stats,
+.dash-metrics-grid,
+.dash-quick-grid,
+.dash-three-grid,
+.dash-distribution-grid,
+.dashboard-widget-grid,
+.dashboard-source-grid,
+.dashboard-metric-preview {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+  min-width: 0 !important;
+}
+
+/* Major two-column workspaces collapse before overlap can happen. */
+@media (max-width: 1440px) {
+  .dash-main-grid,
+  .dd-main-layout,
+  .dd-grid,
+  .dist-report-shell,
+  .supply-grid,
+  .collection-grid,
+  .collection-panel-grid,
+  .van-two-col,
+  .sr-grid,
+  .rm-main-grid,
+  .rep-offline-workspace,
+  .cheque-layout,
+  .cheque-bottom-grid,
+  .ledger-layout,
+  .report-grid,
+  .audit-two-col,
+  .budgeting-grid,
+  .campaign-grid,
+  .campaign-lower-grid,
+  .crm-create-grid,
+  .crm-followup-grid,
+  .fixed-asset-maintenance-grid,
+  .installment-grid,
+  .manufacturing-grid,
+  .service-grid,
+  .transfer-layout,
+  .two-col-page,
+  .stacked-forms,
+  .pos-layout,
+  .invoice-builder,
+  .quotation-create-grid,
+  .delivery-grid,
+  .warranty-grid,
+  .bank-recon-grid,
+  .auto-posting-grid,
+  .dashboard-builder-grid,
+  .dashboard-builder-lists {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* At desktop width keep distributor/dashboard cards neat, but allow shrink. */
+.dash-main-grid,
+.dd-main-layout,
+.dd-grid,
+.dist-report-shell {
+  align-items: start !important;
+  gap: clamp(14px, 2vw, 22px) !important;
+}
+
+.dash-main-grid > *,
+.dd-main-layout > *,
+.dd-grid > *,
+.dist-report-shell > *,
+.dd-left-stack,
+.dd-right-stack,
+.dd-bottom-grid {
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.dd-bottom-grid {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+}
+
+@media (max-width: 840px) {
+  .dd-bottom-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+}
+
+/* Forms and filters should wrap instead of overlap. */
+.form-grid,
+.filter-row,
+.filters-row,
+.actions-row,
+.top-bars,
+.report-filter-panel,
+.audit-filter-grid,
+.approval-filter-row,
+.cheque-filter-grid,
+.crm-filter-grid,
+.delivery-filter-row,
+.fixed-asset-filter-grid,
+.installment-filter,
+.loyalty-filter-grid,
+.notification-toolbar,
+.project-filter-grid,
+.quotation-filter-row,
+.statement-filter-grid,
+.warranty-filter-panel,
+.bank-recon-toolbar,
+.budgeting-grid,
+.campaign-form-panel,
+.service-form-panel,
+.hr-form-panel,
+.tax-form-grid,
+.currency-grid,
+.forecast-grid,
+.fixed-asset-create-grid,
+.manufacturing-post-panel,
+.distribution-filters,
+.distribution-form,
+.shop-supply-page .form-grid,
+.shop-collections-page .filter-row,
+.van-form-grid,
+.van-filter-bar,
+.sr-fields,
+.sr-filter-row,
+.trade-form-grid,
+.trade-toolbar,
+.dist-filters,
+.rm-filter-card,
+.rm-form-grid,
+.rep-offline-filter-card,
+.rep-offline-form,
+.rep-offline-grid {
+  min-width: 0 !important;
+}
+
+.form-grid,
+.audit-filter-grid,
+.cheque-filter-grid,
+.crm-filter-grid,
+.delivery-filter-row,
+.fixed-asset-filter-grid,
+.loyalty-filter-grid,
+.project-filter-grid,
+.statement-filter-grid,
+.warranty-filter-panel,
+.sr-fields,
+.trade-form-grid,
+.van-form-grid,
+.rm-form-grid,
+.rep-offline-form,
+.rep-offline-grid {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important;
+}
+
+@media (max-width: 760px) {
+  .form-grid,
+  .audit-filter-grid,
+  .cheque-filter-grid,
+  .crm-filter-grid,
+  .delivery-filter-row,
+  .fixed-asset-filter-grid,
+  .loyalty-filter-grid,
+  .project-filter-grid,
+  .statement-filter-grid,
+  .warranty-filter-panel,
+  .sr-fields,
+  .trade-form-grid,
+  .van-form-grid,
+  .rm-form-grid,
+  .rep-offline-form,
+  .rep-offline-grid,
+  .filter-row,
+  .filters-row,
+  .report-tabs,
+  .tab-actions,
+  .trade-tabs,
+  .dist-report-tabs,
+  .security-tabs {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+  }
+
+  .form-actions,
+  .row-actions,
+  .head-actions,
+  .invoice-actions,
+  .sr-actions,
+  .rm-actions,
+  .rep-offline-queue-actions {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    width: 100% !important;
+  }
+
+  .form-actions > *,
+  .row-actions > *,
+  .head-actions > *,
+  .invoice-actions > *,
+  .sr-actions > *,
+  .rm-actions > *,
+  .rep-offline-queue-actions > *,
+  .tab-actions > *,
+  .trade-tabs > *,
+  .dist-report-tabs > *,
+  .report-tabs > *,
+  .security-tabs > * {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+
+/* Repeating item rows. */
+.item-row,
+.invoice-item-row,
+.purchase-item-row,
+.quote-line-row,
+.delivery-line-row,
+.recipe-item-row,
+.service-line-row,
+.transfer-item-row,
+.supply-line,
+.load-line,
+.close-line,
+.sr-item,
+.rm-supply-item,
+.journal-line,
+.cheque-mini-row,
+.statement-row,
+.transfer-row {
+  min-width: 0 !important;
+}
+
+@media (max-width: 1180px) {
+  .item-row,
+  .invoice-item-row,
+  .purchase-item-row,
+  .quote-line-row,
+  .delivery-line-row,
+  .recipe-item-row,
+  .service-line-row,
+  .transfer-item-row,
+  .supply-line,
+  .load-line,
+  .close-line,
+  .sr-item,
+  .rm-supply-item,
+  .journal-line {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+    align-items: end !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .item-row,
+  .invoice-item-row,
+  .purchase-item-row,
+  .quote-line-row,
+  .delivery-line-row,
+  .recipe-item-row,
+  .service-line-row,
+  .transfer-item-row,
+  .supply-line,
+  .load-line,
+  .close-line,
+  .sr-item,
+  .rm-supply-item,
+  .journal-line,
+  .preview-row,
+  .history-row,
+  .recovery-row,
+  .stock-row,
+  .movement-row,
+  .rm-mini-row,
+  .rep-offline-draft,
+  .dd-route-row,
+  .dd-mini-item,
+  .trend-row,
+  .activity-card,
+  .task-card-top,
+  .lead-card-top {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 10px !important;
+  }
+}
+
+/* Table safety and real DataTable pagination. */
+.table-card,
+.data-table-card,
+.dist-table-wrap,
+.dist-table-card,
+.trade-table-card,
+.sr-table-wrap,
+.dd-table-wrap,
+.history-table,
+.dashboard-widget-table,
+.report-statement,
+.statement-box,
+.bank-csv-help,
+.trial-summary {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow: hidden !important;
+}
+
+.data-table-scroll,
+.dist-table-wrap,
+.trade-table-card,
+.sr-table-wrap,
+.dd-table-wrap,
+.table-scroll,
+.statement-box,
+.report-statement {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.data-table-scroll:focus,
+.dist-table-wrap:focus,
+.trade-table-card:focus,
+.sr-table-wrap:focus,
+.dd-table-wrap:focus {
+  outline: 3px solid rgba(124, 58, 237, 0.18);
+  outline-offset: -3px;
+}
+
+.data-table,
+.dist-table,
+.trade-table,
+.sr-table,
+.dd-table,
+.history-table table,
+.dashboard-widget-table,
+.report-statement table,
+.statement-box table {
+  min-width: 760px;
+  width: 100%;
+}
+
+.data-table th,
+.data-table td,
+.dist-table th,
+.dist-table td,
+.trade-table th,
+.trade-table td,
+.sr-table th,
+.sr-table td,
+.dd-table th,
+.dd-table td,
+.history-table th,
+.history-table td,
+.dashboard-widget-table th,
+.dashboard-widget-table td,
+.report-statement th,
+.report-statement td,
+.statement-box th,
+.statement-box td {
+  vertical-align: top !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+
+.data-table th,
+.dist-table th,
+.trade-table th,
+.sr-table th,
+.dd-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.table-subtext,
+.data-table td small,
+.dist-table td small,
+.trade-table td small,
+.sr-table td small,
+.dd-table td small {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  border-top: 1px solid rgba(148, 163, 184, 0.24);
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.92), rgba(255, 255, 255, 0.98));
+}
+
+.pagination-summary {
+  color: #64748b;
+  font-size: 0.86rem;
+  font-weight: 750;
+}
+
+.pagination-summary strong {
+  color: #0f172a;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pagination-controls button,
+.pagination-size select {
+  min-height: 36px;
+  border: 1px solid rgba(148, 163, 184, 0.34);
+  border-radius: 11px;
+  background: #fff;
+  color: #334155;
+  font-weight: 800;
+  padding: 0 10px;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+}
+
+.pagination-controls button {
+  cursor: pointer;
+}
+
+.pagination-controls button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.pagination-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.pagination-size select {
+  width: auto;
+  margin: 0;
+}
+
+.pagination-page {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 11px;
+  background: rgba(124, 58, 237, 0.08);
+  color: #5b21b6;
+  font-size: 0.84rem;
+  font-weight: 900;
+}
+
+.empty-state,
+.smart-empty-state,
+.rm-empty,
+.rep-offline-empty,
+.trade-empty,
+.dist-empty,
+.dd-empty,
+.dash-empty-state {
+  max-width: 100%;
+}
+
+.smart-empty-state {
+  display: grid;
+  place-items: center;
+  gap: 7px;
+  min-height: 120px;
+  padding: 20px;
+  text-align: center;
+  color: #64748b;
+}
+
+.smart-empty-state strong {
+  color: #0f172a;
+}
+
+.smart-empty-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: rgba(124, 58, 237, 0.1);
+  color: #6d28d9;
+  font-size: 1.4rem;
+  font-weight: 900;
+}
+
+@media (max-width: 760px) {
+  .data-table,
+  .dist-table,
+  .sr-table,
+  .dd-table {
+    min-width: 0 !important;
+  }
+
+  .data-table thead,
+  .dist-table thead,
+  .sr-table thead,
+  .dd-table thead {
+    display: none !important;
+  }
+
+  .data-table tbody,
+  .data-table tr,
+  .data-table td,
+  .dist-table tbody,
+  .dist-table tr,
+  .dist-table td,
+  .sr-table tbody,
+  .sr-table tr,
+  .sr-table td,
+  .dd-table tbody,
+  .dd-table tr,
+  .dd-table td {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .data-table tr,
+  .dist-table tr,
+  .sr-table tr,
+  .dd-table tr {
+    margin: 10px !important;
+    border: 1px solid rgba(148, 163, 184, 0.28) !important;
+    border-radius: 16px !important;
+    background: #fff !important;
+    overflow: hidden !important;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05) !important;
+  }
+
+  .data-table td,
+  .dist-table td,
+  .sr-table td,
+  .dd-table td {
+    border: 0 !important;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.9) !important;
+    padding: 10px 12px !important;
+  }
+
+  .data-table td:last-child,
+  .dist-table td:last-child,
+  .sr-table td:last-child,
+  .dd-table td:last-child {
+    border-bottom: 0 !important;
+  }
+
+  .data-table td::before,
+  .dist-table td::before,
+  .sr-table td::before,
+  .dd-table td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 4px;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .trade-table {
+    min-width: 720px !important;
+  }
+
+  .pagination-bar {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    padding: 12px;
+  }
+
+  .pagination-controls {
+    justify-content: stretch;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pagination-size,
+  .pagination-page {
+    justify-content: center;
+    width: 100%;
+    grid-column: 1 / -1;
+  }
+
+  .pagination-controls button {
+    width: 100%;
+  }
+}
+
+/* Long custom lists should stay usable until we convert every custom card list to component pagination. */
+.activity-list,
+.dash-mini-list,
+.dash-attention-list,
+.dash-checklist,
+.dash-route-lines,
+.dd-route-list,
+.dd-mini-list,
+.dd-method-list,
+.dd-timeline,
+.watch-list,
+.trend-list,
+.mini-list,
+.stock-list,
+.movement-list,
+.load-list,
+.recovery-list,
+.collection-history,
+.rep-offline-draft-list,
+.rm-shop-list,
+.crm-pipeline-grid,
+.task-board,
+.lead-detail-card,
+.low-stock-chip-row,
+.warehouse-card-list,
+.preview-row-list {
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+@media (min-width: 761px) {
+  .dd-route-list,
+  .dd-mini-list,
+  .dd-timeline,
+  .dash-mini-list,
+  .dash-attention-list,
+  .activity-list,
+  .movement-list,
+  .load-list,
+  .recovery-list,
+  .collection-history,
+  .rep-offline-draft-list,
+  .rm-shop-list {
+    max-height: 560px;
+    overflow: auto;
+    scrollbar-width: thin;
+  }
+}
+
+/* Better readable text wrapping for values and badges. */
+.badge,
+.payment-box,
+.total,
+.invoice-total,
+.supply-total-card,
+.pos-total-box,
+.dd-highlight,
+.dash-row-card,
+.stat-card,
+.collection-stat-card,
+.van-stat-card,
+.trade-summary-card,
+.dist-card,
+.rm-card-icon,
+.rep-offline-stat {
+  min-width: 0 !important;
+  overflow-wrap: anywhere;
+}
+
+.truncate-text,
+.table-subtext,
+.muted,
+.muted-text,
+.muted-line,
+.hint,
+.description-input {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+/* Mobile polishing for dense pages. */
+@media (max-width: 520px) {
+  h1 {
+    font-size: clamp(1.5rem, 8vw, 2rem) !important;
+    line-height: 1.08 !important;
+  }
+
+  h2,
+  h3 {
+    line-height: 1.15 !important;
+  }
+
+  .card,
+  .panel,
+  .content-card,
+  .dash-panel,
+  .dd-panel,
+  .dist-report-panel,
+  .form-card,
+  .table-card {
+    border-radius: 18px !important;
+  }
+
+  .stat-card,
+  .dist-card,
+  .dd-highlight,
+  .dash-row-card,
+  .trade-summary-card,
+  .collection-stat-card,
+  .van-stat-card {
+    padding: 14px !important;
+  }
+}

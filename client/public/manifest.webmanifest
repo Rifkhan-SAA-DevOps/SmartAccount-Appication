@@ -1,12 +1,12 @@
 {
-  "name": "SmartLedger ERP POS",
+  "name": "SmartLedger ERP Offline Distribution",
   "short_name": "SmartLedger",
-  "description": "Accounting, inventory and offline-ready POS for shops and companies.",
-  "start_url": "/pos",
+  "description": "Accounting, inventory, POS and offline-ready distributor sales rep mode.",
+  "start_url": "/rep-offline",
   "scope": "/",
   "display": "standalone",
   "background_color": "#f8fafc",
-  "theme_color": "#6d28d9",
+  "theme_color": "#4f46e5",
   "icons": [
     {
       "src": "/icon.svg",

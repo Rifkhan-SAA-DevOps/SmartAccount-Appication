@@ -44,10 +44,22 @@ import Loyalty from './pages/Loyalty.jsx';
 import Deliveries from './pages/Deliveries.jsx';
 import BudgetingForecasting from './pages/BudgetingForecasting.jsx';
 import Campaigns from './pages/Campaigns.jsx';
+import Distribution from './pages/Distribution.jsx';
+import ShopSupply from './pages/ShopSupply.jsx';
+import ShopCollections from './pages/ShopCollections.jsx';
+import VanStock from './pages/VanStock.jsx';
+import ShopReturns from './pages/ShopReturns.jsx';
+import TradeOffers from './pages/TradeOffers.jsx';
+import DistributorReports from './pages/DistributorReports.jsx';
+import DistributorDashboard from './pages/DistributorDashboard.jsx';
+import RepMobile from './pages/RepMobile.jsx';
+import RepOffline from './pages/RepOffline.jsx';
 import DashboardBuilder from './pages/DashboardBuilder.jsx';
 import BranchTransfers from './pages/BranchTransfers.jsx';
 import SecurityCenter from './pages/SecurityCenter.jsx';
 
+import SmartAssistant from './pages/SmartAssistant.jsx';
+import SmartAlerts from './pages/SmartAlerts.jsx';
 function PrivateRoute({ children }) {
   const { isAuthenticated, loading } = useAuth();
   if (loading) return <div className="loading-screen">Loading SmartLedger...</div>;
@@ -93,7 +105,19 @@ export default function App() {
         <Route path="deliveries" element={<Deliveries />} />
         <Route path="budgeting" element={<BudgetingForecasting />} />
         <Route path="campaigns" element={<Campaigns />} />
+        <Route path="distribution" element={<Distribution />} />
+        <Route path="shop-supply" element={<ShopSupply />} />
+        <Route path="shop-collections" element={<ShopCollections />} />
+        <Route path="van-stock" element={<VanStock />} />
+        <Route path="shop-returns" element={<ShopReturns />} />
+        <Route path="trade-offers" element={<TradeOffers />} />
+        <Route path="distributor-reports" element={<DistributorReports />} />
+        <Route path="distributor-dashboard" element={<DistributorDashboard />} />
+        <Route path="rep-mobile" element={<RepMobile />} />
+        <Route path="rep-offline" element={<RepOffline />} />
         <Route path="dashboard-builder" element={<DashboardBuilder />} />
+        <Route path="smart-alerts" element={<SmartAlerts />} />
+        <Route path="smart-assistant" element={<SmartAssistant />} />
         <Route path="users" element={<Users />} />
         <Route path="subscription" element={<Subscription />} />
         <Route path="settings" element={<Settings />} />

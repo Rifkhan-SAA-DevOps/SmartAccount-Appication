@@ -1,0 +1,741 @@
+.distributor-dashboard-page {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+  padding: clamp(14px, 2vw, 24px);
+  background:
+    radial-gradient(circle at 5% 0%, rgba(79, 70, 229, 0.13), transparent 34%),
+    radial-gradient(circle at 95% 10%, rgba(236, 72, 153, 0.10), transparent 30%),
+    #f6f8fb;
+  min-height: 100vh;
+  color: #0f172a;
+}
+
+.distributor-dashboard-page *,
+.distributor-dashboard-page *::before,
+.distributor-dashboard-page *::after {
+  box-sizing: border-box;
+}
+
+.dd-hero,
+.dd-panel,
+.dd-card,
+.dd-highlight {
+  min-width: 0;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: rgba(255, 255, 255, 0.88);
+  box-shadow: 0 20px 52px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.dd-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: start;
+  border-radius: 26px;
+  padding: clamp(18px, 2.1vw, 24px);
+  margin-bottom: 18px;
+  overflow: hidden;
+  position: relative;
+}
+
+.dd-hero > * {
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+
+.dd-hero::after {
+  content: '';
+  position: absolute;
+  inset: auto -80px -115px auto;
+  width: 280px;
+  height: 280px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.18), rgba(59, 130, 246, 0.16));
+  pointer-events: none;
+}
+
+.dd-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  padding: 7px 12px;
+  border-radius: 999px;
+  color: #4338ca;
+  background: rgba(99, 102, 241, 0.12);
+  font-weight: 800;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.dd-hero h1 {
+  margin: 0;
+  font-size: clamp(24px, 3vw, 42px);
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+  overflow-wrap: anywhere;
+}
+
+.dd-hero p {
+  max-width: 780px;
+  margin: 10px 0 0;
+  color: #64748b;
+  line-height: 1.65;
+}
+
+.dd-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  justify-content: flex-end;
+  min-width: 0;
+  z-index: 1;
+}
+
+.dd-controls label,
+.dd-controls button {
+  min-height: 42px;
+  max-width: 100%;
+  border-radius: 15px;
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  background: rgba(255, 255, 255, 0.9);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 0 14px;
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.dd-controls input {
+  width: 140px;
+  max-width: 100%;
+  border: 0;
+  background: transparent;
+  font-weight: 800;
+  color: #0f172a;
+  outline: none;
+}
+
+.dd-controls button {
+  cursor: pointer;
+  background: linear-gradient(135deg, #4f46e5, #ec4899);
+  color: white;
+  box-shadow: 0 14px 32px rgba(79, 70, 229, 0.28);
+}
+
+.dd-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 18px;
+  padding: 13px 16px;
+  background: #fff1f2;
+  color: #be123c;
+  border: 1px solid rgba(244, 63, 94, 0.22);
+  margin-bottom: 14px;
+  font-weight: 800;
+}
+
+.dd-grid {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.dd-card-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 238px), 1fr));
+  margin-bottom: 18px;
+}
+
+.dd-card {
+  border-radius: 22px;
+  padding: 18px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.dd-card::after {
+  content: '';
+  position: absolute;
+  inset: auto -26px -38px auto;
+  width: 112px;
+  height: 112px;
+  border-radius: 999px;
+  background: var(--tone, rgba(79, 70, 229, 0.12));
+}
+
+.dd-card-icon {
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 16px;
+  background: var(--tone, rgba(79, 70, 229, 0.12));
+  color: var(--tone-color, #4f46e5);
+  flex: 0 0 auto;
+}
+
+.dd-card-copy {
+  min-width: 0;
+}
+
+.dd-card-copy span,
+.dd-card-copy small {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.dd-card-copy strong {
+  display: block;
+  margin: 5px 0 4px;
+  font-size: clamp(20px, 2.2vw, 25px);
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  overflow-wrap: anywhere;
+}
+
+.dd-card em {
+  grid-column: 1 / -1;
+  font-size: 12px;
+  font-style: normal;
+  font-weight: 900;
+  border-radius: 999px;
+  width: max-content;
+  max-width: 100%;
+  padding: 5px 9px;
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.dd-card em.negative {
+  background: #fff1f2;
+  color: #be123c;
+}
+
+.tone-pink { --tone: rgba(236, 72, 153, 0.13); --tone-color: #db2777; }
+.tone-green { --tone: rgba(16, 185, 129, 0.13); --tone-color: #059669; }
+.tone-amber { --tone: rgba(245, 158, 11, 0.16); --tone-color: #d97706; }
+.tone-blue { --tone: rgba(59, 130, 246, 0.13); --tone-color: #2563eb; }
+
+.dd-main-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  gap: 18px;
+  align-items: start;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: visible;
+}
+
+.dd-main-layout > *,
+.dd-left-stack,
+.dd-right-stack,
+.dd-bottom-grid,
+.dd-panel,
+.dd-owner-panel,
+.dd-action-panel {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.dd-left-stack,
+.dd-right-stack,
+.dd-bottom-grid {
+  display: grid;
+  gap: 18px;
+}
+
+.dd-bottom-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+  margin-top: 18px;
+}
+
+.dd-panel {
+  border-radius: 24px;
+  padding: clamp(15px, 1.8vw, 18px);
+  overflow: hidden;
+}
+
+.dd-panel-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 14px;
+  margin-bottom: 16px;
+  min-width: 0;
+}
+
+.dd-panel-title > div {
+  min-width: 0;
+}
+
+.dd-panel-title h2 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  overflow-wrap: anywhere;
+}
+
+.dd-panel-title p {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.dd-panel-title svg {
+  color: #6366f1;
+  flex: 0 0 auto;
+}
+
+.dd-panel-title.compact {
+  margin-bottom: 12px;
+}
+
+.dd-closing-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 155px), 1fr));
+  gap: 12px;
+}
+
+.dd-closing-grid div {
+  min-width: 0;
+  border-radius: 18px;
+  padding: 14px;
+  background: linear-gradient(180deg, #f8fafc, #ffffff);
+  border: 1px solid rgba(148, 163, 184, 0.18);
+}
+
+.dd-closing-grid span,
+.dd-target-line span {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.dd-closing-grid strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 18px;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  overflow-wrap: anywhere;
+}
+
+.dd-target-line {
+  margin-top: 15px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+}
+
+.dd-target-line .dd-progress {
+  grid-column: 1 / -1;
+}
+
+.dd-progress {
+  height: 9px;
+  border-radius: 999px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+
+.dd-progress span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #4f46e5, #ec4899);
+}
+
+.dd-route-list,
+.dd-mini-list,
+.dd-timeline,
+.dd-method-list {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.dd-route-row,
+.dd-mini-item,
+.dd-method,
+.dd-timeline-item {
+  min-width: 0;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 18px;
+  background: rgba(248, 250, 252, 0.88);
+  padding: 12px;
+}
+
+.dd-route-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 220px);
+  gap: 14px;
+  align-items: center;
+}
+
+.dd-route-row > div,
+.dd-route-metrics,
+.dd-mini-item > div,
+.dd-timeline-item > div {
+  min-width: 0;
+}
+
+.dd-route-row strong,
+.dd-mini-item strong,
+.dd-timeline-item strong {
+  display: block;
+  color: #0f172a;
+  overflow-wrap: anywhere;
+}
+
+.dd-route-row small,
+.dd-mini-item small,
+.dd-timeline-item small {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  margin-top: 3px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.dd-route-metrics {
+  display: grid;
+  gap: 4px;
+  text-align: right;
+}
+
+.dd-route-metrics span,
+.dd-route-metrics b {
+  font-weight: 900;
+  overflow-wrap: anywhere;
+}
+
+.dd-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 18px;
+}
+
+.dd-table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+}
+
+.dd-table th,
+.dd-table td {
+  padding: 12px 10px;
+  border-bottom: 1px solid #e2e8f0;
+  text-align: left;
+  font-size: 13px;
+  vertical-align: middle;
+}
+
+.dd-table th {
+  color: #64748b;
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+}
+
+.dd-table td small {
+  display: block;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.dd-table .num {
+  text-align: right;
+  font-weight: 900;
+}
+
+.dd-pill {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.dd-pill.ok {
+  color: #047857;
+  background: #ecfdf5;
+}
+
+.dd-pill.warn {
+  color: #b45309;
+  background: #fffbeb;
+}
+
+.dd-action {
+  min-width: 0;
+  border-radius: 18px;
+  padding: 13px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background: #f8fafc;
+  margin-bottom: 10px;
+}
+
+.dd-action span {
+  display: inline-flex;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  margin-bottom: 8px;
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.dd-action.priority-critical span { background: #fff1f2; color: #be123c; }
+.dd-action.priority-high span { background: #fffbeb; color: #b45309; }
+.dd-action.priority-medium span { background: #eff6ff; color: #1d4ed8; }
+
+.dd-action strong {
+  display: block;
+  margin-bottom: 5px;
+  overflow-wrap: anywhere;
+}
+
+.dd-action p {
+  margin: 0 0 5px;
+  color: #475569;
+  font-size: 13px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.dd-action small {
+  color: #64748b;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.dd-mini-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+}
+
+.dd-mini-item b {
+  min-width: 0;
+  white-space: normal;
+  text-align: right;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.dd-mini-item.warning {
+  background: #fffbeb;
+}
+
+.dd-method {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 10px;
+}
+
+.dd-method span,
+.dd-method small {
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.dd-method strong {
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.dd-method small {
+  grid-column: 1 / -1;
+}
+
+.dd-timeline-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.dd-timeline-item > span {
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4338ca;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.dd-timeline-item > b {
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.dd-empty {
+  color: #94a3b8;
+  text-align: center;
+  padding: 18px;
+  font-weight: 800;
+}
+
+.dd-highlight {
+  margin-top: 18px;
+  border-radius: 24px;
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.95), rgba(236, 72, 153, 0.9));
+  color: white;
+  overflow: hidden;
+}
+
+.dd-highlight div {
+  min-width: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+}
+
+.dd-highlight span {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dd-highlight p {
+  min-width: 0;
+  margin: 0;
+  color: rgba(255, 255, 255, 0.86);
+  overflow-wrap: anywhere;
+}
+
+.spin {
+  animation: dd-spin 0.9s linear infinite;
+}
+
+@keyframes dd-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Hard breakpoint for real app layout:
+   The sidebar reduces available content width, so viewport-based 1180px was too late.
+   At laptop widths this dashboard must become one clean column to avoid right-card overlap. */
+@media (max-width: 1500px) {
+  .dd-main-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .dd-right-stack {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+    align-items: start;
+  }
+}
+
+@media (max-width: 1180px) {
+  .dd-hero {
+    grid-template-columns: 1fr;
+  }
+
+  .dd-controls {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 760px) {
+  .distributor-dashboard-page {
+    padding: 12px;
+  }
+
+  .dd-hero,
+  .dd-panel,
+  .dd-highlight {
+    border-radius: 20px;
+  }
+
+  .dd-controls,
+  .dd-controls label,
+  .dd-controls button {
+    width: 100%;
+  }
+
+  .dd-controls input {
+    width: 100%;
+  }
+
+  .dd-card {
+    grid-template-columns: 1fr;
+  }
+
+  .dd-card-icon {
+    width: 42px;
+    height: 42px;
+  }
+
+  .dd-route-row,
+  .dd-timeline-item,
+  .dd-method {
+    grid-template-columns: 1fr;
+  }
+
+  .dd-route-metrics,
+  .dd-method strong,
+  .dd-timeline-item > b,
+  .dd-mini-item b {
+    text-align: left;
+  }
+
+  .dd-mini-item {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .dd-panel-title {
+    gap: 10px;
+  }
+
+  .dd-highlight {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .dd-table {
+    min-width: 560px;
+  }
+}
+
+@media (max-width: 420px) {
+  .dd-closing-grid,
+  .dd-card-grid,
+  .dd-bottom-grid,
+  .dd-right-stack {
+    grid-template-columns: 1fr;
+  }
+}

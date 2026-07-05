@@ -256,6 +256,475 @@ model Tenant {
   securityEvents            SecurityEvent[]
 }
 
+// ------------------------------
+// v5.9 Wholesale Distribution & Shop Supply Foundation
+// ------------------------------
+model DistributionRoute {
+  id                 String   @id @default(uuid())
+  tenantId           String
+  routeNo            String
+  name               String
+  area               String?
+  assignedEmployeeId String?
+  targetDailySales   Decimal  @default(0) @db.Decimal(12, 2)
+  notes              String?
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([tenantId, routeNo])
+  @@index([tenantId, isActive])
+  @@index([tenantId, assignedEmployeeId])
+}
+
+model ShopProfile {
+  id                 String   @id @default(uuid())
+  tenantId           String
+  customerId         String?
+  routeId            String?
+  assignedEmployeeId String?
+  shopCode           String
+  shopName           String
+  ownerName          String?
+  phone              String?
+  address            String?
+  area               String?
+  category           String   @default("Retail Shop")
+  paymentTerms       String   @default("Credit")
+  creditLimit        Decimal  @default(0) @db.Decimal(12, 2)
+  currentOutstanding Decimal  @default(0) @db.Decimal(12, 2)
+  creditDays         Int      @default(7)
+  visitFrequency     String   @default("Weekly")
+  mapUrl             String?
+  isBlocked          Boolean  @default(false)
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([tenantId, shopCode])
+  @@index([tenantId, customerId])
+  @@index([tenantId, routeId])
+  @@index([tenantId, assignedEmployeeId])
+  @@index([tenantId, isBlocked])
+  @@index([tenantId, area])
+}
+
+model ShopVisit {
+  id                String    @id @default(uuid())
+  tenantId          String
+  visitNo           String
+  shopId            String
+  routeId           String?
+  employeeId        String?
+  plannedAt         DateTime  @default(now())
+  visitedAt         DateTime?
+  status            String    @default("PLANNED")
+  orderTaken        Boolean   @default(false)
+  collectionPromise Decimal   @default(0) @db.Decimal(12, 2)
+  nextFollowUpAt    DateTime?
+  noOrderReason     String?
+  notes             String?
+  createdById       String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@unique([tenantId, visitNo])
+  @@index([tenantId, shopId])
+  @@index([tenantId, routeId])
+  @@index([tenantId, employeeId])
+  @@index([tenantId, plannedAt])
+  @@index([tenantId, status])
+}
+
+model ShopCollection {
+  id           String        @id @default(uuid())
+  tenantId     String
+  collectionNo String
+  shopId       String
+  customerId   String?
+  routeId      String?
+  employeeId   String?
+  amount       Decimal       @db.Decimal(12, 2)
+  method       PaymentMethod @default(CASH)
+  reference    String?
+  notes        String?
+  collectedAt  DateTime      @default(now())
+  createdById  String?
+  createdAt    DateTime      @default(now())
+
+  @@unique([tenantId, collectionNo])
+  @@index([tenantId, shopId])
+  @@index([tenantId, customerId])
+  @@index([tenantId, routeId])
+  @@index([tenantId, employeeId])
+  @@index([tenantId, collectedAt])
+}
+
+model DistributionVan {
+  id               String   @id @default(uuid())
+  tenantId         String
+  vanNo            String
+  name             String
+  vehicleNo        String?
+  driverEmployeeId String?
+  routeId          String?
+  capacityNotes    String?
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([tenantId, vanNo])
+  @@index([tenantId, vehicleNo])
+  @@index([tenantId, driverEmployeeId])
+  @@index([tenantId, routeId])
+  @@index([tenantId, isActive])
+}
+
+// ------------------------------
+// v6.0 Shop Supply Invoice
+// ------------------------------
+model ShopSupplyInvoice {
+  id              String        @id @default(uuid())
+  tenantId        String
+  supplyNo        String
+  shopId          String
+  customerId      String?
+  routeId         String?
+  employeeId      String?
+  vanId           String?
+  warehouseId     String?
+  invoiceId       String?
+  deliveryOrderId String?
+  status          String        @default("DRAFT")
+  supplyDate      DateTime      @default(now())
+  dueDate         DateTime?
+  subtotal        Decimal       @default(0) @db.Decimal(12, 2)
+  discount        Decimal       @default(0) @db.Decimal(12, 2)
+  tax             Decimal       @default(0) @db.Decimal(12, 2)
+  total           Decimal       @default(0) @db.Decimal(12, 2)
+  paid            Decimal       @default(0) @db.Decimal(12, 2)
+  balance         Decimal       @default(0) @db.Decimal(12, 2)
+  paymentMethod   PaymentMethod @default(CREDIT)
+  createDelivery  Boolean       @default(false)
+  notes           String?
+  createdById     String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  items ShopSupplyInvoiceItem[]
+
+  @@unique([tenantId, supplyNo])
+  @@index([tenantId, shopId])
+  @@index([tenantId, routeId])
+  @@index([tenantId, employeeId])
+  @@index([tenantId, vanId])
+  @@index([tenantId, warehouseId])
+  @@index([tenantId, status])
+  @@index([tenantId, supplyDate])
+  @@index([tenantId, deliveryOrderId])
+}
+
+model ShopSupplyInvoiceItem {
+  id              String  @id @default(uuid())
+  supplyInvoiceId String
+  productId       String?
+  description     String
+  qty             Decimal @db.Decimal(12, 3)
+  freeQty         Decimal @default(0) @db.Decimal(12, 3)
+  unitPrice       Decimal @default(0) @db.Decimal(12, 2)
+  discount        Decimal @default(0) @db.Decimal(12, 2)
+  total           Decimal @default(0) @db.Decimal(12, 2)
+
+  supplyInvoice ShopSupplyInvoice @relation(fields: [supplyInvoiceId], references: [id], onDelete: Cascade)
+
+  @@index([supplyInvoiceId])
+  @@index([productId])
+}
+
+// ------------------------------
+// v6.2 Van Stock / Route Stock Loading
+// ------------------------------
+model VanStock {
+  id          String   @id @default(uuid())
+  tenantId    String
+  vanId       String
+  productId   String
+  quantity    Decimal  @default(0) @db.Decimal(12, 3)
+  reservedQty Decimal  @default(0) @db.Decimal(12, 3)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([tenantId, vanId, productId])
+  @@index([tenantId, vanId])
+  @@index([tenantId, productId])
+}
+
+model VanLoad {
+  id          String    @id @default(uuid())
+  tenantId    String
+  loadNo      String
+  vanId       String
+  routeId     String?
+  warehouseId String?
+  employeeId  String?
+  status      String    @default("DRAFT")
+  loadDate    DateTime  @default(now())
+  postedAt    DateTime?
+  closedAt    DateTime?
+  notes       String?
+  createdById String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  items VanLoadItem[]
+
+  @@unique([tenantId, loadNo])
+  @@index([tenantId, vanId])
+  @@index([tenantId, routeId])
+  @@index([tenantId, warehouseId])
+  @@index([tenantId, employeeId])
+  @@index([tenantId, status])
+  @@index([tenantId, loadDate])
+}
+
+model VanLoadItem {
+  id          String  @id @default(uuid())
+  vanLoadId   String
+  productId   String
+  description String?
+  qtyLoaded   Decimal @default(0) @db.Decimal(12, 3)
+  qtyReturned Decimal @default(0) @db.Decimal(12, 3)
+  qtyDamaged  Decimal @default(0) @db.Decimal(12, 3)
+  qtyMissing  Decimal @default(0) @db.Decimal(12, 3)
+  unitCost    Decimal @default(0) @db.Decimal(12, 2)
+  notes       String?
+
+  vanLoad VanLoad @relation(fields: [vanLoadId], references: [id], onDelete: Cascade)
+
+  @@index([vanLoadId])
+  @@index([productId])
+}
+
+model VanStockMovement {
+  id          String   @id @default(uuid())
+  tenantId    String
+  vanId       String
+  productId   String
+  loadId      String?
+  routeId     String?
+  warehouseId String?
+  type        String
+  quantity    Decimal  @db.Decimal(12, 3)
+  unitCost    Decimal  @default(0) @db.Decimal(12, 2)
+  refType     String?
+  refId       String?
+  notes       String?
+  createdAt   DateTime @default(now())
+
+  @@index([tenantId, vanId])
+  @@index([tenantId, productId])
+  @@index([tenantId, loadId])
+  @@index([tenantId, type])
+  @@index([tenantId, createdAt])
+}
+
+model VanDailyClosing {
+  id              String   @id @default(uuid())
+  tenantId        String
+  closingNo       String
+  vanId           String
+  routeId         String?
+  employeeId      String?
+  closingDate     DateTime @default(now())
+  openingValue    Decimal  @default(0) @db.Decimal(12, 2)
+  loadedValue     Decimal  @default(0) @db.Decimal(12, 2)
+  soldValue       Decimal  @default(0) @db.Decimal(12, 2)
+  returnedValue   Decimal  @default(0) @db.Decimal(12, 2)
+  damagedValue    Decimal  @default(0) @db.Decimal(12, 2)
+  missingValue    Decimal  @default(0) @db.Decimal(12, 2)
+  cashCollected   Decimal  @default(0) @db.Decimal(12, 2)
+  chequeCollected Decimal  @default(0) @db.Decimal(12, 2)
+  creditSales     Decimal  @default(0) @db.Decimal(12, 2)
+  routeExpense    Decimal  @default(0) @db.Decimal(12, 2)
+  status          String   @default("DRAFT")
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([tenantId, closingNo])
+  @@index([tenantId, vanId])
+  @@index([tenantId, routeId])
+  @@index([tenantId, employeeId])
+  @@index([tenantId, closingDate])
+  @@index([tenantId, status])
+}
+
+// ------------------------------
+// v6.3 Shop Returns / Damage / Expiry Return Handling
+// ------------------------------
+model ShopReturn {
+  id              String    @id @default(uuid())
+  tenantId        String
+  returnNo        String
+  shopId          String
+  customerId      String?
+  routeId         String?
+  employeeId      String?
+  vanId           String?
+  warehouseId     String?
+  supplyInvoiceId String?
+  returnDate      DateTime  @default(now())
+  status          String    @default("DRAFT")
+  returnType      String    @default("DAMAGED")
+  stockAction     String    @default("HOLD")
+  subtotal        Decimal   @default(0) @db.Decimal(12, 2)
+  discount        Decimal   @default(0) @db.Decimal(12, 2)
+  total           Decimal   @default(0) @db.Decimal(12, 2)
+  creditAmount    Decimal   @default(0) @db.Decimal(12, 2)
+  reason          String?
+  notes           String?
+  createdById     String?
+  postedAt        DateTime?
+  cancelledAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  items ShopReturnItem[]
+
+  @@unique([tenantId, returnNo])
+  @@index([tenantId, shopId])
+  @@index([tenantId, customerId])
+  @@index([tenantId, routeId])
+  @@index([tenantId, employeeId])
+  @@index([tenantId, vanId])
+  @@index([tenantId, warehouseId])
+  @@index([tenantId, supplyInvoiceId])
+  @@index([tenantId, returnDate])
+  @@index([tenantId, status])
+  @@index([tenantId, returnType])
+}
+
+model ShopReturnItem {
+  id           String    @id @default(uuid())
+  shopReturnId String
+  productId    String?
+  description  String
+  qty          Decimal   @db.Decimal(12, 3)
+  unitPrice    Decimal   @default(0) @db.Decimal(12, 2)
+  discount     Decimal   @default(0) @db.Decimal(12, 2)
+  total        Decimal   @default(0) @db.Decimal(12, 2)
+  condition    String    @default("DAMAGED")
+  batchNo      String?
+  expiryDate   DateTime?
+  notes        String?
+
+  shopReturn ShopReturn @relation(fields: [shopReturnId], references: [id], onDelete: Cascade)
+
+  @@index([shopReturnId])
+  @@index([productId])
+  @@index([condition])
+}
+
+// ------------------------------
+// v6.4 Trade Offers / Free Items / Shop Price Lists
+// ------------------------------
+model ShopPriceList {
+  id          String    @id @default(uuid())
+  tenantId    String
+  priceNo     String
+  productId   String
+  shopId      String?
+  customerId  String?
+  routeId     String?
+  priceType   String    @default("SHOP_SPECIAL")
+  unitPrice   Decimal   @db.Decimal(12, 2)
+  minQty      Decimal   @default(0) @db.Decimal(12, 3)
+  validFrom   DateTime  @default(now())
+  validTo     DateTime?
+  isActive    Boolean   @default(true)
+  priority    Int       @default(10)
+  notes       String?
+  createdById String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@unique([tenantId, priceNo])
+  @@index([tenantId, productId])
+  @@index([tenantId, shopId])
+  @@index([tenantId, customerId])
+  @@index([tenantId, routeId])
+  @@index([tenantId, priceType])
+  @@index([tenantId, isActive])
+  @@index([tenantId, validFrom])
+}
+
+model TradeOffer {
+  id            String    @id @default(uuid())
+  tenantId      String
+  offerNo       String
+  name          String
+  offerType     String    @default("BUY_X_GET_Y")
+  status        String    @default("ACTIVE")
+  appliesTo     String    @default("ALL_SHOPS")
+  priority      Int       @default(10)
+  productId     String?
+  freeProductId String?
+  shopId        String?
+  customerId    String?
+  routeId       String?
+  customerGroup String?
+  minQty        Decimal   @default(0) @db.Decimal(12, 3)
+  minAmount     Decimal   @default(0) @db.Decimal(12, 2)
+  buyQty        Decimal   @default(0) @db.Decimal(12, 3)
+  freeQty       Decimal   @default(0) @db.Decimal(12, 3)
+  discountType  String    @default("NONE")
+  discountValue Decimal   @default(0) @db.Decimal(12, 2)
+  startDate     DateTime  @default(now())
+  endDate       DateTime?
+  usageLimit    Int?
+  usedCount     Int       @default(0)
+  notes         String?
+  createdById   String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  redemptions TradeOfferRedemption[]
+
+  @@unique([tenantId, offerNo])
+  @@index([tenantId, offerType])
+  @@index([tenantId, status])
+  @@index([tenantId, appliesTo])
+  @@index([tenantId, productId])
+  @@index([tenantId, freeProductId])
+  @@index([tenantId, shopId])
+  @@index([tenantId, customerId])
+  @@index([tenantId, routeId])
+  @@index([tenantId, startDate])
+}
+
+model TradeOfferRedemption {
+  id              String   @id @default(uuid())
+  tenantId        String
+  tradeOfferId    String
+  shopId          String?
+  customerId      String?
+  routeId         String?
+  supplyInvoiceId String?
+  redeemedAt      DateTime @default(now())
+  appliedQty      Decimal  @default(0) @db.Decimal(12, 3)
+  freeQty         Decimal  @default(0) @db.Decimal(12, 3)
+  discountAmount  Decimal  @default(0) @db.Decimal(12, 2)
+  notes           String?
+
+  offer TradeOffer @relation(fields: [tradeOfferId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, tradeOfferId])
+  @@index([tenantId, shopId])
+  @@index([tenantId, routeId])
+  @@index([tenantId, supplyInvoiceId])
+  @@index([tenantId, redeemedAt])
+}
+
 model TenantSetting {
   id                 String   @id @default(uuid())
   tenantId           String   @unique

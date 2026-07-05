@@ -1,0 +1,654 @@
+/* SmartLedger Cheques Register modal/table fix
+   - Cheque Register is now a clean clickable table with pagination.
+   - Actions are removed from table rows and moved into the modal.
+   - Hard responsive rules stop overlapping on laptop/tablet/mobile.
+*/
+
+.cheques-page,
+.cheques-page * {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.cheques-page {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.cheques-hero,
+.cheques-page .page-head.cheques-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: clamp(18px, 2.4vw, 28px);
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 96% 4%, rgba(124, 58, 237, .20), transparent 32%),
+    linear-gradient(135deg, #ffffff, #f8f5ff 52%, #f8fbff);
+  border: 1px solid rgba(226, 232, 240, .9);
+  box-shadow: 0 22px 56px rgba(15, 23, 42, .07);
+  margin-bottom: 18px;
+}
+
+.cheques-hero > div:first-child,
+.cheque-section-title > div,
+.cheque-register-toolbar > div {
+  min-width: 0;
+}
+
+.page-kicker,
+.cheque-modal-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 8px;
+  font-size: 11px;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  font-weight: 950;
+  color: #7c3aed;
+}
+
+.cheques-hero h1,
+.cheque-modal-head h2 {
+  margin: 0;
+  color: #111827;
+  letter-spacing: -.04em;
+}
+
+.cheques-hero p,
+.cheque-section-title p,
+.cheque-register-toolbar p,
+.cheque-form-note {
+  margin: 7px 0 0;
+  color: #64748b;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.cheques-head-actions,
+.cheques-page .head-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.cheque-stat-grid,
+.cheques-page .stat-grid.cheque-stat-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important;
+  gap: 14px !important;
+  width: 100% !important;
+  margin-bottom: 18px;
+}
+
+.cheque-stat-card,
+.cheques-page .stat-card.cheque-stat-card {
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.cheque-stat-card strong,
+.cheque-stat-card small {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.cheque-filter-panel,
+.cheque-register-panel,
+.cheque-form-panel,
+.cheque-bottom-grid > .panel {
+  overflow: hidden;
+  border-radius: 24px;
+}
+
+.cheque-section-title,
+.cheque-register-toolbar,
+.cheques-page .ledger-toolbar.cheque-register-toolbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.cheque-section-title h2,
+.cheque-register-toolbar h2,
+.cheque-form-panel h2 {
+  margin: 0;
+  color: #111827;
+  letter-spacing: -.025em;
+}
+
+.cheque-filter-grid,
+.cheques-page .form-grid.cheque-filter-grid {
+  display: grid !important;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) auto !important;
+  gap: 12px !important;
+  align-items: end !important;
+}
+
+.cheques-page label {
+  min-width: 0;
+}
+
+.cheques-page input,
+.cheques-page select,
+.cheques-page textarea {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.cheques-page .filter-apply {
+  min-height: 46px;
+  align-self: end;
+  white-space: nowrap;
+}
+
+.cheque-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(330px, 400px);
+  gap: 18px;
+  align-items: start;
+  width: 100%;
+  max-width: 100%;
+  margin-top: 18px;
+}
+
+.cheque-register-panel,
+.cheque-register-panel .cheque-table-card,
+.cheque-register-panel .cheque-table-scroll {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.cheque-table-card {
+  border: 1px solid rgba(226, 232, 240, .92);
+  border-radius: 20px;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 14px 35px rgba(15, 23, 42, .045);
+}
+
+.cheque-table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cheque-register-table {
+  width: 100%;
+  min-width: 980px;
+  border-collapse: collapse;
+}
+
+.cheque-register-table th {
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 11px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  text-align: left;
+  padding: 13px 14px;
+  border-bottom: 1px solid rgba(226, 232, 240, .92);
+  white-space: nowrap;
+}
+
+.cheque-register-table td {
+  padding: 14px;
+  border-bottom: 1px solid rgba(226, 232, 240, .78);
+  color: #1f2937;
+  vertical-align: middle;
+  overflow-wrap: anywhere;
+}
+
+.cheque-register-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.cheque-click-row {
+  cursor: pointer;
+  transition: background .16s ease, transform .16s ease, box-shadow .16s ease;
+}
+
+.cheque-click-row:hover,
+.cheque-click-row:focus-visible {
+  background: #faf7ff;
+  outline: none;
+  box-shadow: inset 4px 0 #7c3aed;
+}
+
+.cheque-click-row:active {
+  transform: scale(.998);
+}
+
+.cheque-date,
+.cheque-account,
+.cheque-direction-pill,
+.cheque-view-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.cheque-direction-pill {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 850;
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #bbf7d0;
+}
+
+.cheque-direction-pill.out {
+  background: #fff7ed;
+  color: #c2410c;
+  border-color: #fed7aa;
+}
+
+.cheque-view-btn {
+  border: 1px solid #ddd6fe;
+  background: #f5f3ff;
+  color: #6d28d9;
+  padding: 8px 10px;
+  border-radius: 12px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.cheque-view-btn:hover {
+  background: #ede9fe;
+}
+
+.cheque-empty-cell {
+  text-align: center;
+  padding: 28px !important;
+  color: #64748b;
+}
+
+.cheque-form-panel {
+  position: sticky;
+  top: 86px;
+}
+
+.cheque-create-form,
+.cheques-page .form-grid.cheque-create-form {
+  display: grid !important;
+  gap: 12px !important;
+}
+
+.cheque-form-two,
+.cheques-page .form-grid.cheque-form-two {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 12px !important;
+}
+
+.cheque-save-btn {
+  width: 100%;
+  justify-content: center;
+  min-height: 46px;
+}
+
+.cheque-bottom-grid,
+.cheques-page .report-grid.two.cheque-bottom-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important;
+  gap: 18px !important;
+  width: 100% !important;
+  margin-top: 18px;
+}
+
+.cheque-mini-row {
+  display: grid;
+  grid-template-columns: minmax(80px, 120px) minmax(0, 1fr) minmax(95px, auto);
+  gap: 8px 12px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(226, 232, 240, .8);
+}
+
+.cheque-mini-row:last-child {
+  border-bottom: 0;
+}
+
+.cheque-mini-row > * {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.cheque-mini-row small {
+  grid-column: 1 / -1;
+  color: #64748b;
+}
+
+/* Modal */
+.cheque-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 20000;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(15, 23, 42, .54);
+  backdrop-filter: blur(6px);
+}
+
+.cheque-modal-card {
+  width: min(880px, 100%);
+  max-height: min(88dvh, 840px);
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid rgba(226, 232, 240, .95);
+  border-radius: 28px;
+  box-shadow: 0 30px 90px rgba(15, 23, 42, .34);
+  padding: clamp(16px, 2.2vw, 24px);
+}
+
+.cheque-modal-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(226, 232, 240, .82);
+}
+
+.cheque-modal-head p {
+  margin: 6px 0 0;
+  color: #64748b;
+}
+
+.cheque-modal-close {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  cursor: pointer;
+}
+
+.cheque-modal-close:hover {
+  background: #f8fafc;
+}
+
+.cheque-modal-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.cheque-modal-summary > div,
+.cheque-detail-field {
+  border: 1px solid rgba(226, 232, 240, .92);
+  border-radius: 18px;
+  background: #f8fafc;
+  padding: 13px;
+  min-width: 0;
+}
+
+.cheque-modal-summary span,
+.cheque-detail-field span {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 850;
+  margin-bottom: 5px;
+}
+
+.cheque-modal-summary strong,
+.cheque-detail-field strong {
+  display: block;
+  color: #111827;
+  overflow-wrap: anywhere;
+}
+
+.cheque-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.cheque-modal-actions-box {
+  margin-top: 16px;
+  padding: 15px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #f8fafc, #faf5ff);
+  border: 1px solid rgba(221, 214, 254, .92);
+}
+
+.cheque-action-account {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 13px;
+}
+
+.cheque-action-account label {
+  color: #334155;
+  font-weight: 900;
+}
+
+.cheque-action-account small {
+  color: #64748b;
+}
+
+.cheque-modal-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.cheque-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 9px 13px;
+  border-radius: 14px;
+  border: 1px solid transparent;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.cheque-action-btn.deposit {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.cheque-action-btn.clear {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #bbf7d0;
+}
+
+.cheque-action-btn.bounce {
+  background: #fff7ed;
+  color: #c2410c;
+  border-color: #fed7aa;
+}
+
+.cheque-action-btn.cancel {
+  background: #fef2f2;
+  color: #b91c1c;
+  border-color: #fecaca;
+}
+
+.cheque-modal-completed {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 16px;
+  padding: 14px;
+  border-radius: 18px;
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #bbf7d0;
+  font-weight: 850;
+}
+
+/* Pagination safety */
+.cheques-page .pagination-bar {
+  border-top: 1px solid rgba(226, 232, 240, .9);
+  padding: 12px 14px;
+  background: #fff;
+}
+
+.cheques-page .pagination-controls {
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1500px) {
+  .cheque-workspace {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .cheque-form-panel {
+    position: static;
+    max-width: 940px;
+  }
+}
+
+@media (max-width: 1180px) {
+  .cheque-filter-grid,
+  .cheques-page .form-grid.cheque-filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .cheques-page .filter-apply {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 900px) {
+  .cheques-hero,
+  .cheques-page .page-head.cheques-hero {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .cheques-head-actions,
+  .cheques-page .head-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .cheques-head-actions > *,
+  .cheques-page .head-actions > * {
+    flex: 1 1 160px;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 760px) {
+  .cheque-stat-grid,
+  .cheques-page .stat-grid.cheque-stat-grid,
+  .cheque-filter-grid,
+  .cheques-page .form-grid.cheque-filter-grid,
+  .cheque-form-two,
+  .cheques-page .form-grid.cheque-form-two,
+  .cheque-bottom-grid,
+  .cheques-page .report-grid.two.cheque-bottom-grid,
+  .cheque-modal-summary,
+  .cheque-detail-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .cheque-register-table {
+    min-width: 0 !important;
+  }
+
+  .cheque-register-table thead {
+    display: none !important;
+  }
+
+  .cheque-register-table,
+  .cheque-register-table tbody,
+  .cheque-register-table tr,
+  .cheque-register-table td {
+    display: block !important;
+    width: 100% !important;
+  }
+
+  .cheque-register-table tr {
+    margin: 10px;
+    border: 1px solid rgba(226, 232, 240, .95);
+    border-radius: 18px;
+    background: #fff;
+    overflow: hidden;
+  }
+
+  .cheque-register-table td {
+    display: grid !important;
+    grid-template-columns: minmax(108px, 38%) minmax(0, 1fr) !important;
+    gap: 10px !important;
+    padding: 11px 12px !important;
+    border-bottom: 1px solid rgba(226, 232, 240, .72) !important;
+  }
+
+  .cheque-register-table td:last-child {
+    border-bottom: 0 !important;
+  }
+
+  .cheque-register-table td::before {
+    content: attr(data-label);
+    color: #64748b;
+    font-weight: 850;
+    font-size: .76rem;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+
+  .cheque-empty-cell {
+    display: block !important;
+  }
+
+  .cheque-empty-cell::before {
+    content: none !important;
+  }
+
+  .cheque-view-btn,
+  .cheque-modal-action-buttons .cheque-action-btn,
+  .cheque-save-btn,
+  .cheques-page .primary-btn,
+  .cheques-page .secondary-btn {
+    width: 100%;
+  }
+
+  .cheque-modal-action-buttons {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cheque-mini-row {
+    grid-template-columns: minmax(0, 1fr) !important;
+    padding: 12px;
+    border: 1px solid rgba(226, 232, 240, .9);
+    border-radius: 16px;
+    margin-bottom: 10px;
+  }
+}
+
+@media (max-width: 430px) {
+  .cheque-register-table td {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  .cheque-modal-backdrop {
+    padding: 10px;
+  }
+
+  .cheque-modal-card {
+    border-radius: 22px;
+  }
+}

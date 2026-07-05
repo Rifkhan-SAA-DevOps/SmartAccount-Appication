@@ -1,0 +1,293 @@
+/* SmartLedger sidebar scroll + submenu repair
+   Fixes after the previous scroll patch:
+   - Sidebar stays fixed while the right content scrolls.
+   - Only the menu list scrolls inside the sidebar.
+   - Sidebar scrollbar is hidden again; soft scroll cues remain.
+   - Desktop flyout submenu is restored and always appears above content.
+   - Mobile inline submenu remains available inside the drawer.
+*/
+
+@media (min-width: 901px) {
+  html,
+  body,
+  #root {
+    height: 100%;
+    overflow: hidden !important;
+  }
+
+  .smart-app-shell,
+  .app-shell {
+    height: 100dvh !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    align-items: stretch !important;
+  }
+
+  .smart-sidebar,
+  .sidebar {
+    flex: 0 0 var(--smart-sidebar-width, 270px) !important;
+    width: var(--smart-sidebar-width, 270px) !important;
+    min-width: var(--smart-sidebar-width, 270px) !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    min-height: 0 !important;
+    position: relative !important;
+    top: auto !important;
+    overflow: visible !important;
+    z-index: 120 !important;
+  }
+
+  .smart-sidebar.is-collapsed,
+  .sidebar.is-collapsed {
+    flex-basis: var(--smart-sidebar-collapsed-width, 82px) !important;
+    width: var(--smart-sidebar-collapsed-width, 82px) !important;
+    min-width: var(--smart-sidebar-collapsed-width, 82px) !important;
+  }
+
+  .smart-main-shell,
+  .main-shell {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+
+  .smart-topbar,
+  .topbar.smart-topbar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 70 !important;
+  }
+
+  .sidebar-nav-shell {
+    position: relative !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 156px) !important;
+    overflow: hidden !important;
+    border-radius: 18px;
+  }
+
+  .sidebar-nav-shell .sidebar-main-nav,
+  .sidebar-main-nav {
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  .sidebar-footer-card {
+    flex: 0 0 auto !important;
+  }
+}
+
+@media (max-width: 900px) {
+  .smart-sidebar,
+  .sidebar,
+  .smart-sidebar.is-collapsed,
+  .sidebar.is-collapsed {
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    overflow: hidden !important;
+    z-index: 1001 !important;
+  }
+
+  .sidebar-nav-shell {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 146px) !important;
+    overflow: hidden !important;
+  }
+
+  .sidebar-nav-shell .sidebar-main-nav,
+  .sidebar-main-nav {
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+}
+
+/* Hide the ugly visible scrollbar again. Menu still scrolls normally. */
+.sidebar-nav-shell .sidebar-main-nav::-webkit-scrollbar,
+.sidebar-main-nav::-webkit-scrollbar {
+  width: 0 !important;
+  height: 0 !important;
+  display: none !important;
+}
+
+.sidebar-scroll-cue {
+  display: block !important;
+  pointer-events: none !important;
+}
+
+.sidebar-scroll-cue-top {
+  background: linear-gradient(180deg, rgba(255,255,255,.98), rgba(255,255,255,.76), rgba(255,255,255,0)) !important;
+}
+
+.sidebar-scroll-cue-bottom {
+  background: linear-gradient(0deg, rgba(255,255,255,.98), rgba(255,255,255,.76), rgba(255,255,255,0)) !important;
+}
+
+.sidebar-nav-shell::after {
+  opacity: .38 !important;
+  pointer-events: none !important;
+}
+
+/* Restore desktop flyout/submenu. */
+@media (min-width: 901px) {
+  .mobile-inline-flyout {
+    display: none !important;
+  }
+
+  .sidebar-flyout.desktop-flyout,
+  .desktop-flyout {
+    display: block !important;
+    position: fixed !important;
+    z-index: 30000 !important;
+    width: var(--smart-flyout-width, clamp(286px, 23vw, 348px)) !important;
+    max-width: min(360px, calc(100vw - 112px)) !important;
+    max-height: var(--flyout-max-height, 620px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    pointer-events: auto !important;
+    visibility: visible !important;
+    background: rgba(255, 255, 255, .992) !important;
+    border: 1px solid rgba(226, 232, 240, .96) !important;
+    box-shadow: 0 24px 70px rgba(44, 35, 100, .20) !important;
+    clip-path: none !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  .sidebar-flyout.desktop-flyout::-webkit-scrollbar,
+  .desktop-flyout::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
+
+  .sidebar-flyout.desktop-flyout.is-positioning {
+    opacity: 0 !important;
+    transform: translateX(-4px) scale(.985) !important;
+    pointer-events: none !important;
+  }
+
+  .sidebar-flyout.desktop-flyout.is-position-ready {
+    opacity: 1 !important;
+    transform: translateX(0) scale(1) !important;
+  }
+
+  .smart-app-shell.mobile-drawer-active .sidebar-flyout.desktop-flyout,
+  .smart-app-shell.mobile-drawer-active .desktop-flyout {
+    display: none !important;
+  }
+}
+
+/* Keep accordion section headings and link lists visible when open. */
+.flyout-sections {
+  display: grid !important;
+  gap: 10px !important;
+}
+
+.flyout-section-toggle {
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  border: 1px solid rgba(226, 232, 240, .9) !important;
+  background: #f8fafc !important;
+  color: #475569 !important;
+  border-radius: 14px !important;
+  padding: 10px 11px !important;
+  cursor: pointer !important;
+  font-size: 12px !important;
+  font-weight: 950 !important;
+  text-transform: uppercase !important;
+  letter-spacing: .055em !important;
+}
+
+.flyout-section.is-open .flyout-section-toggle {
+  background: linear-gradient(90deg, rgba(124, 58, 237, .12), rgba(124, 58, 237, .03)) !important;
+  border-color: #ddd6fe !important;
+  color: #6d28d9 !important;
+}
+
+.flyout-section-chevron {
+  transition: transform .18s ease !important;
+}
+
+.flyout-section.is-open .flyout-section-chevron {
+  transform: rotate(90deg) !important;
+}
+
+.flyout-section:not(.is-open) .flyout-link-list,
+.mobile-inline-flyout .flyout-section:not(.is-open) .flyout-link-list {
+  display: none !important;
+}
+
+.flyout-section.is-open .flyout-link-list,
+.mobile-inline-flyout .flyout-section.is-open .flyout-link-list {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 6px !important;
+  margin-top: 8px !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.flyout-link {
+  min-width: 0 !important;
+}
+
+.flyout-link-copy,
+.flyout-link-copy b,
+.flyout-link-copy small {
+  min-width: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+@media (max-width: 900px) {
+  .desktop-flyout,
+  .sidebar-flyout.desktop-flyout {
+    display: none !important;
+  }
+
+  .mobile-inline-flyout {
+    display: block !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    padding: 0 0 0 12px !important;
+    transition: max-height .25s ease, opacity .2s ease, padding .2s ease !important;
+  }
+
+  .sidebar-menu-row.is-expanded .mobile-inline-flyout {
+    max-height: 900px !important;
+    opacity: 1 !important;
+    padding: 8px 0 10px 12px !important;
+  }
+
+  .mobile-inline-flyout .flyout-header {
+    display: none !important;
+  }
+
+  .mobile-inline-flyout .flyout-link {
+    display: grid !important;
+    grid-template-columns: 32px minmax(0, 1fr) !important;
+    min-height: 46px !important;
+  }
+}

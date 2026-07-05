@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Clock3, CreditCard, PauseCircle, RefreshCw, ScanLine, ShoppingCart, Trash2, Wifi, WifiOff } from 'lucide-react';
 import { api } from '../api/http.js';
 import { openAuthenticatedPrint } from '../utils/print.js';
 import {
@@ -11,6 +12,7 @@ import {
   savePosCache,
   updateOfflinePosSale
 } from '../utils/offlineQueue.js';
+import '../styles/daily-work-ui.css';
 
 const emptyPayment = { method: 'CASH', paid: 0, customerId: '', warehouseId: '' };
 
@@ -256,26 +258,64 @@ export default function POS() {
     <div className="page pos-page">
       <section className="panel pos-top-panel">
         <div>
+          <span className="workflow-kicker"><ScanLine size={16} /> Counter Sales</span>
           <h1>Fast POS</h1>
-          <p>Scan barcode/SKU, bill customers, hold bills, print receipts and keep selling even when internet disconnects.</p>
+          <p>Scan barcode/SKU, select products, hold bills, print receipts and continue selling even if the internet disconnects.</p>
           <div className="pos-status-row">
-            <span className={`status-pill ${isOnline ? 'online' : 'offline'}`}>{isOnline ? 'Online' : 'Offline Mode'}</span>
-            <span className="queue-pill">Offline queue: {offlineQueue.length}</span>
+            <span className={`status-pill ${isOnline ? 'online' : 'offline'}`}>
+              {isOnline ? <Wifi size={14} /> : <WifiOff size={14} />} {isOnline ? 'Online' : 'Offline Mode'}
+            </span>
+            <span className="queue-pill"><Clock3 size={14} /> Offline queue: {offlineQueue.length}</span>
             {syncStatus && <span className="sync-text">{syncStatus}</span>}
           </div>
         </div>
         <div className="actions-row">
-          <button className="ghost-btn" type="button" onClick={() => setCart([])}>Clear Cart</button>
-          <button className="secondary-btn" type="button" onClick={holdBill} disabled={!cart.length}>Hold Bill</button>
-          <button className="secondary-btn" type="button" onClick={syncPendingSales} disabled={loading || !offlineQueue.length || !isOnline}>Sync Pending</button>
+          <button className="ghost-btn" type="button" onClick={() => setCart([])}><Trash2 size={16} /> Clear Cart</button>
+          <button className="secondary-btn" type="button" onClick={holdBill} disabled={!cart.length}><PauseCircle size={16} /> Hold Bill</button>
+          <button className="secondary-btn" type="button" onClick={syncPendingSales} disabled={loading || !offlineQueue.length || !isOnline}><RefreshCw size={16} /> Sync Pending</button>
           <button className="primary-btn" type="button" onClick={checkout} disabled={loading || !cart.length}>{loading ? 'Saving...' : isOnline ? 'Complete Sale' : 'Save Offline'}</button>
         </div>
       </section>
 
       {error && <div className="error-box">{error}</div>}
 
+      <section className="workflow-stat-grid">
+        <div className="workflow-stat-card blue">
+          <div className="workflow-stat-icon"><ShoppingCart size={20} /></div>
+          <span>Cart items</span>
+          <strong>{cart.reduce((sum, item) => sum + Number(item.qty || 0), 0)}</strong>
+          <small>{cart.length} product lines</small>
+        </div>
+        <div className="workflow-stat-card green">
+          <div className="workflow-stat-icon"><CreditCard size={20} /></div>
+          <span>Bill total</span>
+          <strong>LKR {money(subtotal)}</strong>
+          <small>Current customer bill</small>
+        </div>
+        <div className="workflow-stat-card orange">
+          <div className="workflow-stat-icon"><PauseCircle size={20} /></div>
+          <span>Held bills</span>
+          <strong>{heldBills.length}</strong>
+          <small>Paused bills saved locally</small>
+        </div>
+        <div className="workflow-stat-card">
+          <div className="workflow-stat-icon"><Clock3 size={20} /></div>
+          <span>Offline queue</span>
+          <strong>{offlineQueue.length}</strong>
+          <small>Bills waiting to sync</small>
+        </div>
+      </section>
+
       <div className="pos-layout">
         <section className="panel pos-left">
+          <div className="workflow-panel-head">
+            <div>
+              <h2><ScanLine size={20} /> Add Products</h2>
+              <p>Scan barcode or type product name/SKU. Tap a tile to add it to the current bill.</p>
+            </div>
+            <span className="workflow-pill dark">Showing {filteredProducts.length}</span>
+          </div>
+
           <form onSubmit={scanSubmit} className="scanner-bar">
             <input ref={scanRef} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Scan barcode / type SKU / search product" />
             <button className="primary-btn" type="submit">Add</button>
@@ -290,11 +330,18 @@ export default function POS() {
                 <small>Stock: {Number(product.stockQty || 0)}</small>
               </button>
             ))}
+            {!filteredProducts.length && <div className="workflow-empty-state">No products found for this search.</div>}
           </div>
         </section>
 
         <section className="panel pos-cart-panel">
-          <h2>Current Bill</h2>
+          <div className="workflow-panel-head">
+            <div>
+              <h2><ShoppingCart size={20} /> Current Bill</h2>
+              <p>Review quantities, customer and payment before completing the sale.</p>
+            </div>
+          </div>
+
           <div className="cart-lines">
             {cart.map((item) => (
               <div className="cart-line" key={item.id}>
@@ -306,7 +353,7 @@ export default function POS() {
                 <b>LKR {money(item.qty * Number(item.salePrice || 0))}</b>
               </div>
             ))}
-            {!cart.length && <div className="empty-cart">No products added yet.</div>}
+            {!cart.length && <div className="empty-cart">No products added yet. Scan or tap a product tile.</div>}
           </div>
 
           <div className="payment-box">
@@ -342,6 +389,8 @@ export default function POS() {
             <div><span>Change</span><b>LKR {money(change)}</b></div>
           </div>
 
+          <button className="primary-btn full-width" type="button" onClick={checkout} disabled={loading || !cart.length}>{loading ? 'Saving...' : isOnline ? 'Complete Sale & Print' : 'Save Bill Offline'}</button>
+
           {lastInvoice && (
             <button className="secondary-btn full-width" type="button" onClick={() => openAuthenticatedPrint(`/invoices/${lastInvoice.id}/thermal-receipt`)}>
               Reprint Last Receipt {lastInvoice.invoiceNo}
@@ -352,9 +401,9 @@ export default function POS() {
 
       {!!offlineQueue.length && (
         <section className="panel offline-queue-panel">
-          <div className="section-head">
+          <div className="workflow-panel-head">
             <div>
-              <h2>Offline POS Queue</h2>
+              <h2><RefreshCw size={20} /> Offline POS Queue</h2>
               <p>These bills are stored on this device. Keep this browser data until they sync.</p>
             </div>
             <button className="primary-btn" type="button" onClick={syncPendingSales} disabled={!isOnline || loading}>Sync Now</button>
@@ -374,7 +423,12 @@ export default function POS() {
 
       {!!heldBills.length && (
         <section className="panel held-bills-panel">
-          <h2>Held Bills</h2>
+          <div className="workflow-panel-head">
+            <div>
+              <h2><PauseCircle size={20} /> Held Bills</h2>
+              <p>Tap a held bill to resume it and continue checkout.</p>
+            </div>
+          </div>
           <div className="held-bills-grid">
             {heldBills.map((bill) => (
               <button className="held-bill" type="button" key={bill.id} onClick={() => resumeBill(bill)}>

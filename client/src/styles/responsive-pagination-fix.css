@@ -1,0 +1,436 @@
+/* === SmartLedger responsive safety + pagination patch === */
+html,
+body,
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.main-shell,
+.page-wrap,
+.page,
+.panel,
+.card,
+.content-card,
+.workflow-panel,
+.workflow-card,
+.distribution-page,
+.shop-supply-page,
+.shop-collections-page,
+.van-stock-page,
+.shop-returns-page,
+.trade-page,
+.dist-reports-page,
+.distributor-dashboard-page,
+.rep-mobile-page,
+.rep-offline-page {
+  min-width: 0;
+  max-width: 100%;
+}
+
+input,
+select,
+textarea,
+button {
+  min-width: 0;
+  max-width: 100%;
+}
+
+textarea {
+  width: 100%;
+  resize: vertical;
+}
+
+.table-card,
+.data-table-card,
+.dist-table-card,
+.trade-table-card,
+.sr-table-wrap {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.data-table-scroll,
+.dist-table-wrap,
+.trade-table-card,
+.sr-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.data-table-scroll:focus,
+.dist-table-wrap:focus,
+.trade-table-card:focus,
+.sr-table-wrap:focus {
+  outline: 3px solid rgba(124, 58, 237, 0.18);
+  outline-offset: -3px;
+}
+
+.data-table,
+.dist-table,
+.trade-table,
+.sr-table {
+  min-width: 760px;
+}
+
+.data-table th,
+.data-table td,
+.dist-table th,
+.dist-table td,
+.trade-table th,
+.trade-table td,
+.sr-table th,
+.sr-table td {
+  vertical-align: top;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.table-subtext,
+.data-table td small,
+.dist-table td small,
+.trade-table td small,
+.sr-table td small {
+  display: block;
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  border-top: 1px solid rgba(148, 163, 184, 0.24);
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.9), rgba(255, 255, 255, 0.96));
+}
+
+.pagination-summary {
+  color: #64748b;
+  font-size: 0.86rem;
+  font-weight: 750;
+}
+
+.pagination-summary strong {
+  color: #0f172a;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pagination-controls button,
+.pagination-size select {
+  height: 36px;
+  border: 1px solid rgba(148, 163, 184, 0.34);
+  border-radius: 11px;
+  background: #fff;
+  color: #334155;
+  font-weight: 800;
+  padding: 0 10px;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+}
+
+.pagination-controls button {
+  cursor: pointer;
+}
+
+.pagination-controls button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.pagination-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #64748b;
+  font-size: 0.82rem;
+  font-weight: 850;
+}
+
+.pagination-size select {
+  width: auto;
+  margin: 0;
+}
+
+.pagination-page {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 10px;
+  border-radius: 11px;
+  background: rgba(124, 58, 237, 0.08);
+  color: #5b21b6;
+  font-size: 0.84rem;
+  font-weight: 900;
+}
+
+.empty-state,
+.smart-empty-state,
+.rm-empty,
+.rep-offline-empty,
+.trade-empty,
+.dist-empty {
+  max-width: 100%;
+}
+
+@media (max-width: 980px) {
+  .page-wrap {
+    padding: 18px;
+  }
+
+  .page-head,
+  .split-header,
+  .page-header,
+  .workflow-hero,
+  .distribution-hero,
+  .trade-hero,
+  .dist-hero,
+  .dd-hero,
+  .rm-hero,
+  .rep-offline-hero,
+  .sr-hero {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    align-items: stretch !important;
+  }
+
+  .head-actions,
+  .dist-hero-actions,
+  .rep-offline-hero-actions,
+  .dd-controls {
+    justify-content: flex-start !important;
+    flex-wrap: wrap !important;
+  }
+}
+
+@media (max-width: 760px) {
+  .data-table,
+  .dist-table,
+  .sr-table {
+    min-width: 0;
+  }
+
+  .data-table thead,
+  .dist-table thead,
+  .sr-table thead {
+    display: none;
+  }
+
+  .data-table tbody,
+  .data-table tr,
+  .data-table td,
+  .dist-table tbody,
+  .dist-table tr,
+  .dist-table td,
+  .sr-table tbody,
+  .sr-table tr,
+  .sr-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .data-table tr,
+  .dist-table tr,
+  .sr-table tr {
+    margin: 10px;
+    border: 1px solid rgba(148, 163, 184, 0.28);
+    border-radius: 16px;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+  }
+
+  .data-table td,
+  .dist-table td,
+  .sr-table td {
+    border: 0 !important;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.9) !important;
+    padding: 10px 12px !important;
+  }
+
+  .data-table td:last-child,
+  .dist-table td:last-child,
+  .sr-table td:last-child {
+    border-bottom: 0 !important;
+  }
+
+  .data-table td::before,
+  .dist-table td::before,
+  .sr-table td::before {
+    content: attr(data-label);
+    display: block;
+    margin-bottom: 4px;
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .pagination-bar {
+    display: grid;
+    grid-template-columns: 1fr;
+    padding: 12px;
+  }
+
+  .pagination-controls {
+    justify-content: stretch;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .pagination-size,
+  .pagination-page {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .pagination-size {
+    grid-column: 1 / -1;
+  }
+
+  .pagination-page {
+    grid-column: 1 / -1;
+  }
+
+  .pagination-controls button {
+    width: 100%;
+  }
+}
+
+/* Distribution module hard responsive overrides */
+.distribution-page .stat-grid,
+.distribution-page .report-stat-grid,
+.shop-supply-page .stats-grid,
+.shop-collections-page .collection-stat-grid,
+.van-stock-page .van-stat-grid,
+.shop-returns-page .sr-cards,
+.trade-page .trade-summary-grid,
+.dist-reports-page .dist-card-grid,
+.distributor-dashboard-page .dd-card-grid,
+.rep-mobile-page .rm-cards,
+.rep-offline-page .rep-offline-stats {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+}
+
+.distribution-page .form-grid,
+.shop-supply-page .form-grid,
+.shop-collections-page .form-grid,
+.van-stock-page .van-form-grid,
+.shop-returns-page .sr-fields,
+.trade-page .trade-form-grid,
+.rep-mobile-page .rm-form-grid,
+.rep-offline-page .rep-offline-grid,
+.rep-offline-page .rep-offline-form {
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) !important;
+}
+
+.distribution-page .filter-row,
+.distribution-page .distribution-filters,
+.shop-supply-page .filter-row,
+.shop-collections-page .filter-row,
+.van-stock-page .van-filter-bar,
+.shop-returns-page .sr-filter-row,
+.trade-page .trade-toolbar,
+.dist-reports-page .dist-filters,
+.rep-mobile-page .rm-filter-card,
+.rep-offline-page .rep-offline-filter-card {
+  max-width: 100%;
+}
+
+.supply-grid,
+.collection-grid,
+.collection-panel-grid,
+.van-two-col,
+.sr-grid,
+.dist-report-shell,
+.rm-main-grid,
+.rep-offline-workspace {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.supply-line,
+.load-line,
+.close-line,
+.sr-item,
+.rm-supply-item {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
+  align-items: end !important;
+}
+
+.supply-line > *,
+.load-line > *,
+.close-line > *,
+.sr-item > *,
+.rm-supply-item > * {
+  min-width: 0;
+}
+
+.recovery-row,
+.history-head,
+.history-row,
+.stock-row,
+.movement-row,
+.load-card-head,
+.rm-mini-row,
+.rep-offline-draft {
+  max-width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 760px) {
+  .trade-table {
+    min-width: 720px;
+  }
+
+  .distribution-page .tab-actions,
+  .trade-page .trade-tabs,
+  .dist-reports-page .dist-report-tabs {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    width: 100%;
+  }
+
+  .distribution-page .tab-actions button,
+  .trade-page .trade-tabs button,
+  .dist-reports-page .dist-report-tabs button,
+  .form-actions button,
+  .sr-actions button,
+  .rm-actions button,
+  .rep-offline-hero-actions button,
+  .rep-offline-queue-actions button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .history-head {
+    display: none !important;
+  }
+
+  .history-row,
+  .recovery-row,
+  .stock-row,
+  .movement-row,
+  .load-card,
+  .rm-shop-card,
+  .rep-offline-draft {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+}

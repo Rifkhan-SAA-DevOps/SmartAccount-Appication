@@ -1,4 +1,3 @@
-
 import { useEffect, useMemo, useState } from 'react';
 import { Activity, AlertTriangle, ArrowRight, BellRing, CheckCircle2, RefreshCw, ShieldAlert, Siren, Sparkles, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
