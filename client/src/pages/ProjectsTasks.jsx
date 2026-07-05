@@ -3,6 +3,8 @@ import { BellRing, CheckCircle2, KanbanSquare, Plus, RefreshCw } from 'lucide-re
 import { api } from '../api/http.js';
 import DataTable from '../components/ui/DataTable.jsx';
 import StatCard from '../components/ui/StatCard.jsx';
+import ModalDrawer from '../components/ui/ModalDrawer.jsx';
+import '../styles/stage9-operations-polish.css';
 
 const emptyProject = { name: '', customerId: '', crmLeadId: '', serviceJobId: '', quotationId: '', salesOrderId: '', status: 'PLANNED', priority: 'NORMAL', startDate: '', dueDate: '', budget: 0, progress: 0, notes: '' };
 const emptyTask = { projectId: '', title: '', description: '', status: 'TODO', priority: 'NORMAL', assignedUserId: '', assignedEmployeeId: '', customerId: '', crmLeadId: '', serviceJobId: '', quotationId: '', salesOrderId: '', startAt: '', dueAt: '', estimatedHours: 0, actualHours: 0 };
@@ -35,6 +37,8 @@ export default function ProjectsTasks() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [saving, setSaving] = useState(false);
+  const [drawer, setDrawer] = useState(null);
+  const [selectedTask, setSelectedTask] = useState(null);
 
   async function load() {
     setError('');
@@ -74,6 +78,7 @@ export default function ProjectsTasks() {
       await api.post('/projects', { ...cleanPayload(projectForm), budget: Number(projectForm.budget || 0), progress: Number(projectForm.progress || 0) });
       setProjectForm(emptyProject);
       flash('Project created');
+      setDrawer(null);
       await load();
     } catch (e) { setError(e.response?.data?.message || 'Failed to create project'); }
     finally { setSaving(false); }
@@ -86,6 +91,7 @@ export default function ProjectsTasks() {
       await api.post('/projects/tasks', { ...cleanPayload(taskForm), estimatedHours: Number(taskForm.estimatedHours || 0), actualHours: Number(taskForm.actualHours || 0) });
       setTaskForm({ ...emptyTask, projectId: taskForm.projectId });
       flash('Task created');
+      setDrawer(null);
       await load();
     } catch (e) { setError(e.response?.data?.message || 'Failed to create task'); }
     finally { setSaving(false); }
@@ -139,14 +145,19 @@ export default function ProjectsTasks() {
   ];
 
   return (
-    <div className="page projects-page">
+    <div className="page projects-page stage8-page">
       <div className="page-header">
         <div>
           <span className="eyebrow">Task / project management</span>
           <h1>Projects & Tasks</h1>
           <p>Track internal work, client projects, deadlines, assignees, comments, task board and overdue alerts.</p>
         </div>
-        <div className="head-actions"><button className="ghost-btn" onClick={load}><RefreshCw size={16}/> Refresh</button><button className="primary-btn" onClick={generateAlerts}><BellRing size={16}/> Create alerts</button></div>
+        <div className="head-actions">
+          <button className="ghost-btn" onClick={load}><RefreshCw size={16}/> Refresh</button>
+          <button className="secondary-btn" onClick={generateAlerts}><BellRing size={16}/> Create alerts</button>
+          <button className="primary-btn" onClick={() => setDrawer('task')}><Plus size={16}/> New Task</button>
+          <button className="primary-btn" onClick={() => setDrawer('project')}><KanbanSquare size={16}/> New Project</button>
+        </div>
       </div>
 
       {error && <div className="error-box">{error}</div>}
@@ -160,21 +171,23 @@ export default function ProjectsTasks() {
       </div>
 
       <div className="tab-actions">
-        {['board', 'tasks', 'projects', 'create'].map((key) => <button key={key} className={`tab-btn ${tab === key ? 'active' : ''}`} onClick={() => setTab(key)}>{key === 'board' ? 'Task Board' : key}</button>)}
+        {['board', 'tasks', 'projects'].map((key) => <button key={key} className={`tab-btn ${tab === key ? 'active' : ''}`} onClick={() => setTab(key)}>{key === 'board' ? 'Vertical Task Board' : key}</button>)}
       </div>
 
-      {tab === 'board' && <div className="task-board">
-        {boardGroups.map((group) => <div className="task-column" key={group.status}>
-          <div className="task-column-head"><strong>{group.status.replace('_', ' ')}</strong><span>{group.tasks.length}</span></div>
-          {group.tasks.length ? group.tasks.map((task) => <div className={`task-card priority-${String(task.priority).toLowerCase()}`} key={task.id}>
-            <div className="task-card-top"><strong>{task.taskNo}</strong><span className={`badge ${statusClass(task.status)}`}>{task.status}</span></div>
-            <h3>{task.title}</h3>
-            <p>{task.projectName || task.customerName || task.crmLeadTitle || 'General task'}</p>
-            <div className="task-meta"><span>{task.assignedUserName || task.assignedEmployeeName || 'Unassigned'}</span><b>{dateOnly(task.dueAt)}</b></div>
-            {task.overdue && <small className="danger-text">Overdue</small>}
-            <div className="actions-row"><button className="mini-action" onClick={()=>addComment(task)}>Comment</button>{task.status !== 'DONE' && <button className="mini-action" onClick={()=>updateTaskStatus(task, 'DONE')}>Done</button>}</div>
-          </div>) : <div className="task-empty">No tasks</div>}
-        </div>)}
+      {tab === 'board' && <div className="project-board-vertical">
+        {boardGroups.map((group) => <section className="project-status-row" key={group.status}>
+          <div className="project-status-head">
+            <div><strong>{group.status.replaceAll('_', ' ')}</strong><span>{group.tasks.length} task(s)</span></div>
+            <div className={`status-pill ${statusClass(group.status)}`}>{group.status.replaceAll('_', ' ')}</div>
+          </div>
+          <div className="project-status-task-list">
+            {group.tasks.length ? group.tasks.map((task) => <button type="button" className={`project-task-row priority-${String(task.priority).toLowerCase()}`} key={task.id} onClick={() => setSelectedTask(task)}>
+              <div className="project-task-main"><strong>{task.taskNo}</strong><span>{task.title}</span><small>{task.projectName || task.customerName || task.crmLeadTitle || 'General task'}</small></div>
+              <div className="project-task-meta"><span>{task.assignedUserName || task.assignedEmployeeName || 'Unassigned'}</span><b>{dateOnly(task.dueAt)}</b>{task.overdue && <em>Overdue</em>}</div>
+              <div className="project-task-status"><span className={`badge ${statusClass(task.status)}`}>{task.status}</span><small>{task.priority}</small></div>
+            </button>) : <div className="task-empty">No tasks in this stage</div>}
+          </div>
+        </section>)}
       </div>}
 
       {tab === 'tasks' && <>
@@ -185,14 +198,35 @@ export default function ProjectsTasks() {
           <select value={filters.overdue} onChange={(e)=>setFilters({...filters,overdue:e.target.value})}><option value="">All due</option><option value="true">Overdue only</option></select>
           <button className="primary-btn" onClick={load}>Apply</button>
         </div></div>
-        <DataTable columns={taskColumns} rows={tasks} empty="No tasks found" />
+        <DataTable columns={taskColumns} rows={tasks} empty="No tasks found" onRowClick={setSelectedTask} />
       </>}
 
       {tab === 'projects' && <DataTable columns={projectColumns} rows={projects} empty="No projects found" />}
 
-      {tab === 'create' && <div className="project-create-grid">
-        <form className="panel form-grid" onSubmit={createProject}>
-          <h2><KanbanSquare size={18}/> Create project</h2>
+
+      <ModalDrawer open={Boolean(selectedTask)} onClose={() => setSelectedTask(null)} title={selectedTask ? `${selectedTask.taskNo} · ${selectedTask.title}` : 'Task Details'} eyebrow="Task detail" description="Review task information and update the status from one clean modal." mode="modal" size="lg">
+        {selectedTask && <div className="detail-modal-content">
+          <div className="detail-grid">
+            <div><span>Status</span><strong><span className={`badge ${statusClass(selectedTask.status)}`}>{selectedTask.status}</span></strong></div>
+            <div><span>Priority</span><strong>{selectedTask.priority}</strong></div>
+            <div><span>Assigned</span><strong>{selectedTask.assignedUserName || selectedTask.assignedEmployeeName || 'Unassigned'}</strong></div>
+            <div><span>Due</span><strong>{dt(selectedTask.dueAt)}</strong></div>
+            <div><span>Project</span><strong>{selectedTask.projectName || '-'}</strong></div>
+            <div><span>Hours</span><strong>{Number(selectedTask.actualHours || 0)} / {Number(selectedTask.estimatedHours || 0)}</strong></div>
+          </div>
+          <p className="modal-note-text">{selectedTask.description || 'No description added.'}</p>
+          <div className="modal-action-row">
+            <select value={selectedTask.status} onChange={(e) => { updateTaskStatus(selectedTask, e.target.value); setSelectedTask(null); }}>
+              {taskStatuses.map((status) => <option key={status}>{status}</option>)}
+            </select>
+            <button className="secondary-btn" onClick={() => addComment(selectedTask)}>Add Comment</button>
+            {selectedTask.status !== 'DONE' && <button className="primary-btn" onClick={() => { updateTaskStatus(selectedTask, 'DONE'); setSelectedTask(null); }}>Mark Done</button>}
+          </div>
+        </div>}
+      </ModalDrawer>
+
+      <ModalDrawer open={drawer === 'project'} onClose={() => setDrawer(null)} title="Create Project" eyebrow="Project planning" description="Create the project in a focused drawer. Lists and board remain full width.">
+        <form className="form-grid" onSubmit={createProject}>
           <label>Project name<input required value={projectForm.name} onChange={(e)=>setProjectForm({...projectForm,name:e.target.value})} placeholder="Website redesign / shop renovation" /></label>
           <label>Customer<select value={projectForm.customerId} onChange={(e)=>setProjectForm({...projectForm,customerId:e.target.value})}><option value="">Not linked</option>{resources.customers.map((c)=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
           <label>CRM lead<select value={projectForm.crmLeadId} onChange={(e)=>setProjectForm({...projectForm,crmLeadId:e.target.value})}><option value="">Not linked</option>{resources.leads.map((l)=><option key={l.id} value={l.id}>{l.leadNo} - {l.title}</option>)}</select></label>
@@ -204,12 +238,14 @@ export default function ProjectsTasks() {
           <label>Start date<input type="date" value={projectForm.startDate} onChange={(e)=>setProjectForm({...projectForm,startDate:e.target.value})} /></label>
           <label>Due date<input type="date" value={projectForm.dueDate} onChange={(e)=>setProjectForm({...projectForm,dueDate:e.target.value})} /></label>
           <label>Budget<input type="number" min="0" value={projectForm.budget} onChange={(e)=>setProjectForm({...projectForm,budget:e.target.value})} /></label>
+          <label>Progress<input type="number" min="0" max="100" value={projectForm.progress} onChange={(e)=>setProjectForm({...projectForm,progress:e.target.value})} /></label>
           <label className="span-two">Notes<textarea value={projectForm.notes} onChange={(e)=>setProjectForm({...projectForm,notes:e.target.value})} /></label>
           <button className="primary-btn span-two" disabled={saving}><Plus size={16}/> Save project</button>
         </form>
+      </ModalDrawer>
 
-        <form className="panel form-grid" onSubmit={createTask}>
-          <h2><CheckCircle2 size={18}/> Create task</h2>
+      <ModalDrawer open={drawer === 'task'} onClose={() => setDrawer(null)} title="Create Task" eyebrow="Task board" description="Add a task without leaving the board or shrinking the task list.">
+        <form className="form-grid" onSubmit={createTask}>
           <label>Project<select value={taskForm.projectId} onChange={(e)=>setTaskForm({...taskForm,projectId:e.target.value})}><option value="">General task</option>{activeProjects.map((p)=><option key={p.id} value={p.id}>{p.projectNo} - {p.name}</option>)}</select></label>
           <label>Title<input required value={taskForm.title} onChange={(e)=>setTaskForm({...taskForm,title:e.target.value})} placeholder="Call client / prepare quotation / finish design" /></label>
           <label>Assign user<select value={taskForm.assignedUserId} onChange={(e)=>setTaskForm({...taskForm,assignedUserId:e.target.value})}><option value="">Unassigned</option>{resources.users.map((u)=><option key={u.id} value={u.id}>{u.name} · {u.role}</option>)}</select></label>
@@ -225,7 +261,7 @@ export default function ProjectsTasks() {
           <label className="span-two">Description<textarea value={taskForm.description} onChange={(e)=>setTaskForm({...taskForm,description:e.target.value})} /></label>
           <button className="primary-btn span-two" disabled={saving}><Plus size={16}/> Save task</button>
         </form>
-      </div>}
+      </ModalDrawer>
     </div>
   );
 }

@@ -3,6 +3,8 @@ import { BellRing, CalendarCheck, RefreshCw, UserPlus, WalletCards } from 'lucid
 import { api } from '../api/http.js';
 import DataTable from '../components/ui/DataTable.jsx';
 import StatCard from '../components/ui/StatCard.jsx';
+import ModalDrawer from '../components/ui/ModalDrawer.jsx';
+import '../styles/stage9-operations-polish.css';
 
 const emptyEmployee = { name: '', employeeNo: '', phone: '', email: '', nic: '', designation: '', department: '', employmentType: 'FULL_TIME', joinDate: '', basicSalary: 0, hourlyRate: 0, overtimeRate: 0, bankName: '', bankAccountNo: '', address: '', notes: '' };
 const emptyAttendance = { employeeId: '', date: new Date().toISOString().slice(0, 10), checkIn: '', checkOut: '', status: 'PRESENT', regularHours: '', overtimeHours: 0, notes: '' };
@@ -36,6 +38,7 @@ export default function HRPayroll() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [saving, setSaving] = useState(false);
+  const [drawer, setDrawer] = useState(null);
 
   const activeEmployees = useMemo(() => employees.filter((e) => e.status === 'ACTIVE'), [employees]);
 
@@ -152,6 +155,16 @@ export default function HRPayroll() {
     { key: 'actions', label: 'Actions', render: (r) => r.status === 'PENDING' ? <div className="actions-row"><button className="mini-action" onClick={() => leaveStatus(r, 'APPROVED')}>Approve</button><button className="mini-danger" onClick={() => leaveStatus(r, 'REJECTED')}>Reject</button></div> : '-' }
   ];
 
+
+  const tabActions = {
+    employees: { drawer: 'employee', label: 'Add Employee', icon: <UserPlus size={16} /> },
+    attendance: { drawer: 'attendance', label: 'Mark Attendance', icon: <CalendarCheck size={16} /> },
+    advances: { drawer: 'advance', label: 'New Advance', icon: <WalletCards size={16} /> },
+    leaves: { drawer: 'leave', label: 'Request Leave', icon: <CalendarCheck size={16} /> },
+    payroll: { drawer: 'payroll', label: 'Generate Payroll', icon: <WalletCards size={16} /> }
+  };
+  const tabAction = tabActions[tab];
+
   const payrollCols = [
     { key: 'runNo', label: 'Run', render: (r) => <><strong>{r.runNo}</strong><span className="table-subtext">{dateOnly(r.periodStart)} - {dateOnly(r.periodEnd)}</span></> },
     { key: 'grossTotal', label: 'Gross', render: (r) => money(r.grossTotal) },
@@ -162,10 +175,14 @@ export default function HRPayroll() {
   ];
 
   return (
-    <div className="page hr-page">
+    <div className="page hr-page stage8-page">
       <div className="page-head">
         <div><h1>HR / Payroll / Attendance</h1><p>Manage employees, daily attendance, salary advances, leave requests, payroll runs and salary journal posting.</p></div>
-        <div className="head-actions"><button className="secondary-btn" onClick={createAlerts}><BellRing size={18}/> HR Alerts</button><button className="secondary-btn" onClick={load}><RefreshCw size={18}/> Refresh</button></div>
+        <div className="head-actions">
+          <button className="secondary-btn" onClick={createAlerts}><BellRing size={18}/> HR Alerts</button>
+          <button className="secondary-btn" onClick={load}><RefreshCw size={18}/> Refresh</button>
+          {tabAction && <button className="primary-btn" onClick={() => setDrawer(tabAction.drawer)}>{tabAction.icon} {tabAction.label}</button>}
+        </div>
       </div>
       {error && <div className="error-box">{error}</div>}
       {success && <div className="success-box">{success}</div>}
@@ -179,63 +196,72 @@ export default function HRPayroll() {
 
       <div className="tab-actions">{['employees','attendance','advances','leaves','payroll'].map((t)=><button key={t} className={`tab-btn ${tab===t?'active':''}`} onClick={()=>setTab(t)}>{t}</button>)}</div>
 
-      {tab === 'employees' && <div className="hr-grid">
-        <section className="panel"><h2><UserPlus size={19}/> Employee Register</h2><DataTable columns={employeeCols} rows={employees} empty="No employees yet" /></section>
-        <section className="panel hr-form-panel"><h2>Add Employee</h2><form className="form-grid compact" onSubmit={createEmployee}>
+      {tab === 'employees' && <section className="panel ops-register-panel"><div className="section-title-row"><h2><UserPlus size={19}/> Employee Register</h2><p>Use the Add Employee button for the form. The register stays full width.</p></div><DataTable columns={employeeCols} rows={employees} empty="No employees yet" /></section>}
+      {tab === 'attendance' && <section className="panel ops-register-panel"><div className="section-title-row"><h2><CalendarCheck size={19}/> Attendance</h2><p>Mark attendance from a drawer so the table remains readable.</p></div><DataTable columns={attendanceCols} rows={attendance} empty="No attendance records" /></section>}
+      {tab === 'advances' && <section className="panel ops-register-panel"><div className="section-title-row"><h2>Salary Advances</h2><p>Record staff advances from the New Advance button.</p></div><DataTable columns={[{key:'employeeName',label:'Employee'},{key:'amount',label:'Amount',render:(r)=>money(r.amount)},{key:'paidAt',label:'Paid at',render:(r)=>dateOnly(r.paidAt)},{key:'status',label:'Status',render:(r)=><span className={`badge ${statusClass(r.status)}`}>{r.status}</span>}]} rows={advances} empty="No advances" /></section>}
+      {tab === 'leaves' && <section className="panel ops-register-panel"><div className="section-title-row"><h2>Leave Requests</h2><p>Request leave from the drawer and approve/reject from the register.</p></div><DataTable columns={leaveCols} rows={leaves} empty="No leave requests" /></section>}
+      {tab === 'payroll' && <section className="panel ops-register-panel"><div className="section-title-row"><h2><WalletCards size={19}/> Payroll Runs</h2><p>Generate payroll from a focused drawer. Pay/post actions remain in the table.</p></div><DataTable columns={payrollCols} rows={payrollRuns} empty="No payroll runs" /></section>}
+
+      <ModalDrawer open={drawer === 'employee'} onClose={() => setDrawer(null)} title="Add Employee" eyebrow="HR" description="Add staff details in a responsive drawer.">
+        <form className="form-grid compact" onSubmit={createEmployee}>
           <label>Employee No<input value={employeeForm.employeeNo} onChange={(e)=>setEmployeeForm({...employeeForm,employeeNo:e.target.value})} placeholder="auto if empty" /></label>
           <label>Name<input required value={employeeForm.name} onChange={(e)=>setEmployeeForm({...employeeForm,name:e.target.value})} /></label>
-          <div className="form-grid two"><label>Phone<input value={employeeForm.phone} onChange={(e)=>setEmployeeForm({...employeeForm,phone:e.target.value})} /></label><label>Email<input type="email" value={employeeForm.email} onChange={(e)=>setEmployeeForm({...employeeForm,email:e.target.value})} /></label></div>
-          <div className="form-grid two"><label>Department<input value={employeeForm.department} onChange={(e)=>setEmployeeForm({...employeeForm,department:e.target.value})} /></label><label>Designation<input value={employeeForm.designation} onChange={(e)=>setEmployeeForm({...employeeForm,designation:e.target.value})} /></label></div>
-          <div className="form-grid two"><label>Basic Salary<input type="number" value={employeeForm.basicSalary} onChange={(e)=>setEmployeeForm({...employeeForm,basicSalary:e.target.value})} /></label><label>OT Rate<input type="number" value={employeeForm.overtimeRate} onChange={(e)=>setEmployeeForm({...employeeForm,overtimeRate:e.target.value})} /></label></div>
+          <label>Phone<input value={employeeForm.phone} onChange={(e)=>setEmployeeForm({...employeeForm,phone:e.target.value})} /></label>
+          <label>Email<input type="email" value={employeeForm.email} onChange={(e)=>setEmployeeForm({...employeeForm,email:e.target.value})} /></label>
+          <label>Department<input value={employeeForm.department} onChange={(e)=>setEmployeeForm({...employeeForm,department:e.target.value})} /></label>
+          <label>Designation<input value={employeeForm.designation} onChange={(e)=>setEmployeeForm({...employeeForm,designation:e.target.value})} /></label>
+          <label>Basic Salary<input type="number" value={employeeForm.basicSalary} onChange={(e)=>setEmployeeForm({...employeeForm,basicSalary:e.target.value})} /></label>
+          <label>OT Rate<input type="number" value={employeeForm.overtimeRate} onChange={(e)=>setEmployeeForm({...employeeForm,overtimeRate:e.target.value})} /></label>
           <label>Join date<input type="date" value={employeeForm.joinDate} onChange={(e)=>setEmployeeForm({...employeeForm,joinDate:e.target.value})} /></label>
-          <button className="primary-btn" disabled={saving}>Save Employee</button>
-        </form></section>
-      </div>}
+          <button className="primary-btn span-two" disabled={saving}>Save Employee</button>
+        </form>
+      </ModalDrawer>
 
-      {tab === 'attendance' && <div className="hr-grid">
-        <section className="panel"><h2><CalendarCheck size={19}/> Attendance</h2><DataTable columns={attendanceCols} rows={attendance} empty="No attendance records" /></section>
-        <section className="panel hr-form-panel"><h2>Mark Attendance</h2><form className="form-grid compact" onSubmit={saveAttendance}>
+      <ModalDrawer open={drawer === 'attendance'} onClose={() => setDrawer(null)} title="Mark Attendance" eyebrow="Attendance" description="Record present, absent, half-day, leave or overtime details.">
+        <form className="form-grid compact" onSubmit={saveAttendance}>
           <label>Employee<select value={attendanceForm.employeeId} onChange={(e)=>setAttendanceForm({...attendanceForm,employeeId:e.target.value})} required><option value="">Select employee</option>{activeEmployees.map((e)=><option key={e.id} value={e.id}>{e.employeeNo} - {e.name}</option>)}</select></label>
           <label>Date<input type="date" value={attendanceForm.date} onChange={(e)=>setAttendanceForm({...attendanceForm,date:e.target.value})} required /></label>
           <label>Status<select value={attendanceForm.status} onChange={(e)=>setAttendanceForm({...attendanceForm,status:e.target.value})}>{['PRESENT','ABSENT','HALF_DAY','LEAVE','HOLIDAY'].map((s)=><option key={s}>{s}</option>)}</select></label>
-          <div className="form-grid two"><label>Check in<input type="datetime-local" value={attendanceForm.checkIn} onChange={(e)=>setAttendanceForm({...attendanceForm,checkIn:e.target.value})} /></label><label>Check out<input type="datetime-local" value={attendanceForm.checkOut} onChange={(e)=>setAttendanceForm({...attendanceForm,checkOut:e.target.value})} /></label></div>
-          <div className="form-grid two"><label>Regular hours<input type="number" step="0.01" value={attendanceForm.regularHours} onChange={(e)=>setAttendanceForm({...attendanceForm,regularHours:e.target.value})} placeholder="auto" /></label><label>OT hours<input type="number" step="0.01" value={attendanceForm.overtimeHours} onChange={(e)=>setAttendanceForm({...attendanceForm,overtimeHours:e.target.value})} /></label></div>
-          <button className="primary-btn" disabled={saving}>Save Attendance</button>
-        </form></section>
-      </div>}
+          <label>Check in<input type="datetime-local" value={attendanceForm.checkIn} onChange={(e)=>setAttendanceForm({...attendanceForm,checkIn:e.target.value})} /></label>
+          <label>Check out<input type="datetime-local" value={attendanceForm.checkOut} onChange={(e)=>setAttendanceForm({...attendanceForm,checkOut:e.target.value})} /></label>
+          <label>Regular hours<input type="number" step="0.01" value={attendanceForm.regularHours} onChange={(e)=>setAttendanceForm({...attendanceForm,regularHours:e.target.value})} placeholder="auto" /></label>
+          <label>OT hours<input type="number" step="0.01" value={attendanceForm.overtimeHours} onChange={(e)=>setAttendanceForm({...attendanceForm,overtimeHours:e.target.value})} /></label>
+          <button className="primary-btn span-two" disabled={saving}>Save Attendance</button>
+        </form>
+      </ModalDrawer>
 
-      {tab === 'advances' && <div className="hr-grid">
-        <section className="panel"><h2>Salary Advances</h2><DataTable columns={[{key:'employeeName',label:'Employee'},{key:'amount',label:'Amount',render:(r)=>money(r.amount)},{key:'paidAt',label:'Paid at',render:(r)=>dateOnly(r.paidAt)},{key:'status',label:'Status',render:(r)=><span className={`badge ${statusClass(r.status)}`}>{r.status}</span>}]} rows={advances} empty="No advances" /></section>
-        <section className="panel hr-form-panel"><h2>New Advance</h2><form className="form-grid compact" onSubmit={createAdvance}>
+      <ModalDrawer open={drawer === 'advance'} onClose={() => setDrawer(null)} title="New Salary Advance" eyebrow="Payroll" description="Record money paid early to an employee.">
+        <form className="form-grid compact" onSubmit={createAdvance}>
           <label>Employee<select value={advanceForm.employeeId} onChange={(e)=>setAdvanceForm({...advanceForm,employeeId:e.target.value})} required><option value="">Select employee</option>{activeEmployees.map((e)=><option key={e.id} value={e.id}>{e.name}</option>)}</select></label>
           <label>Amount<input type="number" value={advanceForm.amount} onChange={(e)=>setAdvanceForm({...advanceForm,amount:e.target.value})} required /></label>
           <label>Paid at<input type="date" value={advanceForm.paidAt} onChange={(e)=>setAdvanceForm({...advanceForm,paidAt:e.target.value})} /></label>
           <label>Notes<input value={advanceForm.notes} onChange={(e)=>setAdvanceForm({...advanceForm,notes:e.target.value})} /></label>
-          <button className="primary-btn" disabled={saving}>Save Advance</button>
-        </form></section>
-      </div>}
+          <button className="primary-btn span-two" disabled={saving}>Save Advance</button>
+        </form>
+      </ModalDrawer>
 
-      {tab === 'leaves' && <div className="hr-grid">
-        <section className="panel"><h2>Leave Requests</h2><DataTable columns={leaveCols} rows={leaves} empty="No leave requests" /></section>
-        <section className="panel hr-form-panel"><h2>Request Leave</h2><form className="form-grid compact" onSubmit={createLeave}>
+      <ModalDrawer open={drawer === 'leave'} onClose={() => setDrawer(null)} title="Request Leave" eyebrow="HR" description="Create a leave request and approve it from the table.">
+        <form className="form-grid compact" onSubmit={createLeave}>
           <label>Employee<select value={leaveForm.employeeId} onChange={(e)=>setLeaveForm({...leaveForm,employeeId:e.target.value})} required><option value="">Select employee</option>{activeEmployees.map((e)=><option key={e.id} value={e.id}>{e.name}</option>)}</select></label>
           <label>Type<input value={leaveForm.leaveType} onChange={(e)=>setLeaveForm({...leaveForm,leaveType:e.target.value})} /></label>
-          <div className="form-grid two"><label>Start<input type="date" value={leaveForm.startDate} onChange={(e)=>setLeaveForm({...leaveForm,startDate:e.target.value})} required /></label><label>End<input type="date" value={leaveForm.endDate} onChange={(e)=>setLeaveForm({...leaveForm,endDate:e.target.value})} required /></label></div>
+          <label>Start<input type="date" value={leaveForm.startDate} onChange={(e)=>setLeaveForm({...leaveForm,startDate:e.target.value})} required /></label>
+          <label>End<input type="date" value={leaveForm.endDate} onChange={(e)=>setLeaveForm({...leaveForm,endDate:e.target.value})} required /></label>
           <label>Days<input type="number" step="0.5" value={leaveForm.days} onChange={(e)=>setLeaveForm({...leaveForm,days:e.target.value})} /></label>
           <label>Reason<input value={leaveForm.reason} onChange={(e)=>setLeaveForm({...leaveForm,reason:e.target.value})} /></label>
-          <button className="primary-btn" disabled={saving}>Save Leave</button>
-        </form></section>
-      </div>}
+          <button className="primary-btn span-two" disabled={saving}>Save Leave</button>
+        </form>
+      </ModalDrawer>
 
-      {tab === 'payroll' && <div className="hr-grid">
-        <section className="panel"><h2><WalletCards size={19}/> Payroll Runs</h2><DataTable columns={payrollCols} rows={payrollRuns} empty="No payroll runs" /></section>
-        <section className="panel hr-form-panel"><h2>Generate Payroll</h2><form className="form-grid compact" onSubmit={generatePayroll}>
-          <div className="form-grid two"><label>Period start<input type="date" value={payrollForm.periodStart} onChange={(e)=>setPayrollForm({...payrollForm,periodStart:e.target.value})} required /></label><label>Period end<input type="date" value={payrollForm.periodEnd} onChange={(e)=>setPayrollForm({...payrollForm,periodEnd:e.target.value})} required /></label></div>
-          <div className="form-grid two"><label>Default allowances<input type="number" value={payrollForm.defaultAllowances} onChange={(e)=>setPayrollForm({...payrollForm,defaultAllowances:e.target.value})} /></label><label>Default deductions<input type="number" value={payrollForm.defaultDeductions} onChange={(e)=>setPayrollForm({...payrollForm,defaultDeductions:e.target.value})} /></label></div>
-          <label>Notes<input value={payrollForm.notes} onChange={(e)=>setPayrollForm({...payrollForm,notes:e.target.value})} /></label>
-          <button className="primary-btn" disabled={saving}>Generate Payroll</button>
-        </form></section>
-      </div>}
+      <ModalDrawer open={drawer === 'payroll'} onClose={() => setDrawer(null)} title="Generate Payroll" eyebrow="Payroll" description="Generate salary run from period dates and default allowance/deduction values.">
+        <form className="form-grid compact" onSubmit={generatePayroll}>
+          <label>Period start<input type="date" value={payrollForm.periodStart} onChange={(e)=>setPayrollForm({...payrollForm,periodStart:e.target.value})} required /></label>
+          <label>Period end<input type="date" value={payrollForm.periodEnd} onChange={(e)=>setPayrollForm({...payrollForm,periodEnd:e.target.value})} required /></label>
+          <label>Default allowances<input type="number" value={payrollForm.defaultAllowances} onChange={(e)=>setPayrollForm({...payrollForm,defaultAllowances:e.target.value})} /></label>
+          <label>Default deductions<input type="number" value={payrollForm.defaultDeductions} onChange={(e)=>setPayrollForm({...payrollForm,defaultDeductions:e.target.value})} /></label>
+          <label className="span-two">Notes<input value={payrollForm.notes} onChange={(e)=>setPayrollForm({...payrollForm,notes:e.target.value})} /></label>
+          <button className="primary-btn span-two" disabled={saving}>Generate Payroll</button>
+        </form>
+      </ModalDrawer>
     </div>
   );
 }

@@ -3,6 +3,8 @@ import { CalendarPlus, FileText, RefreshCw, Wrench } from 'lucide-react';
 import { api } from '../api/http.js';
 import DataTable from '../components/ui/DataTable.jsx';
 import StatCard from '../components/ui/StatCard.jsx';
+import ModalDrawer from '../components/ui/ModalDrawer.jsx';
+import '../styles/stage9-operations-polish.css';
 
 const emptyService = { code: '', category: 'General', name: '', unitPrice: 0, costPrice: 0, estimatedMinutes: 0, description: '' };
 const emptyAppointment = { customerId: '', title: '', appointmentAt: '', endAt: '', priority: 'NORMAL', status: 'PENDING', location: '', notes: '' };
@@ -41,6 +43,7 @@ export default function ServiceJobs() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [saving, setSaving] = useState(false);
+  const [drawer, setDrawer] = useState(null);
 
   async function load() {
     setError('');
@@ -118,6 +121,7 @@ export default function ServiceJobs() {
       await api.post('/services/catalog', { ...serviceForm, unitPrice: Number(serviceForm.unitPrice || 0), costPrice: Number(serviceForm.costPrice || 0), estimatedMinutes: Number(serviceForm.estimatedMinutes || 0) });
       setServiceForm(emptyService);
       flash('Service item saved');
+      setDrawer(null);
       await load();
     } catch (e) { setError(e.response?.data?.message || 'Failed to save service item'); }
     finally { setSaving(false); }
@@ -134,6 +138,7 @@ export default function ServiceJobs() {
       });
       setAppointmentForm(emptyAppointment);
       flash('Appointment scheduled');
+      setDrawer(null);
       await load();
     } catch (e) { setError(e.response?.data?.message || 'Failed to schedule appointment'); }
     finally { setSaving(false); }
@@ -154,6 +159,7 @@ export default function ServiceJobs() {
       });
       setJobForm({ ...emptyJob, warehouseId: warehouses[0]?.id || '' });
       flash('Service job / work order created');
+      setDrawer(null);
       await load();
     } catch (e) { setError(e.response?.data?.message || 'Failed to create service job'); }
     finally { setSaving(false); }
@@ -224,48 +230,67 @@ export default function ServiceJobs() {
     { key: 'isActive', label: 'Status', render: (r) => <span className={`badge ${r.isActive ? 'paid' : 'cancelled'}`}>{r.isActive ? 'Active' : 'Inactive'}</span> }
   ];
 
-  return <div className="page service-jobs-page">
-    <div className="page-head">
-      <div><h1>Service Jobs / Appointments</h1><p>Manage appointments, service catalog, work orders, repair jobs, materials, technician workflow and job-to-invoice conversion.</p></div>
-      <div className="head-actions"><button className="secondary-btn" onClick={generateAlerts}><CalendarPlus size={18} /> Generate Alerts</button><button className="secondary-btn" onClick={load}><RefreshCw size={18} /> Refresh</button></div>
-    </div>
-
-    {error && <div className="error-box">{error}</div>}
-    {success && <div className="success-box">{success}</div>}
-
-    <div className="stat-grid service-stat-grid">
-      <StatCard title="Open Jobs" value={summary?.openJobs || 0} subtitle="Waiting / scheduled" tone="blue" />
-      <StatCard title="In Progress" value={summary?.inProgress || 0} subtitle="Active work orders" tone="orange" />
-      <StatCard title="Today Appointments" value={summary?.todaysAppointments || 0} subtitle={`${summary?.pendingAppointments || 0} pending`} tone="purple" />
-      <StatCard title="Service Profit" value={money(summary?.profit)} subtitle={`Revenue ${money(summary?.revenue)}`} tone="green" />
-    </div>
-
-    <div className="tab-actions">
-      {['jobs', 'appointments', 'catalog'].map((item) => <button key={item} className={`tab-btn ${tab === item ? 'active' : ''}`} onClick={() => setTab(item)}>{item === 'jobs' ? 'Work Orders' : item === 'appointments' ? 'Appointments' : 'Service Catalog'}</button>)}
-    </div>
-
-    {tab === 'jobs' && <div className="service-grid">
-      <div className="panel">
-        <div className="section-title-row"><h2><Wrench size={20} /> Work Orders</h2><div className="filters-row compact-service-filter"><input placeholder="Search job/customer" value={filters.q} onChange={(e) => setFilters({ ...filters, q: e.target.value })} /><select value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}><option value="">All status</option>{['OPEN','SCHEDULED','IN_PROGRESS','WAITING_PARTS','COMPLETED','INVOICED','CANCELLED'].map((s)=><option key={s} value={s}>{s}</option>)}</select><button className="secondary-btn" onClick={load}>Apply</button></div></div>
-        <DataTable columns={jobColumns} rows={jobs} empty="No service jobs yet" />
+  return (
+    <div className="page service-jobs-page stage8-page">
+      <div className="page-head">
+        <div>
+          <h1>Service Jobs / Appointments</h1>
+          <p>Manage appointments, service catalog, work orders, repair jobs, materials, technician workflow and job-to-invoice conversion.</p>
+        </div>
+        <div className="head-actions">
+          <button className="secondary-btn" onClick={generateAlerts}><CalendarPlus size={18} /> Generate Alerts</button>
+          <button className="secondary-btn" onClick={load}><RefreshCw size={18} /> Refresh</button>
+          <button className="primary-btn" onClick={() => setDrawer('job')}>+ Create Work Order</button>
+        </div>
       </div>
 
-      <div className="panel service-form-panel">
-        <h2>Create Work Order</h2>
+      {error && <div className="error-box">{error}</div>}
+      {success && <div className="success-box">{success}</div>}
+
+      <div className="stat-grid service-stat-grid">
+        <StatCard title="Open Jobs" value={summary?.openJobs || 0} subtitle="Waiting / scheduled" tone="blue" />
+        <StatCard title="In Progress" value={summary?.inProgress || 0} subtitle="Active work orders" tone="orange" />
+        <StatCard title="Today Appointments" value={summary?.todaysAppointments || 0} subtitle={`${summary?.pendingAppointments || 0} pending`} tone="purple" />
+        <StatCard title="Service Profit" value={money(summary?.profit)} subtitle={`Revenue ${money(summary?.revenue)}`} tone="green" />
+      </div>
+
+      <div className="tab-actions">
+        {['jobs', 'appointments', 'catalog'].map((item) => <button key={item} className={`tab-btn ${tab === item ? 'active' : ''}`} onClick={() => setTab(item)}>{item === 'jobs' ? 'Work Orders' : item === 'appointments' ? 'Appointments' : 'Service Catalog'}</button>)}
+      </div>
+
+      {tab === 'jobs' && <section className="panel ops-register-panel">
+        <div className="section-title-row">
+          <div><h2><Wrench size={20} /> Work Orders</h2><p>Use the button above to create a work order. The register stays wide, readable and paginated.</p></div>
+          <div className="filters-row compact-service-filter">
+            <input placeholder="Search job/customer" value={filters.q} onChange={(e) => setFilters({ ...filters, q: e.target.value })} />
+            <select value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}><option value="">All status</option>{['OPEN','SCHEDULED','IN_PROGRESS','WAITING_PARTS','COMPLETED','INVOICED','CANCELLED'].map((s)=><option key={s} value={s}>{s}</option>)}</select>
+            <button className="secondary-btn" onClick={load}>Apply</button>
+          </div>
+        </div>
+        <DataTable columns={jobColumns} rows={jobs} empty="No service jobs yet" />
+      </section>}
+
+      {tab === 'appointments' && <section className="panel ops-register-panel">
+        <div className="section-title-row"><div><h2>Appointment Calendar List</h2><p>Schedule appointments from the button below, then convert appointments into jobs when needed.</p></div><button className="primary-btn" onClick={() => setDrawer('appointment')}>+ Schedule Appointment</button></div>
+        <DataTable columns={appointmentColumns} rows={appointments} empty="No appointments yet" />
+      </section>}
+
+      {tab === 'catalog' && <section className="panel ops-register-panel">
+        <div className="section-title-row"><div><h2>Service Catalog</h2><p>Manage reusable service charges and technician work items without shrinking the register.</p></div><button className="primary-btn" onClick={() => setDrawer('service')}>+ Add Service Item</button></div>
+        <DataTable columns={serviceColumns} rows={services} empty="No service items yet" />
+      </section>}
+
+      <ModalDrawer open={drawer === 'job'} onClose={() => setDrawer(null)} title="Create Work Order" eyebrow="Service workflow" description="Create the job in a focused drawer. The work-order table stays clean in the background.">
         <form className="form-grid compact" onSubmit={createJob}>
           <label>Customer<select value={jobForm.customerId} onChange={(e)=>setJobForm({...jobForm,customerId:e.target.value})}><option value="">Walk-in / select customer</option>{customers.map((c)=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
           <label>Appointment<select value={jobForm.appointmentId} onChange={(e)=>setJobForm({...jobForm,appointmentId:e.target.value})}><option value="">No linked appointment</option>{appointmentOptions.map((a)=><option key={a.id} value={a.id}>{a.appointmentNo} - {a.title}</option>)}</select></label>
           <label>Warehouse<select value={jobForm.warehouseId} onChange={(e)=>setJobForm({...jobForm,warehouseId:e.target.value})}><option value="">Default warehouse</option>{warehouses.map((w)=><option key={w.id} value={w.id}>{w.name}</option>)}</select></label>
           <label>Title<input required value={jobForm.title} onChange={(e)=>setJobForm({...jobForm,title:e.target.value})} placeholder="Repair laptop / install CCTV" /></label>
-          <div className="form-grid two">
-            <label>Priority<select value={jobForm.priority} onChange={(e)=>setJobForm({...jobForm,priority:e.target.value})}>{['LOW','NORMAL','HIGH','URGENT'].map((s)=><option key={s} value={s}>{s}</option>)}</select></label>
-            <label>Status<select value={jobForm.status} onChange={(e)=>setJobForm({...jobForm,status:e.target.value})}>{['OPEN','SCHEDULED','IN_PROGRESS'].map((s)=><option key={s} value={s}>{s}</option>)}</select></label>
-          </div>
-          <div className="form-grid two">
-            <label>Scheduled<input type="datetime-local" value={jobForm.scheduledAt} onChange={(e)=>setJobForm({...jobForm,scheduledAt:e.target.value})} /></label>
-            <label>Due<input type="datetime-local" value={jobForm.dueAt} onChange={(e)=>setJobForm({...jobForm,dueAt:e.target.value})} /></label>
-          </div>
-          <label>Description<input value={jobForm.description} onChange={(e)=>setJobForm({...jobForm,description:e.target.value})} placeholder="Customer complaint / work details" /></label>
+          <label>Priority<select value={jobForm.priority} onChange={(e)=>setJobForm({...jobForm,priority:e.target.value})}>{['LOW','NORMAL','HIGH','URGENT'].map((s)=><option key={s} value={s}>{s}</option>)}</select></label>
+          <label>Status<select value={jobForm.status} onChange={(e)=>setJobForm({...jobForm,status:e.target.value})}>{['OPEN','SCHEDULED','IN_PROGRESS'].map((s)=><option key={s} value={s}>{s}</option>)}</select></label>
+          <label>Scheduled<input type="datetime-local" value={jobForm.scheduledAt} onChange={(e)=>setJobForm({...jobForm,scheduledAt:e.target.value})} /></label>
+          <label>Due<input type="datetime-local" value={jobForm.dueAt} onChange={(e)=>setJobForm({...jobForm,dueAt:e.target.value})} /></label>
+          <label className="span-two">Description<input value={jobForm.description} onChange={(e)=>setJobForm({...jobForm,description:e.target.value})} placeholder="Customer complaint / work details" /></label>
 
           <div className="service-lines">
             <div className="section-title-row small"><strong>Job Lines</strong><span>{money(jobTotal)}</span></div>
@@ -279,33 +304,36 @@ export default function ServiceJobs() {
             </div>)}
             <div className="actions-row"><button type="button" className="mini-action" onClick={()=>addLine('SERVICE')}>+ Service</button><button type="button" className="mini-action" onClick={()=>addLine('MATERIAL')}>+ Material</button><button type="button" className="mini-action" onClick={()=>addLine('CUSTOM')}>+ Custom</button></div>
           </div>
-          <button className="primary-btn" disabled={saving}>Create Work Order</button>
+          <button className="primary-btn span-two" disabled={saving}>Create Work Order</button>
         </form>
-      </div>
-    </div>}
+      </ModalDrawer>
 
-    {tab === 'appointments' && <div className="service-grid">
-      <div className="panel"><h2>Appointment Calendar List</h2><DataTable columns={appointmentColumns} rows={appointments} empty="No appointments yet" /></div>
-      <div className="panel service-form-panel"><h2>Schedule Appointment</h2><form className="form-grid compact" onSubmit={createAppointment}>
-        <label>Customer<select value={appointmentForm.customerId} onChange={(e)=>setAppointmentForm({...appointmentForm,customerId:e.target.value})}><option value="">Walk-in / select customer</option>{customers.map((c)=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
-        <label>Title<input required value={appointmentForm.title} onChange={(e)=>setAppointmentForm({...appointmentForm,title:e.target.value})} placeholder="Site visit / repair booking" /></label>
-        <div className="form-grid two"><label>Start<input required type="datetime-local" value={appointmentForm.appointmentAt} onChange={(e)=>setAppointmentForm({...appointmentForm,appointmentAt:e.target.value})} /></label><label>End<input type="datetime-local" value={appointmentForm.endAt} onChange={(e)=>setAppointmentForm({...appointmentForm,endAt:e.target.value})} /></label></div>
-        <div className="form-grid two"><label>Priority<select value={appointmentForm.priority} onChange={(e)=>setAppointmentForm({...appointmentForm,priority:e.target.value})}>{['LOW','NORMAL','HIGH','URGENT'].map((s)=><option key={s} value={s}>{s}</option>)}</select></label><label>Status<select value={appointmentForm.status} onChange={(e)=>setAppointmentForm({...appointmentForm,status:e.target.value})}>{['PENDING','CONFIRMED'].map((s)=><option key={s} value={s}>{s}</option>)}</select></label></div>
-        <label>Location<input value={appointmentForm.location} onChange={(e)=>setAppointmentForm({...appointmentForm,location:e.target.value})} /></label>
-        <label>Notes<input value={appointmentForm.notes} onChange={(e)=>setAppointmentForm({...appointmentForm,notes:e.target.value})} /></label>
-        <button className="primary-btn" disabled={saving}><CalendarPlus size={18} /> Schedule Appointment</button>
-      </form></div>
-    </div>}
+      <ModalDrawer open={drawer === 'appointment'} onClose={() => setDrawer(null)} title="Schedule Appointment" eyebrow="Calendar" description="Book a customer appointment without shrinking the appointment list.">
+        <form className="form-grid compact" onSubmit={createAppointment}>
+          <label>Customer<select value={appointmentForm.customerId} onChange={(e)=>setAppointmentForm({...appointmentForm,customerId:e.target.value})}><option value="">Walk-in / select customer</option>{customers.map((c)=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
+          <label>Title<input required value={appointmentForm.title} onChange={(e)=>setAppointmentForm({...appointmentForm,title:e.target.value})} placeholder="Site visit / repair booking" /></label>
+          <label>Start<input required type="datetime-local" value={appointmentForm.appointmentAt} onChange={(e)=>setAppointmentForm({...appointmentForm,appointmentAt:e.target.value})} /></label>
+          <label>End<input type="datetime-local" value={appointmentForm.endAt} onChange={(e)=>setAppointmentForm({...appointmentForm,endAt:e.target.value})} /></label>
+          <label>Priority<select value={appointmentForm.priority} onChange={(e)=>setAppointmentForm({...appointmentForm,priority:e.target.value})}>{['LOW','NORMAL','HIGH','URGENT'].map((s)=><option key={s} value={s}>{s}</option>)}</select></label>
+          <label>Status<select value={appointmentForm.status} onChange={(e)=>setAppointmentForm({...appointmentForm,status:e.target.value})}>{['PENDING','CONFIRMED'].map((s)=><option key={s} value={s}>{s}</option>)}</select></label>
+          <label>Location<input value={appointmentForm.location} onChange={(e)=>setAppointmentForm({...appointmentForm,location:e.target.value})} /></label>
+          <label>Notes<input value={appointmentForm.notes} onChange={(e)=>setAppointmentForm({...appointmentForm,notes:e.target.value})} /></label>
+          <button className="primary-btn span-two" disabled={saving}><CalendarPlus size={18} /> Schedule Appointment</button>
+        </form>
+      </ModalDrawer>
 
-    {tab === 'catalog' && <div className="service-grid">
-      <div className="panel"><h2>Service Catalog</h2><DataTable columns={serviceColumns} rows={services} empty="No service items yet" /></div>
-      <div className="panel service-form-panel"><h2>Add Service Item</h2><form className="form-grid compact" onSubmit={createService}>
-        <div className="form-grid two"><label>Code<input value={serviceForm.code} onChange={(e)=>setServiceForm({...serviceForm,code:e.target.value})} placeholder="SVC-001" /></label><label>Category<input value={serviceForm.category} onChange={(e)=>setServiceForm({...serviceForm,category:e.target.value})} /></label></div>
-        <label>Name<input required value={serviceForm.name} onChange={(e)=>setServiceForm({...serviceForm,name:e.target.value})} placeholder="Installation / repair / editing work" /></label>
-        <div className="form-grid three"><label>Price<input type="number" min="0" value={serviceForm.unitPrice} onChange={(e)=>setServiceForm({...serviceForm,unitPrice:e.target.value})} /></label><label>Cost<input type="number" min="0" value={serviceForm.costPrice} onChange={(e)=>setServiceForm({...serviceForm,costPrice:e.target.value})} /></label><label>Minutes<input type="number" min="0" value={serviceForm.estimatedMinutes} onChange={(e)=>setServiceForm({...serviceForm,estimatedMinutes:e.target.value})} /></label></div>
-        <label>Description<input value={serviceForm.description} onChange={(e)=>setServiceForm({...serviceForm,description:e.target.value})} /></label>
-        <button className="primary-btn" disabled={saving}><FileText size={18} /> Save Service</button>
-      </form></div>
-    </div>}
-  </div>;
+      <ModalDrawer open={drawer === 'service'} onClose={() => setDrawer(null)} title="Add Service Item" eyebrow="Service catalog" description="Create reusable service charges for future work orders.">
+        <form className="form-grid compact" onSubmit={createService}>
+          <label>Code<input value={serviceForm.code} onChange={(e)=>setServiceForm({...serviceForm,code:e.target.value})} placeholder="SRV-001" /></label>
+          <label>Category<input value={serviceForm.category} onChange={(e)=>setServiceForm({...serviceForm,category:e.target.value})} /></label>
+          <label>Name<input required value={serviceForm.name} onChange={(e)=>setServiceForm({...serviceForm,name:e.target.value})} /></label>
+          <label>Estimated minutes<input type="number" value={serviceForm.estimatedMinutes} onChange={(e)=>setServiceForm({...serviceForm,estimatedMinutes:e.target.value})} /></label>
+          <label>Cost price<input type="number" value={serviceForm.costPrice} onChange={(e)=>setServiceForm({...serviceForm,costPrice:e.target.value})} /></label>
+          <label>Unit price<input type="number" value={serviceForm.unitPrice} onChange={(e)=>setServiceForm({...serviceForm,unitPrice:e.target.value})} /></label>
+          <label className="span-two">Description<textarea value={serviceForm.description} onChange={(e)=>setServiceForm({...serviceForm,description:e.target.value})} /></label>
+          <button className="primary-btn span-two" disabled={saving}>Save Service Item</button>
+        </form>
+      </ModalDrawer>
+    </div>
+  );
 }

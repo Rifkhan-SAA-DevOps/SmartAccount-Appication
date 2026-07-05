@@ -1,0 +1,196 @@
+/* --------------------------------------------------------------------------
+   SmartLedger Stage 18
+   Fix 1: desktop sidebar must NOT scroll together with right-side content.
+   Fix 2: only the sidebar menu list scrolls when the user scrolls inside it.
+   Fix 3: Distributor Reports chart must be above the table, not side-by-side.
+-------------------------------------------------------------------------- */
+
+@media (min-width: 901px) {
+  html,
+  body,
+  #root {
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .smart-app-shell,
+  .app-shell {
+    height: 100vh !important;
+    min-height: 0 !important;
+    max-height: 100vh !important;
+    display: flex !important;
+    overflow: hidden !important;
+  }
+
+  .smart-sidebar,
+  .sidebar {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    max-height: 100vh !important;
+    flex: 0 0 var(--smart-sidebar-width) !important;
+    align-self: stretch !important;
+    overflow: hidden !important;
+    z-index: 90 !important;
+  }
+
+  .smart-sidebar.is-collapsed,
+  .sidebar.is-collapsed {
+    flex-basis: var(--smart-sidebar-collapsed-width) !important;
+  }
+
+  .smart-brand,
+  .brand.smart-brand,
+  .sidebar-footer-card {
+    flex: 0 0 auto !important;
+  }
+
+  .sidebar-main-nav {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  .sidebar-main-nav::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  .smart-main-shell,
+  .main-shell {
+    height: 100vh !important;
+    min-height: 0 !important;
+    max-height: 100vh !important;
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+    scroll-behavior: smooth;
+  }
+
+  .smart-topbar,
+  .topbar.smart-topbar {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 55 !important;
+  }
+
+  .smart-page-wrap,
+  .page-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+  }
+}
+
+@media (max-width: 900px) {
+  html,
+  body,
+  #root {
+    min-height: 100% !important;
+    overflow-x: hidden !important;
+  }
+
+  .smart-app-shell,
+  .app-shell {
+    min-height: 100vh !important;
+    overflow-x: hidden !important;
+  }
+
+  .smart-main-shell,
+  .main-shell {
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+  }
+
+  .smart-sidebar,
+  .sidebar,
+  .smart-sidebar.is-collapsed,
+  .sidebar.is-collapsed {
+    overflow: hidden !important;
+  }
+
+  .sidebar-main-nav {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  .sidebar-main-nav::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+  }
+}
+
+/* Distributor Reports: graph first, table below. No side-by-side report body. */
+.dist-pro-chart-table-grid,
+.dist-chart-table-grid,
+.dist-report-chart-table-grid,
+.distributor-report-chart-table-grid,
+.route-sales-report-grid {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 18px !important;
+  align-items: stretch !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+.dist-pro-chart-card,
+.dist-pro-table-card,
+.dist-chart-card,
+.dist-table-card,
+.distributor-chart-card,
+.distributor-table-card {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+.dist-pro-chart-wrap,
+.dist-chart-wrap,
+.distributor-chart-wrap {
+  width: 100% !important;
+  min-width: 0 !important;
+  height: clamp(260px, 34vh, 390px) !important;
+}
+
+.dist-pro-table-wrap,
+.dist-table-wrap,
+.distributor-table-wrap {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch;
+}
+
+.dist-pro-report-panel,
+.dist-report-panel,
+.distributor-report-panel {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+@media (max-width: 700px) {
+  .dist-pro-chart-wrap,
+  .dist-chart-wrap,
+  .distributor-chart-wrap {
+    height: 240px !important;
+  }
+}

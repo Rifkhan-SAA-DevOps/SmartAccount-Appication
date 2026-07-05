@@ -1,9 +1,12 @@
 import { X } from 'lucide-react';
 import { useEffect, useId } from 'react';
+import { createPortal } from 'react-dom';
+import '../../styles/modal-viewport-responsive-fix.css';
 
 export default function ModalDrawer({
   open,
   title,
+  eyebrow,
   description,
   onClose,
   children,
@@ -33,18 +36,19 @@ export default function ModalDrawer({
 
   if (!open) return null;
 
-  return (
+  const modalMarkup = (
     <div
-      className={`modal-drawer-layer ${mode}`}
+      className={`modal-drawer-layer ${mode} modal-drawer-size-${size}`}
       role="dialog"
       aria-modal="true"
       aria-labelledby={titleId}
       aria-describedby={description ? descId : undefined}
     >
       <button type="button" className="modal-drawer-backdrop" onClick={onClose} aria-label="Close modal" />
-      <section className={`modal-drawer-panel ${size} ${className}`}>
+      <section className={`modal-drawer-panel ${size} ${className}`.trim()}>
         <div className="modal-drawer-head">
           <div className="modal-drawer-title-block">
+            {eyebrow && <span className="modal-drawer-eyebrow">{eyebrow}</span>}
             <h2 id={titleId}>{title}</h2>
             {description && <p id={descId}>{description}</p>}
           </div>
@@ -57,4 +61,6 @@ export default function ModalDrawer({
       </section>
     </div>
   );
+
+  return createPortal(modalMarkup, document.body);
 }

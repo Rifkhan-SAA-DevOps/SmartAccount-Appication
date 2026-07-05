@@ -1,0 +1,390 @@
+/* Stage 8: Operations UI polish - responsive layouts, modals, tables and vertical boards */
+* { box-sizing: border-box; }
+.page { min-width: 0; max-width: 100%; overflow-x: clip; }
+.page-head,
+.page-header,
+.section-title-row,
+.head-actions,
+.actions-row,
+.filters-row,
+.tab-actions {
+  min-width: 0;
+}
+.page-head,
+.page-header,
+.section-title-row {
+  gap: 16px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.page-head > div,
+.page-header > div,
+.section-title-row > div { min-width: 0; }
+.page-head h1,
+.page-header h1,
+.section-title-row h2 { overflow-wrap: anywhere; }
+.head-actions,
+.actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+.head-actions > button,
+.actions-row > button,
+.actions-row > select { flex: 0 1 auto; min-width: 0; }
+
+/* List-first page pattern */
+.service-grid,
+.hr-grid,
+.delivery-grid,
+.project-create-grid,
+.two-col-page,
+.document-layout,
+.campaign-grid,
+.installment-grid,
+.approvals-grid,
+.warranty-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 18px;
+  align-items: start;
+}
+.service-form-panel,
+.hr-form-panel,
+.delivery-form-panel,
+.upload-panel,
+.installment-form-panel,
+.approval-help-panel {
+  min-width: 0;
+  max-width: 100%;
+}
+.panel,
+.card,
+.stat-card {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Table/list safety */
+.table-wrap,
+.data-table-wrap,
+.responsive-table,
+.panel:has(table) {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+table { width: 100%; min-width: 720px; border-collapse: collapse; }
+.data-table td,
+.data-table th,
+td,
+th { overflow-wrap: anywhere; vertical-align: top; }
+.compact-actions,
+.actions-row.project-actions { max-width: 100%; }
+.actions-row.project-actions select { min-width: 150px; max-width: 100%; }
+
+/* Forms inside drawers/modals */
+.sl-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(15, 23, 42, 0.42);
+  display: flex;
+  justify-content: flex-end;
+  align-items: stretch;
+  padding: 16px;
+}
+.sl-drawer-panel,
+.sl-modal-panel {
+  width: min(760px, 100%);
+  max-width: 100%;
+  max-height: calc(100vh - 32px);
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  box-shadow: 0 30px 80px rgba(15, 23, 42, 0.28);
+  border-radius: 28px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.sl-modal-panel {
+  margin: auto;
+  width: min(900px, 100%);
+}
+.sl-dialog-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 22px 24px 16px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.95);
+  background: linear-gradient(135deg, rgba(248, 250, 252, 0.98), rgba(241, 245, 249, 0.82));
+}
+.sl-dialog-title-wrap { min-width: 0; }
+.sl-dialog-eyebrow {
+  display: inline-flex;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: #7c3aed;
+}
+.sl-dialog-head h2 { margin: 0; color: #0f172a; font-size: clamp(20px, 3vw, 28px); line-height: 1.15; }
+.sl-dialog-head p { margin: 7px 0 0; color: #64748b; line-height: 1.5; max-width: 62ch; }
+.sl-dialog-close {
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  border: 1px solid rgba(148, 163, 184, 0.32);
+  background: #fff;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+.sl-dialog-body {
+  padding: 20px 24px 24px;
+  overflow: auto;
+  min-height: 0;
+}
+.sl-dialog-footer {
+  padding: 14px 24px;
+  border-top: 1px solid rgba(226, 232, 240, 0.95);
+  background: rgba(248, 250, 252, 0.88);
+}
+.sl-dialog-body .form-grid,
+.sl-dialog-body form.form-grid,
+.sl-dialog-body .form-grid.two,
+.sl-dialog-body .form-grid.four,
+.sl-dialog-body .form-grid.compact {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  align-items: start;
+}
+.sl-dialog-body label,
+.form-grid label {
+  min-width: 0;
+}
+.sl-dialog-body input,
+.sl-dialog-body select,
+.sl-dialog-body textarea,
+.form-grid input,
+.form-grid select,
+.form-grid textarea,
+.filters-row input,
+.filters-row select {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+.sl-dialog-body textarea { min-height: 96px; resize: vertical; }
+.sl-dialog-body .span-two,
+.sl-dialog-body h2,
+.sl-dialog-body h3,
+.sl-dialog-body .service-lines,
+.sl-dialog-body .delivery-lines,
+.sl-dialog-body .quick-invoice-box,
+.sl-dialog-body .section-title-row,
+.sl-dialog-body .actions-row,
+.sl-dialog-body .check-label {
+  grid-column: 1 / -1;
+}
+.sl-dialog-body .primary-btn,
+.sl-dialog-body .secondary-btn,
+.sl-dialog-body .ghost-btn {
+  justify-content: center;
+  min-height: 42px;
+}
+
+/* Dynamic item lines */
+.service-line-row,
+.delivery-line-row {
+  display: grid;
+  grid-template-columns: minmax(110px, 0.9fr) minmax(140px, 1.2fr) minmax(150px, 1.4fr) minmax(72px, .45fr) minmax(90px, .55fr) auto;
+  gap: 10px;
+  align-items: end;
+  min-width: 0;
+}
+.delivery-line-row { grid-template-columns: minmax(170px, 1fr) minmax(190px, 1.4fr) minmax(84px, .45fr) auto; }
+.service-lines,
+.delivery-lines {
+  border: 1px solid rgba(226, 232, 240, .95);
+  border-radius: 18px;
+  padding: 14px;
+  background: #f8fafc;
+  min-width: 0;
+}
+.quick-invoice-box {
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #f8fafc, #eef2ff);
+  border: 1px solid rgba(148, 163, 184, 0.24);
+}
+
+/* Projects: vertical creative task board */
+.task-board.stage8-vertical-board,
+.task-board {
+  display: grid;
+  grid-template-columns: 1fr !important;
+  gap: 14px;
+}
+.task-column {
+  min-width: 0 !important;
+  width: 100%;
+  border-radius: 22px;
+  padding: 16px;
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+  border: 1px solid rgba(226, 232, 240, .95);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, .06);
+}
+.task-column-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 12px;
+  position: sticky;
+  top: 0;
+  background: inherit;
+  z-index: 1;
+}
+.task-column-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+.task-card { min-width: 0; }
+
+/* CRM vertical pipeline */
+.crm-pipeline-vertical {
+  display: grid;
+  gap: 12px;
+}
+.crm-stage-row {
+  display: grid;
+  grid-template-columns: minmax(180px, 240px) minmax(0, 1fr) minmax(110px, 140px);
+  gap: 14px;
+  align-items: stretch;
+  padding: 14px;
+  border: 1px solid rgba(226,232,240,.95);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 12px 30px rgba(15,23,42,.05);
+  min-width: 0;
+}
+.crm-stage-summary { min-width: 0; }
+.crm-stage-summary strong { display: block; color: #0f172a; font-size: 15px; }
+.crm-stage-summary span { color: #64748b; font-size: 13px; }
+.crm-stage-leads {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 10px;
+  min-width: 0;
+}
+.crm-mini-lead {
+  text-align: left;
+  border: 1px solid rgba(226,232,240,.95);
+  background: linear-gradient(135deg, #fff, #f8fafc);
+  border-radius: 16px;
+  padding: 12px;
+  cursor: pointer;
+  min-width: 0;
+}
+.crm-mini-lead strong,
+.crm-mini-lead span,
+.crm-mini-lead small { display: block; overflow-wrap: anywhere; }
+.crm-stage-value { text-align: right; color: #334155; font-weight: 800; }
+.crm-detail-grid,
+.warranty-modern-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.lead-detail-card,
+.warranty-info-card {
+  min-width: 0;
+  border: 1px solid rgba(226,232,240,.95);
+  border-radius: 18px;
+  padding: 14px;
+  background: #f8fafc;
+}
+
+/* Delivery and operational registers */
+.delivery-register-panel,
+.ops-register-panel {
+  width: 100%;
+  min-width: 0;
+}
+.delivery-grid .panel:first-child,
+.service-grid .panel:first-child,
+.hr-grid .panel:first-child { width: 100%; }
+
+/* Global shrink fixes for mentioned pages */
+.campaigns-page .campaign-grid,
+.installments-page .installment-grid,
+.documents-page .documents-grid,
+.approvals-page .approvals-grid,
+.audit-page .audit-two-col,
+.security-page .security-grid,
+.warranty-page .warranty-grid {
+  grid-template-columns: minmax(0, 1fr) !important;
+}
+.campaigns-page .panel,
+.installments-page .panel,
+.documents-page .panel,
+.approvals-page .panel,
+.audit-page .panel,
+.security-page .panel,
+.warranty-page .panel {
+  min-width: 0;
+  width: 100%;
+}
+
+@media (max-width: 1100px) {
+  .sl-dialog-body .form-grid,
+  .sl-dialog-body form.form-grid,
+  .sl-dialog-body .form-grid.two,
+  .sl-dialog-body .form-grid.four,
+  .sl-dialog-body .form-grid.compact {
+    grid-template-columns: 1fr;
+  }
+  .service-line-row,
+  .delivery-line-row {
+    grid-template-columns: 1fr 1fr;
+  }
+  .crm-stage-row {
+    grid-template-columns: 1fr;
+  }
+  .crm-stage-value { text-align: left; }
+}
+@media (max-width: 760px) {
+  .sl-overlay { padding: 0; align-items: stretch; }
+  .sl-drawer-panel,
+  .sl-modal-panel {
+    width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+  .sl-dialog-head { padding: 18px 16px 14px; }
+  .sl-dialog-body { padding: 16px; }
+  .service-line-row,
+  .delivery-line-row,
+  .task-column-list,
+  .crm-stage-leads {
+    grid-template-columns: 1fr;
+  }
+  .head-actions > button,
+  .filters-row > *,
+  .tab-actions > button,
+  .sl-dialog-body .primary-btn,
+  .sl-dialog-body .secondary-btn {
+    width: 100%;
+  }
+  table { min-width: 620px; }
+}

@@ -1,0 +1,450 @@
+/* SmartLedger Stage 12 — Inventory/Admin responsive polish
+   Purpose: stop shrinking/overlap on remaining stock, finance report and admin pages. */
+
+/* Safe layout foundation for remaining pages */
+.page,
+.page > *,
+.panel,
+.stat-card,
+.table-card,
+.ledger-layout,
+.two-col-page,
+.transfer-layout,
+.batch-grid,
+.bank-recon-grid,
+.currency-grid,
+.report-grid,
+.export-grid,
+.plan-grid,
+.usage-grid,
+.ledger-summary-grid,
+.saas-section,
+.current-plan-panel {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.page {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.page-head,
+.section-head,
+.section-title-row,
+.ledger-toolbar,
+.head-actions,
+.statement-actions,
+.statement-share-actions,
+.actions-row,
+.tab-actions,
+.compact-actions {
+  min-width: 0;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.page-head > *,
+.section-head > *,
+.section-title-row > *,
+.ledger-toolbar > *,
+.head-actions > * {
+  min-width: 0;
+}
+
+.page-head h1,
+.page-head p,
+.section-head h2,
+.section-head p,
+.section-title-row h2,
+.section-title-row p {
+  overflow-wrap: anywhere;
+}
+
+/* KPI cards should never push into each other */
+.stat-grid,
+.report-stat-grid,
+.statement-stat-grid,
+.batch-stat-grid,
+.transfer-stat-grid,
+.bank-recon-stat-grid,
+.currency-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+  width: 100%;
+}
+
+.stat-card strong,
+.usage-card strong,
+.focus-balance strong,
+.conversion-result strong {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+/* Main split layouts — keep useful two columns on large screens, stack earlier on laptops */
+.two-col-page,
+.ledger-layout,
+.ledger-layout.small-side,
+.transfer-layout,
+.batch-grid,
+.bank-recon-grid,
+.currency-grid,
+.report-grid.two,
+.export-grid,
+.usage-grid,
+.ledger-summary-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(320px, 0.9fr);
+  gap: 18px;
+  align-items: start;
+  width: 100%;
+}
+
+.report-grid.two,
+.export-grid,
+.usage-grid,
+.ledger-summary-grid {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.plan-grid,
+.feature-grid,
+.warehouse-card-list,
+.low-stock-chip-row,
+.top-bars,
+.trend-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+  min-width: 0;
+}
+
+/* Forms: readable and not squeezed */
+.form-grid,
+.form-grid.two,
+.form-grid.three,
+.form-grid.four,
+.form-grid.compact,
+.form-grid.two.compact,
+.form-grid.four.compact,
+.statement-filter-grid,
+.plan-create-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  width: 100%;
+  min-width: 0;
+}
+
+.form-grid label,
+.form-grid .check-label,
+.form-grid input,
+.form-grid select,
+.form-grid textarea,
+.form-grid button,
+.inline-input {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.span-two,
+.form-grid .span-two,
+.file-drop.span-two,
+.primary-btn.span-two,
+.secondary-btn.span-two,
+.check-label.span-two {
+  grid-column: 1 / -1;
+}
+
+/* Long row builders: stock transfers, batch rows, return items, journal lines */
+.transfer-row,
+.transfer-item-row,
+.purchase-item-row,
+.item-row,
+.journal-line,
+.preview-row,
+.statement-row,
+.trend-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  align-items: end;
+  min-width: 0;
+}
+
+.transfer-items,
+.items-list,
+.journal-lines,
+.preview-row-list,
+.mini-list {
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+/* Table safety — keep table full width, allow horizontal scroll only inside table card */
+.table-card,
+.datatable-shell,
+.datatable-scroll,
+.data-table-wrap,
+.data-table-container,
+.panel:has(table) {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-card table,
+.panel table,
+.data-table,
+table {
+  max-width: 100%;
+}
+
+.table-card table:not(.mobile-card-table),
+.panel table:not(.mobile-card-table) {
+  min-width: 760px;
+}
+
+.table-subtext,
+.muted-line,
+.muted-text,
+.empty-cell,
+td,
+th {
+  overflow-wrap: anywhere;
+}
+
+/* Buttons and action chips: no overflow */
+.primary-btn,
+.secondary-btn,
+.ghost-btn,
+.mini-action,
+.mini-danger,
+.filter-action,
+.tab-btn {
+  max-width: 100%;
+  white-space: normal;
+}
+
+.actions-row > *,
+.compact-actions > *,
+.head-actions > *,
+.statement-share-actions > *,
+.invoice-actions > * {
+  flex: 0 1 auto;
+}
+
+/* Page-specific improvements */
+.branches-page .two-col-page,
+.branch-transfer-page .transfer-layout,
+.batches-page .batch-grid,
+.cash-bank-page .ledger-layout,
+.accounting-page .ledger-layout,
+.bank-recon-page .bank-recon-grid,
+.multi-currency-page .currency-grid,
+.reports-page .report-grid.two,
+.statements-page .statement-filter-grid,
+.saas-admin-page .ledger-summary-grid {
+  container-type: inline-size;
+}
+
+.branch-transfer-page .transfer-main-panel,
+.branch-transfer-page .transfer-side-panel,
+.batches-page .panel,
+.branches-page .panel,
+.bank-recon-page .panel,
+.multi-currency-page .panel,
+.reports-page .panel,
+.statements-page .panel,
+.saas-admin-page .panel {
+  width: 100%;
+}
+
+/* Barcode label page: tools should stay above sheet and sheet scroll safely */
+.barcode-page .label-sheet {
+  max-width: 100%;
+  overflow: auto;
+}
+
+.barcode-page .product-label {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.barcode-page .barcode-svg,
+.barcode-page .qr-canvas {
+  max-width: 100%;
+}
+
+/* SaaS admin: long plan cards and tenant action rows */
+.saas-admin-page .saas-main {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.saas-admin-page .plan-card ul {
+  padding-left: 18px;
+  max-height: 360px;
+  overflow: auto;
+}
+
+.saas-admin-page .compact-actions {
+  display: flex;
+  align-items: center;
+}
+
+/* Report panels */
+.report-statement,
+.span-report {
+  min-width: 0;
+}
+
+.mini-bar {
+  min-width: 0;
+  max-width: 100%;
+}
+
+/* Medium screens: stop right panels overlapping early */
+@media (max-width: 1320px) {
+  .two-col-page,
+  .ledger-layout,
+  .ledger-layout.small-side,
+  .transfer-layout,
+  .batch-grid,
+  .bank-recon-grid,
+  .currency-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .panel,
+  .transfer-main-panel,
+  .transfer-side-panel {
+    width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  .page {
+    padding-inline: 12px;
+  }
+
+  .page-head,
+  .section-head,
+  .section-title-row,
+  .ledger-toolbar,
+  .head-actions {
+    align-items: stretch;
+  }
+
+  .page-head .actions-row,
+  .section-head .actions-row,
+  .ledger-toolbar,
+  .head-actions,
+  .statement-actions,
+  .statement-share-actions {
+    width: 100%;
+  }
+
+  .page-head button,
+  .section-head button,
+  .ledger-toolbar button,
+  .head-actions button,
+  .statement-actions button,
+  .statement-share-actions button,
+  .actions-row button,
+  .tab-actions button {
+    flex: 1 1 160px;
+  }
+
+  .form-grid,
+  .form-grid.two,
+  .form-grid.three,
+  .form-grid.four,
+  .form-grid.compact,
+  .form-grid.two.compact,
+  .form-grid.four.compact,
+  .statement-filter-grid,
+  .plan-create-form {
+    grid-template-columns: 1fr;
+  }
+
+  .transfer-row,
+  .transfer-item-row,
+  .purchase-item-row,
+  .item-row,
+  .journal-line,
+  .preview-row,
+  .statement-row,
+  .trend-row {
+    grid-template-columns: 1fr;
+  }
+
+  .table-card table:not(.mobile-card-table),
+  .panel table:not(.mobile-card-table) {
+    min-width: 680px;
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    padding-inline: 10px;
+  }
+
+  .panel {
+    padding: 14px;
+    border-radius: 18px;
+  }
+
+  .stat-grid,
+  .report-stat-grid,
+  .statement-stat-grid,
+  .batch-stat-grid,
+  .transfer-stat-grid,
+  .bank-recon-stat-grid,
+  .currency-stat-grid,
+  .plan-grid,
+  .feature-grid,
+  .warehouse-card-list,
+  .low-stock-chip-row,
+  .top-bars,
+  .trend-list,
+  .export-grid,
+  .usage-grid,
+  .ledger-summary-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions-row,
+  .compact-actions,
+  .head-actions,
+  .statement-share-actions,
+  .invoice-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions-row > *,
+  .compact-actions > *,
+  .head-actions > *,
+  .statement-share-actions > *,
+  .invoice-actions > * {
+    width: 100%;
+  }
+
+  .tab-actions {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 4px;
+  }
+
+  .tab-actions .tab-btn {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+}

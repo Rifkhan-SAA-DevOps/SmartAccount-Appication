@@ -1,0 +1,209 @@
+/* Stage 17: raw table safety layer for tables that do not use DataTable.jsx yet */
+.raw-table-scroll-area {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 18px;
+}
+
+.raw-table-scroll-area::-webkit-scrollbar {
+  height: 8px;
+}
+
+.raw-table-scroll-area::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.06);
+  border-radius: 999px;
+}
+
+.raw-table-scroll-area::-webkit-scrollbar-thumb {
+  background: linear-gradient(90deg, rgba(109, 40, 217, 0.6), rgba(14, 165, 233, 0.55));
+  border-radius: 999px;
+}
+
+.raw-table-enhanced {
+  width: 100%;
+  min-width: 760px;
+  border-collapse: separate;
+  border-spacing: 0;
+  table-layout: auto;
+}
+
+.raw-table-enhanced th,
+.raw-table-enhanced td {
+  max-width: 260px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  vertical-align: top;
+}
+
+.raw-table-enhanced tbody tr.raw-table-clickable-row {
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.raw-table-enhanced tbody tr.raw-table-clickable-row:hover {
+  background: rgba(124, 58, 237, 0.06);
+  box-shadow: inset 3px 0 0 rgba(124, 58, 237, 0.55);
+}
+
+.raw-table-enhanced tbody tr.raw-table-clickable-row:focus-visible {
+  outline: 3px solid rgba(124, 58, 237, 0.25);
+  outline-offset: -3px;
+  background: rgba(124, 58, 237, 0.08);
+}
+
+.raw-table-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 4px 2px;
+  color: #64748b;
+  font-size: 0.88rem;
+}
+
+.raw-table-page-info strong,
+.raw-table-page-actions strong {
+  color: #0f172a;
+}
+
+.raw-table-page-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.raw-table-page-actions button {
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: #ffffff;
+  color: #334155;
+  min-height: 34px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.raw-table-page-actions button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(124, 58, 237, 0.45);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.raw-table-page-actions button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.raw-row-modal-content {
+  display: grid;
+  gap: 18px;
+  min-width: 0;
+}
+
+.raw-row-modal-summary {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: start;
+  padding: 16px;
+  border: 1px solid rgba(124, 58, 237, 0.14);
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.08), rgba(14, 165, 233, 0.07));
+  min-width: 0;
+}
+
+.raw-row-modal-icon {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  color: #ffffff;
+  background: linear-gradient(135deg, #7c3aed, #0ea5e9);
+  box-shadow: 0 14px 28px rgba(124, 58, 237, 0.22);
+  font-weight: 900;
+}
+
+.raw-row-modal-summary strong {
+  display: block;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.raw-row-modal-summary p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.raw-row-modal-field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  min-width: 0;
+}
+
+.raw-row-modal-field {
+  min-width: 0;
+  padding: 13px 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  background: rgba(248, 250, 252, 0.85);
+}
+
+.raw-row-modal-field span {
+  display: block;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+
+.raw-row-modal-field div {
+  color: #0f172a;
+  font-weight: 700;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 760px) {
+  .raw-table-enhanced {
+    min-width: 680px;
+  }
+
+  .raw-row-modal-field-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .raw-table-pagination {
+    align-items: stretch;
+  }
+
+  .raw-table-page-actions,
+  .raw-table-page-actions button {
+    width: 100%;
+  }
+
+  .raw-table-page-actions button {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 520px) {
+  .raw-row-modal-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .raw-table-enhanced {
+    min-width: 620px;
+  }
+}

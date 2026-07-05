@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api/http.js';
 import DataTable from '../components/ui/DataTable.jsx';
+import ModalDrawer from '../components/ui/ModalDrawer.jsx';
+import '../styles/stage13-registers-finance-polish.css';
 
 const fmt = (value) => `LKR ${Number(value || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
@@ -23,6 +25,8 @@ export default function Accounting() {
   const [journalEntries, setJournalEntries] = useState([]);
   const [accountForm, setAccountForm] = useState(emptyAccount);
   const [journalForm, setJournalForm] = useState(emptyJournal);
+  const [accountDrawerOpen, setAccountDrawerOpen] = useState(false);
+  const [selectedJournal, setSelectedJournal] = useState(null);
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
@@ -47,8 +51,8 @@ export default function Accounting() {
       setProfitLoss(p.data);
       setBalanceSheet(b.data);
       setTrialBalance(t.data);
-      setAccounts(a.data);
-      setJournalEntries(j.data);
+      setAccounts(a.data || []);
+      setJournalEntries(j.data || []);
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load accounting reports');
     }
@@ -57,7 +61,8 @@ export default function Accounting() {
   useEffect(() => { load(); }, []);
 
   async function setupDefaults() {
-    setMessage(''); setError('');
+    setMessage('');
+    setError('');
     try {
       const res = await api.post('/accounting/setup-defaults');
       setMessage(res.data.message || 'Default chart of accounts created');
@@ -69,10 +74,12 @@ export default function Accounting() {
 
   async function createAccount(e) {
     e.preventDefault();
-    setMessage(''); setError('');
+    setMessage('');
+    setError('');
     try {
       await api.post('/accounting/chart-of-accounts', accountForm);
       setAccountForm(emptyAccount);
+      setAccountDrawerOpen(false);
       setMessage('Ledger account created');
       await load();
     } catch (err) {
@@ -103,7 +110,8 @@ export default function Accounting() {
 
   async function createJournalEntry(e) {
     e.preventDefault();
-    setMessage(''); setError('');
+    setMessage('');
+    setError('');
     try {
       await api.post('/accounting/journal-entries', {
         description: journalForm.description,
@@ -124,15 +132,17 @@ export default function Accounting() {
   }
 
   return (
-    <div className="page accounting-page">
-      <div className="page-head">
+    <div className="page accounting-page stage13-page">
+      <div className="page-head stage13-hero">
         <div>
+          <span className="eyebrow">Finance control</span>
           <h1>Accounting</h1>
-          <p>Profit & Loss, Balance Sheet, Chart of Accounts, manual journals and automatic double-entry posting.</p>
+          <p>Ledger accounts now open in a drawer, and recent journal entries are a clean clickable register with modal details.</p>
         </div>
         <div className="head-actions">
           <button className="secondary-btn" onClick={setupDefaults}>Setup Default Accounts</button>
-          <button className="primary-btn" onClick={load}>Refresh</button>
+          <button className="secondary-btn" onClick={load}>Refresh</button>
+          <button className="primary-btn" onClick={() => setAccountDrawerOpen(true)}>+ Add Ledger Account</button>
         </div>
       </div>
 
@@ -146,10 +156,10 @@ export default function Accounting() {
         <div className="stat-card tone-blue"><span>Net Profit</span><strong>{fmt(profitLoss?.netProfit)}</strong><small>After operating expenses</small><div className="stat-orb" /></div>
       </div>
 
-      <div className="ledger-layout small-side">
+      <div className="stage13-stack-layout">
         <section className="panel">
           <h2>Profit & Loss</h2>
-          <div className="statement-box">
+          <div className="statement-box stage13-statement-box">
             <div><span>Gross Sales</span><strong>{fmt(profitLoss?.sales?.grossSales)}</strong></div>
             <div><span>Less: Sales Returns</span><strong>{fmt(profitLoss?.sales?.salesReturns)}</strong></div>
             <div className="statement-total"><span>Net Sales</span><strong>{fmt(profitLoss?.netSales)}</strong></div>
@@ -162,7 +172,7 @@ export default function Accounting() {
 
         <section className="panel">
           <h2>Balance Sheet Foundation</h2>
-          <div className="statement-box compact-statement">
+          <div className="statement-box compact-statement stage13-statement-box">
             <h3>Assets</h3>
             <div><span>Cash & Bank</span><strong>{fmt(balanceSheet?.assets?.cashAndBank)}</strong></div>
             <div><span>Accounts Receivable</span><strong>{fmt(balanceSheet?.assets?.accountsReceivable)}</strong></div>
@@ -178,23 +188,18 @@ export default function Accounting() {
         </section>
       </div>
 
-      <section className="panel auto-posting-panel">
+      <section className="panel auto-posting-panel stage13-full-panel">
         <h2>Automatic Double-Entry Posting</h2>
         <p>Every important business transaction now creates a balanced journal entry automatically, so accounting reports become more reliable.</p>
         <div className="auto-posting-grid">
-          <span>Invoice → Sales + COGS</span>
-          <span>GRN → Inventory + Payable</span>
-          <span>Receipt → Cash/Bank + Receivable</span>
-          <span>Supplier Payment → Payable + Cash/Bank</span>
-          <span>Expense → Expense + Cash/Bank</span>
-          <span>Returns → Reverse sales/purchase impact</span>
+          <span>Invoice → Sales + COGS</span><span>GRN → Inventory + Payable</span><span>Receipt → Cash/Bank + Receivable</span><span>Supplier Payment → Payable + Cash/Bank</span><span>Expense → Expense + Cash/Bank</span><span>Returns → Reverse sales/purchase impact</span>
         </div>
       </section>
 
-      <section className="panel">
+      <section className="panel stage13-register-panel">
         <h2>Trial Balance</h2>
-        <p>This table now includes both manual journal entries and automatic journal entries posted from invoices, GRNs, payments, expenses, returns, opening stock, stock adjustments and bank movements.</p>
-        <div className="trial-summary">
+        <p>This table includes manual journals and automatic journals posted from operational modules.</p>
+        <div className="trial-summary stage13-summary-strip">
           <div><span>Total Debit</span><strong>{fmt(trialBalance?.totalDebit)}</strong></div>
           <div><span>Total Credit</span><strong>{fmt(trialBalance?.totalCredit)}</strong></div>
           <div><span>Difference</span><strong>{fmt(trialBalance?.difference)}</strong></div>
@@ -206,52 +211,33 @@ export default function Accounting() {
           { key: 'debit', label: 'Debit', render: (r) => fmt(r.debit) },
           { key: 'credit', label: 'Credit', render: (r) => fmt(r.credit) },
           { key: 'balance', label: 'Balance', render: (r) => fmt(r.balance) }
-        ]} rows={trialBalance?.rows || []} />
+        ]} rows={trialBalance?.rows || []} pagination pageSize={10} paginationLabel="accounts" />
       </section>
 
-      <div className="ledger-layout">
-        <section className="panel">
-          <div className="ledger-toolbar">
-            <div>
-              <h2>Chart of Accounts</h2>
-              <p>{summary?.accountCount || accounts.length} active ledger accounts</p>
-            </div>
-          </div>
-          <DataTable columns={[
-            { key: 'code', label: 'Code' },
-            { key: 'name', label: 'Name' },
-            { key: 'type', label: 'Type' },
-            { key: 'normalBalance', label: 'Normal' },
-            { key: 'isSystem', label: 'System', render: (r) => r.isSystem ? 'Yes' : 'No' }
-          ]} rows={accounts} />
-        </section>
+      <section className="panel stage13-register-panel">
+        <div className="section-title-row">
+          <div><h2>Chart of Accounts</h2><p>{summary?.accountCount || accounts.length} active ledger accounts</p></div>
+          <button className="primary-btn" onClick={() => setAccountDrawerOpen(true)}>+ Add Ledger Account</button>
+        </div>
+        <DataTable columns={[
+          { key: 'code', label: 'Code' },
+          { key: 'name', label: 'Name' },
+          { key: 'type', label: 'Type' },
+          { key: 'normalBalance', label: 'Normal' },
+          { key: 'isSystem', label: 'System', render: (r) => r.isSystem ? 'Yes' : 'No' }
+        ]} rows={accounts} pagination pageSize={10} paginationLabel="ledger accounts" />
+      </section>
 
-        <section className="panel">
-          <h2>Add Ledger Account</h2>
-          <form className="form-grid" onSubmit={createAccount}>
-            <label>Code<input value={accountForm.code} onChange={(e) => setAccountForm({ ...accountForm, code: e.target.value })} placeholder="6050" required /></label>
-            <label>Name<input value={accountForm.name} onChange={(e) => setAccountForm({ ...accountForm, name: e.target.value })} placeholder="Internet Expense" required /></label>
-            <label>Type<select value={accountForm.type} onChange={(e) => setAccountForm({ ...accountForm, type: e.target.value })}>
-              <option value="ASSET">Asset</option><option value="LIABILITY">Liability</option><option value="EQUITY">Equity</option><option value="INCOME">Income</option><option value="EXPENSE">Expense</option><option value="COST_OF_GOODS_SOLD">Cost of Goods Sold</option>
-            </select></label>
-            <label>Normal Balance<select value={accountForm.normalBalance} onChange={(e) => setAccountForm({ ...accountForm, normalBalance: e.target.value })}>
-              <option value="DEBIT">Debit</option><option value="CREDIT">Credit</option>
-            </select></label>
-            <button className="primary-btn">Create Account</button>
-          </form>
-        </section>
-      </div>
-
-      <section className="panel">
+      <section className="panel stage13-full-panel">
         <h2>Post Manual Journal Entry</h2>
-        <form className="form-grid" onSubmit={createJournalEntry}>
-          <div className="form-grid two">
+        <form className="form-grid stage13-form-grid" onSubmit={createJournalEntry}>
+          <div className="form-grid two span-two">
             <label>Description<input value={journalForm.description} onChange={(e) => setJournalForm({ ...journalForm, description: e.target.value })} placeholder="Owner capital introduced" required /></label>
             <label>Reference<input value={journalForm.reference} onChange={(e) => setJournalForm({ ...journalForm, reference: e.target.value })} placeholder="REF-001" /></label>
           </div>
-          <div className="journal-lines">
+          <div className="journal-lines span-two stage13-item-stack">
             {journalForm.lines.map((line, index) => (
-              <div className="journal-line" key={index}>
+              <div className="journal-line stage13-item-row" key={index}>
                 <select value={line.ledgerAccountId} onChange={(e) => updateJournalLine(index, { ledgerAccountId: e.target.value })} required>
                   <option value="">Select account</option>
                   {accounts.map((account) => <option key={account.id} value={account.id}>{account.code} - {account.name}</option>)}
@@ -263,7 +249,7 @@ export default function Accounting() {
               </div>
             ))}
           </div>
-          <div className="journal-footer">
+          <div className="journal-footer span-two stage13-journal-footer">
             <button type="button" className="secondary-btn" onClick={addJournalLine}>Add Line</button>
             <div><strong>Debit:</strong> {fmt(totals.debit)} &nbsp; <strong>Credit:</strong> {fmt(totals.credit)} &nbsp; <strong>Difference:</strong> {fmt(totals.difference)}</div>
             <button className="primary-btn">Post Journal Entry</button>
@@ -271,17 +257,43 @@ export default function Accounting() {
         </form>
       </section>
 
-      <section className="panel">
-        <h2>Recent Journal Entries</h2>
+      <section className="panel stage13-register-panel">
+        <div className="section-title-row"><div><h2>Recent Journal Entries</h2><p>Click an entry to see all debit/credit lines. This table is now full width and paginated.</p></div></div>
         <DataTable columns={[
-          { key: 'entryNo', label: 'Entry No' },
+          { key: 'entryNo', label: 'Entry No', render: (r) => <><strong>{r.entryNo}</strong><span className="table-subtext">Click to view lines</span></> },
           { key: 'entryDate', label: 'Date', render: (r) => new Date(r.entryDate).toLocaleDateString() },
           { key: 'description', label: 'Description' },
           { key: 'reference', label: 'Reference', render: (r) => r.reference || '-' },
           { key: 'status', label: 'Type', render: (r) => r.reference?.startsWith('AUTO:') ? 'Auto' : 'Manual' },
           { key: 'lines', label: 'Lines', render: (r) => r.lines?.length || 0 }
-        ]} rows={journalEntries} />
+        ]} rows={journalEntries} onRowClick={setSelectedJournal} pagination pageSize={10} paginationLabel="journal entries" />
       </section>
+
+      <ModalDrawer open={accountDrawerOpen} onClose={() => setAccountDrawerOpen(false)} title="Add Ledger Account" eyebrow="Chart of accounts" description="Create a new account without shrinking the chart of accounts table." size="md" mode="drawer" footer={<button type="submit" form="ledger-account-create-form" className="primary-btn">Create Account</button>}>
+        <form id="ledger-account-create-form" className="form-grid stage13-form-grid" onSubmit={createAccount}>
+          <label>Code<input value={accountForm.code} onChange={(e) => setAccountForm({ ...accountForm, code: e.target.value })} placeholder="6050" required /></label>
+          <label>Name<input value={accountForm.name} onChange={(e) => setAccountForm({ ...accountForm, name: e.target.value })} placeholder="Internet Expense" required /></label>
+          <label>Type<select value={accountForm.type} onChange={(e) => setAccountForm({ ...accountForm, type: e.target.value })}><option value="ASSET">Asset</option><option value="LIABILITY">Liability</option><option value="EQUITY">Equity</option><option value="INCOME">Income</option><option value="EXPENSE">Expense</option><option value="COST_OF_GOODS_SOLD">Cost of Goods Sold</option></select></label>
+          <label>Normal Balance<select value={accountForm.normalBalance} onChange={(e) => setAccountForm({ ...accountForm, normalBalance: e.target.value })}><option value="DEBIT">Debit</option><option value="CREDIT">Credit</option></select></label>
+        </form>
+      </ModalDrawer>
+
+      <ModalDrawer open={Boolean(selectedJournal)} onClose={() => setSelectedJournal(null)} title={selectedJournal?.entryNo || 'Journal Entry'} eyebrow="Journal register" description="Review journal header and debit/credit lines." size="lg" mode="modal">
+        {selectedJournal && <>
+          <div className="stage13-detail-grid">
+            <div><span>Date</span><strong>{new Date(selectedJournal.entryDate).toLocaleDateString()}</strong></div>
+            <div><span>Type</span><strong>{selectedJournal.reference?.startsWith('AUTO:') ? 'Auto' : 'Manual'}</strong></div>
+            <div className="span-two"><span>Description</span><strong>{selectedJournal.description}</strong></div>
+            <div className="span-two"><span>Reference</span><strong>{selectedJournal.reference || '-'}</strong></div>
+          </div>
+          <DataTable columns={[
+            { key: 'account', label: 'Account', render: (r) => r.ledgerAccount?.name || r.account?.name || r.accountName || '-' },
+            { key: 'description', label: 'Description', render: (r) => r.description || '-' },
+            { key: 'debit', label: 'Debit', render: (r) => fmt(r.debit) },
+            { key: 'credit', label: 'Credit', render: (r) => fmt(r.credit) }
+          ]} rows={selectedJournal.lines || []} pagination={false} empty="No journal lines" />
+        </>}
+      </ModalDrawer>
     </div>
   );
 }

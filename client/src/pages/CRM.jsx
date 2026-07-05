@@ -3,6 +3,8 @@ import { BellRing, Filter, Handshake, Megaphone, PhoneCall, RefreshCw, UserPlus 
 import { api } from '../api/http.js';
 import DataTable from '../components/ui/DataTable.jsx';
 import StatCard from '../components/ui/StatCard.jsx';
+import ModalDrawer from '../components/ui/ModalDrawer.jsx';
+import '../styles/stage9-operations-polish.css';
 
 const emptyLead = { title: '', companyName: '', contactName: '', phone: '', email: '', source: 'Walk-in', stageId: '', status: 'OPEN', priority: 'NORMAL', probability: 10, expectedValue: 0, expectedCloseDate: '', nextFollowUpAt: '', customerId: '', notes: '' };
 const emptyStage = { name: '', sortOrder: 10, probability: 10, color: '', isWon: false, isLost: false, isActive: true };
@@ -45,6 +47,7 @@ export default function CRM() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [saving, setSaving] = useState(false);
+  const [drawer, setDrawer] = useState(null);
 
   async function load() {
     setError('');
@@ -173,119 +176,103 @@ export default function CRM() {
     { key: 'contact', label: 'Contact', render: (r) => <>{r.contactName}<span className="table-subtext">{r.companyName || r.phone || r.email || '-'}</span></> },
     { key: 'stageName', label: 'Stage', render: (r) => <><span className={`badge ${statusClass(r.status)}`}>{r.status}</span><span className="table-subtext">{r.stageName} · {r.probability}%</span></> },
     { key: 'expectedValue', label: 'Value', render: (r) => <><strong>{money(r.expectedValue)}</strong><span className="table-subtext">Weighted {money(r.weightedValue)}</span></> },
-    { key: 'followup', label: 'Follow-up', render: (r) => <>{dt(r.nextFollowUpAt)}{r.overdueFollowUp && <span className="table-subtext danger-text">Overdue</span>}</> },
-    { key: 'actions', label: 'Actions', render: (r) => <div className="actions-row compact-actions">
-      <button className="mini-action" onClick={() => setSelectedLead(r)}>Open</button>
-      <select value={r.stageId || ''} onChange={(e) => updateLead(r, { stageId: e.target.value || null })}>
-        <option value="">No stage</option>
-        {stages.filter((s) => s.isActive).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-      </select>
-      {r.status !== 'WON' ? <button className="mini-action" onClick={() => convertCustomer(r)}>Convert</button> : null}
-      {r.status !== 'LOST' ? <button className="mini-danger" onClick={() => updateLead(r, { status: 'LOST', lostReason: 'Marked lost from CRM page' })}>Lost</button> : null}
-    </div> }
+    { key: 'followup', label: 'Follow-up', render: (r) => <>{dt(r.nextFollowUpAt)}{r.overdueFollowUp && <span className="table-subtext danger-text">Overdue</span>}</> }
   ];
 
   return (
-    <div className="page crm-page">
+    <div className="page crm-page stage8-page">
       <div className="page-header">
         <div>
           <span className="eyebrow">CRM / leads / follow-up pipeline</span>
-          <h1>Sales Pipeline</h1>
-          <p>Track inquiries, follow-ups, opportunities, quotations, won customers and lost deals.</p>
+          <h1>CRM Pipeline</h1>
+          <p>Track leads, follow-ups, stages, sales probability, expected value and customer conversion.</p>
         </div>
         <div className="head-actions">
-          <button className="ghost-btn" onClick={() => load()}><RefreshCw size={16} /> Refresh</button>
-          <button className="primary-btn" onClick={generateAlerts}><BellRing size={16} /> Create follow-up alerts</button>
+          <button className="ghost-btn" onClick={load}><RefreshCw size={16} /> Refresh</button>
+          <button className="secondary-btn" onClick={generateAlerts}><BellRing size={16} /> Create follow-up alerts</button>
+          <button className="primary-btn" onClick={() => setDrawer('lead')}><UserPlus size={16} /> Add Lead</button>
         </div>
       </div>
 
       {error && <div className="error-box">{error}</div>}
       {success && <div className="success-box">{success}</div>}
 
-      <div className="stat-grid report-stat-grid">
-        <StatCard title="Open Leads" value={summary?.openLeads || 0} subtitle="Active opportunities" />
+      <div className="stat-grid crm-stat-grid">
+        <StatCard title="Open Leads" value={summary?.openLeads || 0} subtitle={`${summary?.leads || 0} total`} />
         <StatCard title="Pipeline Value" value={money(summary?.pipelineValue || 0)} subtitle="Expected total" tone="green" />
-        <StatCard title="Weighted Value" value={money(summary?.weightedValue || 0)} subtitle="Probability adjusted" tone="orange" />
-        <StatCard title="Overdue Follow-ups" value={summary?.overdueFollowUps || 0} subtitle={`${summary?.upcomingFollowUps || 0} upcoming`} tone="red" />
+        <StatCard title="Weighted Value" value={money(summary?.weightedValue || 0)} subtitle="Probability adjusted" tone="purple" />
+        <StatCard title="Overdue Follow-ups" value={summary?.overdueFollowUps || 0} subtitle={`${summary?.dueToday || 0} due today`} tone="red" />
       </div>
 
       <div className="tab-actions">
-        {['pipeline', 'leads', 'followups', 'create', 'stages'].map((key) => <button key={key} className={`tab-btn ${tab === key ? 'active' : ''}`} onClick={() => setTab(key)}>{key}</button>)}
+        {['pipeline', 'leads', 'followups', 'stages'].map((key) => <button key={key} className={`tab-btn ${tab === key ? 'active' : ''}`} onClick={() => setTab(key)}>{key === 'pipeline' ? 'Vertical Pipeline' : key}</button>)}
       </div>
 
-      {tab === 'pipeline' && <div className="crm-pipeline-grid">
-        {pipelineGroups.map((stage) => <div className="pipeline-column" key={stage.id}>
-          <div className="pipeline-head"><strong>{stage.name}</strong><span>{stage.leads.length} lead(s)</span></div>
-          {stage.leads.length ? stage.leads.map((lead) => <div className="lead-card" key={lead.id} onClick={() => setSelectedLead(lead)}>
-            <div className="lead-card-top"><strong>{lead.title}</strong><span className={`badge ${statusClass(lead.status)}`}>{lead.status}</span></div>
-            <p>{lead.contactName}{lead.companyName ? ` · ${lead.companyName}` : ''}</p>
-            <div><span>{money(lead.expectedValue)}</span><b>{lead.probability}%</b></div>
-            {lead.overdueFollowUp ? <small className="danger-text">Follow-up overdue</small> : <small>Next: {dt(lead.nextFollowUpAt)}</small>}
-          </div>) : <div className="pipeline-empty">No leads here</div>}
-        </div>)}
-      </div>}
-
-      {tab === 'leads' && <>
-        <div className="panel crm-filter-panel">
-          <div className="audit-filter-grid crm-filter-grid">
-            <label className="span-two">Search<input value={filters.q} onChange={(e)=>setFilters({...filters,q:e.target.value})} placeholder="Lead no, name, phone, company" /></label>
-            <label>Status<select value={filters.status} onChange={(e)=>setFilters({...filters,status:e.target.value})}><option value="">All</option>{['OPEN','FOLLOW_UP','QUOTED','WON','LOST','ARCHIVED'].map((s)=><option key={s}>{s}</option>)}</select></label>
-            <label>Stage<select value={filters.stageId} onChange={(e)=>setFilters({...filters,stageId:e.target.value})}><option value="">All</option>{stages.map((s)=><option key={s.id} value={s.id}>{s.name}</option>)}</select></label>
-            <label>Follow-up<select value={filters.followup} onChange={(e)=>setFilters({...filters,followup:e.target.value})}><option value="">All</option><option value="overdue">Overdue</option></select></label>
-            <button className="primary-btn" onClick={load}><Filter size={16}/> Apply</button>
-          </div>
+      {tab === 'pipeline' && <section className="panel crm-pipeline-table-panel">
+        <div className="section-title-row"><div><h2><Handshake size={20}/> Pipeline by Stage</h2><p>Stage cards were changed into a vertical table-style format. Click any lead row to open details.</p></div></div>
+        <div className="crm-pipeline-table">
+          {pipelineGroups.map((stage) => <div className="crm-pipeline-stage-table" key={stage.id}>
+            <div className="crm-pipeline-stage-head">
+              <div><strong>{stage.name}</strong><span>{stage.leads.length} lead(s) · {stage.probability || 0}% probability</span></div>
+              <b>{money(stage.leads.reduce((sum, lead) => sum + Number(lead.expectedValue || 0), 0))}</b>
+            </div>
+            <div className="crm-pipeline-stage-body">
+              {stage.leads.length ? stage.leads.map((lead) => <button type="button" className="crm-pipeline-lead-row" key={lead.id} onClick={() => setSelectedLead(lead)}>
+                <span><strong>{lead.leadNo}</strong><small>{lead.title}</small></span>
+                <span>{lead.contactName || lead.companyName || 'No contact'}</span>
+                <span>{money(lead.expectedValue)}</span>
+                <span>{dt(lead.nextFollowUpAt)}</span>
+                <span className={`badge ${statusClass(lead.status)}`}>{lead.status}</span>
+              </button>) : <div className="pipeline-empty">No leads here</div>}
+            </div>
+          </div>)}
         </div>
-        <DataTable columns={columns} rows={leads} empty="No CRM leads found" />
-      </>}
+      </section>}
 
-      {tab === 'followups' && <div className="two-col-page crm-followup-grid">
-        <div className="panel">
-          <h2><PhoneCall size={18}/> Overdue follow-ups</h2>
-          <DataTable columns={columns} rows={overdueFollowUps} empty="No overdue follow-ups" />
+      {tab === 'leads' && <section className="panel ops-register-panel">
+        <div className="section-title-row"><div><h2><Filter size={20}/> Lead Register</h2><p>Search and manage leads in a full-width paginated table.</p></div></div>
+        <div className="filters-row crm-filter-row">
+          <input value={filters.q} onChange={(e)=>setFilters({...filters,q:e.target.value})} placeholder="Search title/company/contact" />
+          <select value={filters.stageId} onChange={(e)=>setFilters({...filters,stageId:e.target.value})}><option value="">All stages</option>{stages.map((s)=><option key={s.id} value={s.id}>{s.name}</option>)}</select>
+          <select value={filters.status} onChange={(e)=>setFilters({...filters,status:e.target.value})}><option value="">All status</option>{['OPEN','FOLLOW_UP','QUOTED','WON','LOST','ARCHIVED'].map((s)=><option key={s}>{s}</option>)}</select>
+          <button className="primary-btn" onClick={load}>Apply</button>
         </div>
-        <div className="panel">
-          <h2><Megaphone size={18}/> Pipeline summary</h2>
-          <div className="top-bars">
-            {(summary?.stageSummary || []).map((stage) => <div className="trend-row" key={stage.id}>
-              <span>{stage.name}</span><div className="mini-bar"><span style={{ width: `${Math.min(100, (stage.count || 0) * 18)}%` }} /></div><b>{stage.count} · {money(stage.value)}</b>
-            </div>)}
-          </div>
-        </div>
-      </div>}
+        <DataTable columns={columns} rows={leads} empty="No CRM leads found" onRowClick={setSelectedLead} paginationLabel="leads" />
+      </section>}
 
-      {tab === 'create' && <div className="two-col-page crm-create-grid">
-        <form className="panel form-grid" onSubmit={createLead}>
-          <h2><UserPlus size={18}/> Add new lead</h2>
-          <label>Title<input required value={leadForm.title} onChange={(e)=>setLeadForm({...leadForm,title:e.target.value})} placeholder="Website project inquiry" /></label>
-          <label>Contact name<input required value={leadForm.contactName} onChange={(e)=>setLeadForm({...leadForm,contactName:e.target.value})} /></label>
-          <label>Company / shop<input value={leadForm.companyName} onChange={(e)=>setLeadForm({...leadForm,companyName:e.target.value})} /></label>
+      {tab === 'followups' && <section className="panel ops-register-panel">
+        <div className="section-title-row"><div><h2><PhoneCall size={20}/> Overdue / Due Follow-ups</h2><p>Click a lead to add call notes, meeting notes or close the follow-up.</p></div></div>
+        <DataTable columns={columns} rows={overdueFollowUps} empty="No overdue follow-ups" onRowClick={setSelectedLead} paginationLabel="follow-ups" />
+      </section>}
+
+      {tab === 'stages' && <section className="panel ops-register-panel">
+        <div className="section-title-row"><div><h2><Megaphone size={20}/> Pipeline Stages</h2><p>Keep stage creation in a drawer so the stage register stays readable.</p></div><button className="primary-btn" onClick={() => setDrawer('stage')}>+ Add Stage</button></div>
+        <DataTable columns={[{key:'name',label:'Stage'},{key:'probability',label:'Probability',render:(r)=>`${r.probability}%`},{key:'sortOrder',label:'Order'},{key:'type',label:'Type',render:(r)=><>{r.isWon?'Won':r.isLost?'Lost':'Open'}</>}]} rows={stages} empty="No stages" />
+      </section>}
+
+      <ModalDrawer open={drawer === 'lead'} onClose={() => setDrawer(null)} title="Add New Lead" eyebrow="CRM" description="Create a lead using a responsive drawer instead of a crowded page form.">
+        <form className="form-grid" onSubmit={createLead}>
+          <label>Title<input required value={leadForm.title} onChange={(e)=>setLeadForm({...leadForm,title:e.target.value})} placeholder="New CCTV enquiry / wholesale customer" /></label>
+          <label>Company<input value={leadForm.companyName} onChange={(e)=>setLeadForm({...leadForm,companyName:e.target.value})} /></label>
+          <label>Contact name<input value={leadForm.contactName} onChange={(e)=>setLeadForm({...leadForm,contactName:e.target.value})} /></label>
           <label>Phone<input value={leadForm.phone} onChange={(e)=>setLeadForm({...leadForm,phone:e.target.value})} /></label>
-          <label>Email<input type="email" value={leadForm.email} onChange={(e)=>setLeadForm({...leadForm,email:e.target.value})} /></label>
-          <label>Existing customer<select value={leadForm.customerId} onChange={(e)=>setLeadForm({...leadForm,customerId:e.target.value})}><option value="">New / not linked</option>{customers.map((c)=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
-          <label>Source<input value={leadForm.source} onChange={(e)=>setLeadForm({...leadForm,source:e.target.value})} placeholder="Facebook, Walk-in, Referral" /></label>
-          <label>Stage<select value={leadForm.stageId} onChange={(e)=>chooseStage(e.target.value)}><option value="">No stage</option>{stages.filter((s)=>s.isActive).map((s)=><option key={s.id} value={s.id}>{s.name}</option>)}</select></label>
+          <label>Email<input value={leadForm.email} onChange={(e)=>setLeadForm({...leadForm,email:e.target.value})} /></label>
+          <label>Source<input value={leadForm.source} onChange={(e)=>setLeadForm({...leadForm,source:e.target.value})} /></label>
+          <label>Stage<select value={leadForm.stageId} onChange={(e)=>setLeadForm({...leadForm,stageId:e.target.value})}><option value="">Select stage</option>{stages.map((s)=><option key={s.id} value={s.id}>{s.name}</option>)}</select></label>
           <label>Status<select value={leadForm.status} onChange={(e)=>setLeadForm({...leadForm,status:e.target.value})}>{['OPEN','FOLLOW_UP','QUOTED','WON','LOST','ARCHIVED'].map((s)=><option key={s}>{s}</option>)}</select></label>
           <label>Priority<select value={leadForm.priority} onChange={(e)=>setLeadForm({...leadForm,priority:e.target.value})}>{['LOW','NORMAL','HIGH','URGENT'].map((s)=><option key={s}>{s}</option>)}</select></label>
-          <label>Expected value<input type="number" min="0" value={leadForm.expectedValue} onChange={(e)=>setLeadForm({...leadForm,expectedValue:e.target.value})} /></label>
           <label>Probability %<input type="number" min="0" max="100" value={leadForm.probability} onChange={(e)=>setLeadForm({...leadForm,probability:e.target.value})} /></label>
-          <label>Expected close date<input type="date" value={leadForm.expectedCloseDate} onChange={(e)=>setLeadForm({...leadForm,expectedCloseDate:e.target.value})} /></label>
+          <label>Expected value<input type="number" value={leadForm.expectedValue} onChange={(e)=>setLeadForm({...leadForm,expectedValue:e.target.value})} /></label>
+          <label>Expected close<input type="date" value={leadForm.expectedCloseDate} onChange={(e)=>setLeadForm({...leadForm,expectedCloseDate:e.target.value})} /></label>
           <label>Next follow-up<input type="datetime-local" value={leadForm.nextFollowUpAt} onChange={(e)=>setLeadForm({...leadForm,nextFollowUpAt:e.target.value})} /></label>
+          <label>Customer<select value={leadForm.customerId} onChange={(e)=>setLeadForm({...leadForm,customerId:e.target.value})}><option value="">Not linked</option>{customers.map((c)=><option key={c.id} value={c.id}>{c.name}</option>)}</select></label>
           <label className="span-two">Notes<textarea value={leadForm.notes} onChange={(e)=>setLeadForm({...leadForm,notes:e.target.value})} /></label>
-          <button className="primary-btn span-two" disabled={saving}>Save lead</button>
+          <button className="primary-btn span-two" disabled={saving}>Save Lead</button>
         </form>
-        <div className="panel crm-help-panel">
-          <h2><Handshake size={18}/> Real-world CRM flow</h2>
-          <div className="approval-steps">
-            <div><strong>1</strong><span>Capture inquiry</span><small>Walk-in, call, WhatsApp, website or referral.</small></div>
-            <div><strong>2</strong><span>Follow up</span><small>Schedule calls, meetings, WhatsApp reminders and tasks.</small></div>
-            <div><strong>3</strong><span>Win customer</span><small>Convert lead into customer and continue invoice/service job flow.</small></div>
-          </div>
-        </div>
-      </div>}
+      </ModalDrawer>
 
-      {tab === 'stages' && <div className="two-col-page crm-stage-grid">
-        <form className="panel form-grid" onSubmit={createStage}>
-          <h2>Pipeline stages</h2>
+      <ModalDrawer open={drawer === 'stage'} onClose={() => setDrawer(null)} title="Add Pipeline Stage" eyebrow="CRM setup" description="Add stages like Demo, Quoted, Negotiation, Won or Lost.">
+        <form className="form-grid" onSubmit={createStage}>
           <label>Name<input required value={stageForm.name} onChange={(e)=>setStageForm({...stageForm,name:e.target.value})} placeholder="Demo / Quoted / Negotiation" /></label>
           <label>Sort order<input type="number" value={stageForm.sortOrder} onChange={(e)=>setStageForm({...stageForm,sortOrder:e.target.value})} /></label>
           <label>Probability %<input type="number" min="0" max="100" value={stageForm.probability} onChange={(e)=>setStageForm({...stageForm,probability:e.target.value})} /></label>
@@ -294,16 +281,22 @@ export default function CRM() {
           <label className="check-label"><input type="checkbox" checked={stageForm.isLost} onChange={(e)=>setStageForm({...stageForm,isLost:e.target.checked,isWon:false})} /> Lost stage</label>
           <button className="primary-btn span-two" disabled={saving}>Add stage</button>
         </form>
-        <DataTable columns={[{key:'name',label:'Stage'},{key:'probability',label:'Probability',render:(r)=>`${r.probability}%`},{key:'sortOrder',label:'Order'},{key:'type',label:'Type',render:(r)=><>{r.isWon?'Won':r.isLost?'Lost':'Open'}</>}]} rows={stages} empty="No stages" />
-      </div>}
+      </ModalDrawer>
 
-      {selectedLead && <div className="modal-backdrop" onClick={() => setSelectedLead(null)}>
-        <div className="modal-card crm-modal" onClick={(e) => e.stopPropagation()}>
-          <div className="modal-head"><div><span className="eyebrow">{selectedLead.leadNo}</span><h2>{selectedLead.title}</h2></div><button onClick={() => setSelectedLead(null)}>×</button></div>
-          <div className="crm-lead-detail">
+      <ModalDrawer open={!!selectedLead} onClose={() => setSelectedLead(null)} title={selectedLead?.title || 'Lead details'} eyebrow={selectedLead?.leadNo} mode="modal" size="lg" description="View lead information and add follow-up activity.">
+        {selectedLead && <>
+          <div className="crm-detail-grid">
             <div className="lead-detail-card"><span>Contact</span><strong>{selectedLead.contactName}</strong><small>{selectedLead.companyName || selectedLead.phone || selectedLead.email || '-'}</small></div>
             <div className="lead-detail-card"><span>Value</span><strong>{money(selectedLead.expectedValue)}</strong><small>Weighted {money(selectedLead.weightedValue)}</small></div>
             <div className="lead-detail-card"><span>Follow-up</span><strong>{dt(selectedLead.nextFollowUpAt)}</strong><small>{selectedLead.overdueFollowUp ? 'Overdue' : 'Scheduled'}</small></div>
+          </div>
+          <div className="modal-action-row">
+            <select value={selectedLead.stageId || ''} onChange={(e) => updateLead(selectedLead, { stageId: e.target.value || null })}>
+              <option value="">No stage</option>
+              {stages.filter((s) => s.isActive).map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+            </select>
+            {selectedLead.status !== 'WON' && <button className="primary-btn" onClick={() => convertCustomer(selectedLead)}>Convert Customer</button>}
+            {selectedLead.status !== 'LOST' && <button className="danger-btn" onClick={() => updateLead(selectedLead, { status: 'LOST', lostReason: 'Marked lost from CRM page' })}>Mark Lost</button>}
           </div>
           <form className="form-grid" onSubmit={addActivity}>
             <h3 className="span-two">Add follow-up / activity</h3>
@@ -322,8 +315,8 @@ export default function CRM() {
               {!activity.completedAt && <button className="mini-action" onClick={() => completeActivity(activity)}>Complete</button>}
             </div>)}
           </div>
-        </div>
-      </div>}
+        </>}
+      </ModalDrawer>
     </div>
   );
 }

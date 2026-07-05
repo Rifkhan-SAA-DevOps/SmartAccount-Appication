@@ -1,70 +1,131 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
-export function useClientPagination(rows = [], initialPageSize = 10) {
-  const safeRows = Array.isArray(rows) ? rows : [];
-  const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(initialPageSize);
+function clamp(value, min, max) {
+  const number = Number(value);
+  if (!Number.isFinite(number)) return min;
+  return Math.max(min, Math.min(max, number));
+}
 
-  const totalPages = Math.max(1, Math.ceil(safeRows.length / pageSize));
-  const safePage = Math.min(page, totalPages);
-  const startIndex = (safePage - 1) * pageSize;
-  const pageRows = useMemo(() => safeRows.slice(startIndex, startIndex + pageSize), [safeRows, startIndex, pageSize]);
+export function useClientPagination(items = [], options = {}) {
+  const {
+    initialPageSize = 10,
+    resetKey = '',
+    enabled = true
+  } = options;
 
-  function goToPage(nextPage) {
-    setPage(Math.min(Math.max(1, Number(nextPage) || 1), totalPages));
-  }
+  const safeItems = Array.isArray(items) ? items : [];
+  const safeInitialSize = Math.max(1, Number(initialPageSize || 10));
+  const [page, setPageState] = useState(1);
+  const [pageSize, setPageSizeState] = useState(safeInitialSize);
 
-  function changePageSize(nextSize) {
-    setPageSize(Number(nextSize) || initialPageSize);
-    setPage(1);
-  }
+  const totalItems = safeItems.length;
+  const totalPages = enabled ? Math.max(1, Math.ceil(totalItems / Math.max(1, pageSize))) : 1;
+
+  useEffect(() => {
+    setPageState(1);
+  }, [resetKey, pageSize, enabled]);
+
+  useEffect(() => {
+    setPageState((current) => clamp(current, 1, totalPages));
+  }, [totalPages]);
+
+  const pageItems = useMemo(() => {
+    if (!enabled) return safeItems;
+    const startIndex = (page - 1) * pageSize;
+    return safeItems.slice(startIndex, startIndex + pageSize);
+  }, [enabled, safeItems, page, pageSize]);
+
+  const start = totalItems === 0 ? 0 : (page - 1) * pageSize + 1;
+  const end = enabled ? Math.min(totalItems, page * pageSize) : totalItems;
 
   return {
-    rows: pageRows,
-    pageRows,
-    page: safePage,
+    page,
+    setPage: (next) => setPageState((current) => clamp(typeof next === 'function' ? next(current) : next, 1, totalPages)),
     pageSize,
+    setPageSize: (next) => setPageSizeState(Math.max(1, Number(next) || safeInitialSize)),
+    totalItems,
     totalPages,
-    totalRows: safeRows.length,
-    startIndex,
-    endIndex: Math.min(startIndex + pageSize, safeRows.length),
-    setPage: goToPage,
-    goToPage,
-    setPageSize: changePageSize,
-    changePageSize
+    pageItems,
+    start,
+    end,
+    enabled
   };
 }
 
 export default function Pagination({
   page = 1,
-  totalPages = 1,
-  totalRows = 0,
+  setPage,
   pageSize = 10,
-  onPageChange,
-  onPageSizeChange,
-  pageSizeOptions = [5, 10, 20, 50]
+  setPageSize,
+  totalPages = 1,
+  totalItems = 0,
+  start,
+  end,
+  label = 'records',
+  pageSizeOptions = [5, 10, 20, 50],
+  onPageChange
 }) {
-  const safeTotalPages = Math.max(1, Number(totalPages) || 1);
-  const safePage = Math.min(Math.max(1, Number(page) || 1), safeTotalPages);
-  const start = totalRows === 0 ? 0 : ((safePage - 1) * pageSize) + 1;
-  const end = Math.min(safePage * pageSize, totalRows);
+  const safeTotalPages = Math.max(1, Number(totalPages || 1));
+  const safePageSize = Math.max(1, Number(pageSize || 10));
+  const safePage = clamp(page, 1, safeTotalPages);
+  const safeTotalItems = Math.max(0, Number(totalItems || 0));
+  const firstItem = start ?? (safeTotalItems ? ((safePage - 1) * safePageSize) + 1 : 0);
+  const lastItem = end ?? Math.min(safeTotalItems, safePage * safePageSize);
+
+  function changePage(nextPage) {
+    const value = clamp(nextPage, 1, safeTotalPages);
+    if (onPageChange) {
+      onPageChange(value);
+      return;
+    }
+    if (setPage) setPage(value);
+  }
+
+  function changePageSize(event) {
+    const value = Math.max(1, Number(event.target.value) || safePageSize);
+    if (setPageSize) setPageSize(value);
+  }
+
+  if (!safeTotalItems || safeTotalPages <= 1) return null;
+
+  const pages = [];
+  const firstPage = Math.max(1, safePage - 2);
+  const lastPage = Math.min(safeTotalPages, safePage + 2);
+  for (let item = firstPage; item <= lastPage; item += 1) pages.push(item);
 
   return (
-    <div className="pagination-bar">
-      <div className="pagination-info">
-        Showing <strong>{start}</strong> - <strong>{end}</strong> of <strong>{totalRows}</strong>
+    <div className="pagination-bar" role="navigation" aria-label="Table pagination">
+      <div className="pagination-summary pagination-info">
+        Showing <strong>{firstItem}</strong>–<strong>{lastItem}</strong> of <strong>{safeTotalItems}</strong> {label}
       </div>
+
       <div className="pagination-controls">
-        {onPageSizeChange && (
-          <select value={pageSize} onChange={(e) => onPageSizeChange(Number(e.target.value))} aria-label="Rows per page">
-            {pageSizeOptions.map((size) => <option key={size} value={size}>{size} / page</option>)}
-          </select>
+        {setPageSize && (
+          <label className="pagination-size">
+            Rows
+            <select value={safePageSize} onChange={changePageSize}>
+              {pageSizeOptions.map((size) => <option key={size} value={size}>{size}</option>)}
+            </select>
+          </label>
         )}
-        <button type="button" className="page-btn" onClick={() => onPageChange?.(1)} disabled={safePage <= 1}>First</button>
-        <button type="button" className="page-btn" onClick={() => onPageChange?.(safePage - 1)} disabled={safePage <= 1}>Prev</button>
-        <span className="page-now">{safePage} / {safeTotalPages}</span>
-        <button type="button" className="page-btn" onClick={() => onPageChange?.(safePage + 1)} disabled={safePage >= safeTotalPages}>Next</button>
-        <button type="button" className="page-btn" onClick={() => onPageChange?.(safeTotalPages)} disabled={safePage >= safeTotalPages}>Last</button>
+
+        <button type="button" onClick={() => changePage(1)} disabled={safePage <= 1}>First</button>
+        <button type="button" onClick={() => changePage(safePage - 1)} disabled={safePage <= 1}>Prev</button>
+        {firstPage > 1 && <span className="pagination-dots">…</span>}
+        {pages.map((item) => (
+          <button
+            type="button"
+            key={item}
+            className={item === safePage ? 'active' : ''}
+            onClick={() => changePage(item)}
+            disabled={item === safePage}
+          >
+            {item}
+          </button>
+        ))}
+        {lastPage < safeTotalPages && <span className="pagination-dots">…</span>}
+        <button type="button" onClick={() => changePage(safePage + 1)} disabled={safePage >= safeTotalPages}>Next</button>
+        <button type="button" onClick={() => changePage(safeTotalPages)} disabled={safePage >= safeTotalPages}>Last</button>
       </div>
     </div>
   );

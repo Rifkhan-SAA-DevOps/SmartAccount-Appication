@@ -1,0 +1,582 @@
+/* Stage 7 — Work, service and control pages responsive hardening.
+   Purpose: stop overlap, make long lists readable, keep forms/buttons aligned,
+   and give older operational pages a more modern ERP layout without changing backend APIs. */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+.page,
+.app-content,
+.content-area,
+.main-content {
+  min-width: 0;
+}
+
+.page.service-jobs-page,
+.page.crm-page,
+.page.projects-page,
+.page.hr-page,
+.page.deliveries-page,
+.page.campaigns-page,
+.page.installments-page,
+.page.loyalty-page,
+.page.warranty-page,
+.page.documents-page,
+.page.approvals-page,
+.page.audit-page,
+.page.security-center-page,
+.page.notifications-page,
+.page.settings-page {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+.page-head,
+.page-header,
+.document-hero,
+.security-hero {
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.page-head > *,
+.page-header > *,
+.panel > *,
+.stat-card > *,
+.table-card > *,
+.smart-data-table-card > * {
+  min-width: 0;
+}
+
+.head-actions,
+.actions-row,
+.compact-actions,
+.project-actions,
+.installment-actions,
+.tax-actions,
+.delivery-filter-row,
+.filters-row,
+.tab-actions,
+.ledger-toolbar,
+.top-bars,
+.panel-head-inline,
+.section-title-row,
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.head-actions {
+  justify-content: flex-end;
+}
+
+.head-actions button,
+.actions-row button,
+.tab-actions button,
+.ledger-toolbar button,
+.section-title-row button,
+.primary-btn,
+.secondary-btn,
+.ghost-btn,
+.mini-action,
+.mini-danger {
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+.primary-btn,
+.secondary-btn,
+.ghost-btn {
+  min-height: 38px;
+}
+
+.panel,
+.table-card,
+.smart-data-table-card,
+.lead-card,
+.task-card,
+.security-user-card,
+.loyalty-rule-card,
+.quick-invoice-box,
+.installment-preview,
+.json-card,
+.mini-invoice,
+.stat-card {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 18px;
+}
+
+.panel,
+.table-card,
+.smart-data-table-card {
+  background: rgba(255,255,255,.94);
+  border: 1px solid rgba(148, 163, 184, .22);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, .06);
+}
+
+.stat-grid,
+.service-stat-grid,
+.report-stat-grid,
+.project-stat-grid,
+.hr-stat-grid,
+.delivery-stat-grid,
+.campaign-stat-grid,
+.installment-stat-grid,
+.warranty-stat-grid,
+.document-stat-grid,
+.security-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  min-width: 0;
+}
+
+.service-grid,
+.hr-grid,
+.delivery-grid,
+.campaign-grid,
+.installment-grid,
+.warranty-grid,
+.ledger-layout,
+.ledger-layout.small-side,
+.document-center-grid,
+.two-col-page,
+.crm-followup-grid,
+.crm-create-grid,
+.project-create-grid,
+.loyalty-action-grid,
+.loyalty-tier-grid,
+.loyalty-rule-grid,
+.audit-two-col,
+.settings-grid,
+.security-user-grid,
+.campaign-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  min-width: 0;
+  align-items: start;
+}
+
+@media (min-width: 1280px) {
+  .service-grid,
+  .hr-grid,
+  .delivery-grid,
+  .campaign-grid,
+  .installment-grid,
+  .warranty-grid {
+    grid-template-columns: minmax(0, 1.6fr) minmax(320px, .8fr);
+  }
+
+  .two-col-page,
+  .crm-followup-grid,
+  .crm-create-grid,
+  .project-create-grid,
+  .loyalty-action-grid,
+  .loyalty-tier-grid,
+  .loyalty-rule-grid,
+  .audit-two-col,
+  .settings-grid,
+  .campaign-detail-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .ledger-layout.small-side,
+  .document-center-grid {
+    grid-template-columns: minmax(0, 1.35fr) minmax(300px, .75fr);
+  }
+}
+
+/* If the sidebar is open/collapsed on laptop, two columns become risky. Stack earlier. */
+@media (max-width: 1279px) {
+  .service-grid,
+  .hr-grid,
+  .delivery-grid,
+  .campaign-grid,
+  .installment-grid,
+  .warranty-grid,
+  .ledger-layout,
+  .ledger-layout.small-side,
+  .document-center-grid,
+  .two-col-page,
+  .crm-followup-grid,
+  .crm-create-grid,
+  .project-create-grid,
+  .loyalty-action-grid,
+  .loyalty-tier-grid,
+  .loyalty-rule-grid,
+  .audit-two-col,
+  .settings-grid,
+  .campaign-detail-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+.form-grid,
+.form-grid.two,
+.form-grid.four,
+.form-grid.compact,
+.audit-filter-grid,
+.crm-filter-grid,
+.project-filter-grid,
+.notification-settings-grid,
+.tax-form-grid,
+.approval-filter-row,
+.loyalty-filter-grid,
+.delivery-filter-row,
+.installment-filter,
+.compact-service-filter {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+  min-width: 0;
+}
+
+.form-grid input,
+.form-grid select,
+.form-grid textarea,
+.filters-row input,
+.filters-row select,
+.ledger-toolbar input,
+.ledger-toolbar select,
+.audit-filter-grid input,
+.audit-filter-grid select,
+.project-filter-grid input,
+.project-filter-grid select,
+.delivery-filter-row input,
+.delivery-filter-row select,
+.approval-filter-row input,
+.approval-filter-row select,
+.settings-grid input,
+.settings-grid select,
+.settings-grid textarea,
+.panel input,
+.panel select,
+.panel textarea {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.span-two,
+.full-width,
+.file-drop,
+.check-label,
+.section-subtitle {
+  min-width: 0;
+}
+
+@media (min-width: 760px) {
+  .span-two,
+  .full-width,
+  .file-drop.span-two,
+  .primary-btn.span-two,
+  .secondary-btn.span-two {
+    grid-column: span 2;
+  }
+}
+
+/* Dynamic item rows */
+.service-line-row,
+.delivery-line-row,
+.installment-payment-bar,
+.campaign-template-note,
+.trend-row,
+.audit-detail-grid,
+.warranty-grid .form-grid,
+.security-user-grid,
+.tax-rate-list,
+.approval-steps,
+.mini-list {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.service-line-row,
+.delivery-line-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  align-items: end;
+  padding: 12px;
+  border: 1px solid rgba(148, 163, 184, .18);
+  border-radius: 16px;
+  background: rgba(248,250,252,.72);
+}
+
+.service-lines,
+.delivery-lines {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+/* Kanban / pipeline boards: scroll horizontally instead of overlapping. */
+.task-board,
+.crm-pipeline-grid {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(260px, 320px);
+  gap: 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 10px;
+  scroll-snap-type: x proximity;
+  max-width: 100%;
+}
+
+.task-column,
+.pipeline-column {
+  min-width: 0;
+  scroll-snap-align: start;
+}
+
+.task-card,
+.lead-card {
+  overflow-wrap: anywhere;
+}
+
+/* Safer tables + pagination */
+.smart-data-table-card,
+.table-card {
+  padding: 0;
+}
+
+.table-scroll-shell,
+.table-card {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.smart-data-table,
+.table-card table,
+table.smart-data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 760px;
+}
+
+.smart-data-table th,
+.smart-data-table td,
+.table-card th,
+.table-card td {
+  vertical-align: top;
+  overflow-wrap: anywhere;
+}
+
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row:hover {
+  background: rgba(99, 102, 241, .06);
+}
+
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  border-top: 1px solid rgba(148, 163, 184, .22);
+  background: rgba(248,250,252,.82);
+}
+
+.pagination-summary {
+  color: #64748b;
+  font-size: .86rem;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pagination-controls button,
+.pagination-size select {
+  min-height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, .35);
+  background: white;
+  padding: 0 10px;
+}
+
+.pagination-controls button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+
+.pagination-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: .84rem;
+}
+
+.pagination-page {
+  color: #334155;
+  font-weight: 700;
+  font-size: .85rem;
+  white-space: nowrap;
+}
+
+.table-subtext,
+.muted-line,
+.truncate-text,
+.muted,
+.hint {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.badge {
+  display: inline-flex;
+  max-width: 100%;
+  white-space: nowrap;
+}
+
+/* Mobile: table becomes readable cards where possible. */
+@media (max-width: 760px) {
+  .page-head,
+  .page-header,
+  .document-hero,
+  .security-hero {
+    align-items: stretch;
+  }
+
+  .head-actions,
+  .tab-actions,
+  .actions-row,
+  .compact-actions,
+  .ledger-toolbar,
+  .section-title-row {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .head-actions button,
+  .tab-actions button,
+  .actions-row button,
+  .ledger-toolbar button,
+  .primary-btn,
+  .secondary-btn,
+  .ghost-btn {
+    flex: 1 1 145px;
+    justify-content: center;
+  }
+
+  .form-grid,
+  .form-grid.two,
+  .form-grid.four,
+  .form-grid.compact,
+  .audit-filter-grid,
+  .crm-filter-grid,
+  .project-filter-grid,
+  .notification-settings-grid,
+  .tax-form-grid,
+  .approval-filter-row,
+  .loyalty-filter-grid,
+  .delivery-filter-row,
+  .installment-filter,
+  .compact-service-filter {
+    grid-template-columns: 1fr !important;
+  }
+
+  .span-two,
+  .full-width,
+  .file-drop.span-two,
+  .primary-btn.span-two,
+  .secondary-btn.span-two {
+    grid-column: auto !important;
+  }
+
+  .smart-data-table,
+  .smart-data-table thead,
+  .smart-data-table tbody,
+  .smart-data-table th,
+  .smart-data-table td,
+  .smart-data-table tr {
+    display: block;
+    min-width: 0;
+  }
+
+  .smart-data-table {
+    min-width: 0;
+  }
+
+  .smart-data-table thead {
+    display: none;
+  }
+
+  .smart-data-table tbody {
+    display: grid;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .smart-data-table tr {
+    border: 1px solid rgba(148, 163, 184, .24);
+    border-radius: 16px;
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, .05);
+  }
+
+  .smart-data-table td {
+    display: grid;
+    grid-template-columns: minmax(96px, 36%) minmax(0, 1fr);
+    gap: 10px;
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(226,232,240,.85);
+  }
+
+  .smart-data-table td:last-child {
+    border-bottom: 0;
+  }
+
+  .smart-data-table td::before {
+    content: attr(data-label);
+    font-size: .74rem;
+    font-weight: 800;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+  }
+
+  .pagination-bar,
+  .pagination-controls {
+    width: 100%;
+  }
+
+  .pagination-controls button {
+    flex: 1 1 70px;
+  }
+
+  .pagination-size {
+    flex: 1 1 100%;
+  }
+
+  .pagination-size select {
+    flex: 1;
+  }
+
+  .task-board,
+  .crm-pipeline-grid {
+    grid-auto-columns: minmax(240px, 86vw);
+  }
+}

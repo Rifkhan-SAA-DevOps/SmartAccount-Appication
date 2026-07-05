@@ -1,0 +1,471 @@
+/* Stage 15 — POS, inventory tools, admin pages final responsive polish
+   Safe CSS layer: no backend changes, no schema changes. */
+
+/* Global safety for remaining complex pages */
+.pos-page,
+.barcode-page,
+.branches-page,
+.multi-currency-page,
+.subscription-page,
+.saas-admin-page,
+.settings-page,
+.notifications-page,
+.export-center-page,
+.statements-page {
+  width: 100%;
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.pos-page *,
+.barcode-page *,
+.branches-page *,
+.multi-currency-page *,
+.subscription-page *,
+.saas-admin-page *,
+.settings-page *,
+.notifications-page *,
+.export-center-page *,
+.statements-page * {
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* Make all busy panels breathe and avoid shrink overlap */
+.pos-page .panel,
+.barcode-page .panel,
+.branches-page .panel,
+.multi-currency-page .panel,
+.subscription-page .panel,
+.saas-admin-page .panel,
+.settings-page .panel,
+.notifications-page .panel,
+.export-center-page .panel,
+.statements-page .panel {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 24px;
+}
+
+/* Page headers become clean and readable on small screens */
+.pos-page .page-head,
+.barcode-page .page-head,
+.branches-page .page-head,
+.multi-currency-page .page-head,
+.subscription-page .page-head,
+.saas-admin-page .page-head,
+.settings-page .page-head,
+.notifications-page .page-head,
+.export-center-page .page-head,
+.statements-page .page-head,
+.barcode-page .page-header-panel {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+/* Actions should wrap instead of squeezing */
+.pos-page .actions-row,
+.barcode-page .actions-row,
+.branches-page .actions-row,
+.multi-currency-page .actions-row,
+.subscription-page .actions-row,
+.saas-admin-page .actions-row,
+.settings-page .actions-row,
+.notifications-page .actions-row,
+.export-center-page .actions-row,
+.statements-page .actions-row,
+.statement-actions,
+.statement-share-actions,
+.tab-actions,
+.compact-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.primary-btn,
+.secondary-btn,
+.ghost-btn,
+.mini-action,
+.mini-danger {
+  white-space: nowrap;
+}
+
+/* POS: keep cart from crushing products */
+.pos-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 430px);
+  gap: 18px;
+  align-items: start;
+}
+
+.pos-left,
+.pos-cart-panel,
+.offline-queue-panel,
+.held-bills-panel {
+  min-width: 0;
+}
+
+.product-tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.product-tile {
+  min-height: 118px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  text-align: left;
+}
+
+.cart-lines {
+  max-height: min(52vh, 520px);
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.cart-line {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.payment-box,
+.pos-total-box {
+  width: 100%;
+}
+
+.pos-top-panel .pos-status-row,
+.offline-sale-grid,
+.held-bills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+/* Barcode labels: preview below tools when space is tight */
+.barcode-page .form-grid.four,
+.barcode-page .label-tools .form-grid,
+.form-grid.four,
+.form-grid.three,
+.form-grid.two,
+.form-grid,
+.tax-form-grid,
+.statement-filter-grid,
+.plan-create-form {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.barcode-page .span-two,
+.settings-page .span-two,
+.span-two {
+  grid-column: span 2;
+}
+
+.label-sheet {
+  width: 100%;
+  overflow: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 14px;
+  padding: 6px;
+}
+
+.product-label {
+  min-width: 0;
+  width: 100%;
+  break-inside: avoid;
+}
+
+.barcode-svg,
+.qr-canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Branches, multi-currency, settings and notifications: stack main blocks safely */
+.two-col-page,
+.currency-grid,
+.settings-grid,
+.notification-settings-grid,
+.current-plan-panel,
+.ledger-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.stat-grid,
+.usage-grid,
+.feature-grid,
+.plan-grid,
+.export-grid,
+.statement-stat-grid,
+.currency-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+  gap: 14px;
+}
+
+.stat-card,
+.usage-card,
+.plan-card,
+.export-card,
+.currency-grid > *,
+.settings-grid > *,
+.notification-settings-grid > * {
+  min-width: 0;
+  width: 100%;
+}
+
+/* Avoid transfer/item rows breaking the page */
+.transfer-items,
+.tax-rate-list,
+.stacked-forms,
+.notification-settings-panel,
+.statement-party-card,
+.report-filter-panel,
+.statement-filter-panel {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.transfer-row,
+.inline-input {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+
+/* Tables stay full width but never destroy page width */
+.table-card,
+.saas-section .table-card,
+.statement-table-head,
+.ledger-toolbar,
+.notification-toolbar {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.table-card table {
+  min-width: 760px;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table-subtext,
+.muted-line,
+.danger-text,
+.warning-box,
+.error-box,
+.success-box {
+  overflow-wrap: anywhere;
+}
+
+/* SaaS admin rail/page should not create horizontal overflow */
+.saas-admin-page {
+  display: grid;
+  grid-template-columns: 260px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.saas-rail {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  max-height: 100vh;
+  overflow-y: auto;
+}
+
+.saas-main {
+  min-width: 0;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Modern visual polish for remaining admin pages */
+.subscription-page .plan-card,
+.saas-admin-page .plan-card,
+.export-center-page .export-card,
+.settings-page .panel,
+.notifications-page .panel,
+.statements-page .panel,
+.multi-currency-page .panel,
+.barcode-page .panel {
+  border: 1px solid rgba(148, 163, 184, 0.22);
+  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.06);
+}
+
+.subscription-page .plan-card:hover,
+.saas-admin-page .plan-card:hover,
+.export-center-page .export-card:hover,
+.product-tile:hover {
+  transform: translateY(-2px);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: 0 22px 60px rgba(15, 23, 42, 0.10);
+}
+
+/* Mobile and tablet hard rules */
+@media (max-width: 1200px) {
+  .pos-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .pos-cart-panel {
+    position: relative;
+    top: auto;
+  }
+
+  .table-card table {
+    min-width: 680px;
+  }
+
+  .saas-admin-page {
+    grid-template-columns: 1fr;
+  }
+
+  .saas-rail {
+    position: relative;
+    max-height: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+}
+
+@media (max-width: 760px) {
+  .pos-page,
+  .barcode-page,
+  .branches-page,
+  .multi-currency-page,
+  .subscription-page,
+  .saas-admin-page,
+  .settings-page,
+  .notifications-page,
+  .export-center-page,
+  .statements-page {
+    padding-inline: 0;
+  }
+
+  .pos-page .panel,
+  .barcode-page .panel,
+  .branches-page .panel,
+  .multi-currency-page .panel,
+  .subscription-page .panel,
+  .saas-admin-page .panel,
+  .settings-page .panel,
+  .notifications-page .panel,
+  .export-center-page .panel,
+  .statements-page .panel {
+    border-radius: 18px;
+    padding: 14px;
+  }
+
+  .product-tile-grid,
+  .label-sheet,
+  .stat-grid,
+  .usage-grid,
+  .feature-grid,
+  .plan-grid,
+  .export-grid,
+  .settings-grid,
+  .notification-settings-grid,
+  .currency-grid,
+  .two-col-page,
+  .statement-stat-grid,
+  .barcode-page .form-grid.four,
+  .form-grid.four,
+  .form-grid.three,
+  .form-grid.two,
+  .form-grid,
+  .tax-form-grid,
+  .statement-filter-grid,
+  .plan-create-form {
+    grid-template-columns: 1fr !important;
+  }
+
+  .span-two,
+  .barcode-page .span-two,
+  .settings-page .span-two {
+    grid-column: 1 / -1;
+  }
+
+  .pos-page .actions-row,
+  .barcode-page .actions-row,
+  .branches-page .actions-row,
+  .multi-currency-page .actions-row,
+  .subscription-page .actions-row,
+  .saas-admin-page .actions-row,
+  .settings-page .actions-row,
+  .notifications-page .actions-row,
+  .export-center-page .actions-row,
+  .statements-page .actions-row,
+  .statement-actions,
+  .statement-share-actions,
+  .tab-actions,
+  .compact-actions {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .primary-btn,
+  .secondary-btn,
+  .ghost-btn,
+  .mini-action,
+  .mini-danger {
+    width: 100%;
+    justify-content: center;
+    text-align: center;
+  }
+
+  .cart-line,
+  .transfer-row,
+  .inline-input {
+    grid-template-columns: 1fr;
+  }
+
+  .cart-lines {
+    max-height: none;
+  }
+
+  .table-card table {
+    min-width: 620px;
+  }
+}
+
+@media print {
+  .no-print,
+  .saas-rail,
+  .actions-row,
+  .tab-actions {
+    display: none !important;
+  }
+
+  .label-sheet {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    overflow: visible;
+  }
+
+  .product-label {
+    box-shadow: none !important;
+    border: 1px solid #111 !important;
+  }
+}

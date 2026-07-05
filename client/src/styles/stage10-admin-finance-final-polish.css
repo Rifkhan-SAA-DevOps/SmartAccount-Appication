@@ -1,0 +1,557 @@
+/* Stage 10 — Admin, finance, marketing and long-list responsive polish.
+   Goal: stop shrink/overlap, keep registers readable, keep filters/buttons wrapped,
+   and make long lists feel professional with the existing paginated DataTable. */
+
+.page,
+.page * {
+  min-width: 0;
+}
+
+/* Page headers must not squeeze buttons into content */
+.page-head,
+.page-header,
+.panel-head-inline,
+.ledger-toolbar,
+.section-title-row,
+.audit-detail-head {
+  min-width: 0;
+}
+
+.head-actions,
+.tab-actions,
+.actions-row,
+.statement-actions,
+.statement-share-actions,
+.approval-filter-row,
+.tax-actions {
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+.head-actions > *,
+.tab-actions > *,
+.actions-row > *,
+.approval-filter-row > *,
+.statement-actions > *,
+.statement-share-actions > * {
+  flex: 0 1 auto;
+}
+
+.primary-btn,
+.secondary-btn,
+.ghost-btn,
+.mini-action,
+.mini-danger,
+.tab-btn {
+  white-space: normal;
+  text-align: center;
+  min-width: 0;
+}
+
+/* Forms: professional spacing and no narrow squeezing */
+.form-grid,
+.settings-grid,
+.audit-filter-grid,
+.filters-row,
+.notification-settings-grid,
+.statement-filter-grid,
+.fixed-asset-filter-grid,
+.tax-form-grid {
+  min-width: 0;
+}
+
+.form-grid.two,
+.form-grid.three,
+.form-grid.four,
+.settings-grid,
+.notification-settings-grid,
+.statement-filter-grid,
+.audit-filter-grid,
+.fixed-asset-filter-grid,
+.tax-form-grid {
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)) !important;
+}
+
+label,
+input,
+select,
+textarea,
+button {
+  min-width: 0;
+}
+
+textarea {
+  width: 100%;
+  min-height: 104px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  padding: 12px 13px;
+  margin-top: 7px;
+  outline: 0;
+  resize: vertical;
+  background: #fff;
+  font: inherit;
+}
+
+textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(124,58,237,.12);
+}
+
+/* Data tables: keep registers full width, but scroll inside the card only */
+.data-table-card,
+.table-card {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden !important;
+}
+
+.data-table-scroll,
+.table-card:not(.data-table-card) {
+  overflow-x: auto !important;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+.data-table,
+table {
+  table-layout: auto;
+  min-width: 760px;
+}
+
+.data-table td,
+.data-table th,
+td,
+th {
+  max-width: 360px;
+}
+
+.data-table td,
+td {
+  vertical-align: top;
+}
+
+.table-subtext,
+.muted-line,
+.muted-text,
+.hint {
+  overflow-wrap: anywhere;
+  white-space: normal !important;
+}
+
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row:hover td {
+  background: #faf7ff;
+}
+
+/* Marketing / campaigns */
+.campaign-grid,
+.campaign-detail-grid,
+.campaign-lower-grid,
+.installment-grid,
+.audit-two-col,
+.two-col-page.audit-two-col,
+.fixed-asset-create-grid,
+.fixed-asset-maintenance-grid,
+.currency-grid,
+.bank-recon-grid,
+.ledger-layout,
+.ledger-layout.small-side {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 430px);
+  gap: 22px;
+  align-items: start;
+}
+
+.campaign-main-panel,
+.installment-list-panel,
+.audit-detail-panel,
+.statement-party-card,
+.fixed-asset-help,
+.depreciation-panel {
+  min-width: 0;
+}
+
+.campaign-form-panel,
+.campaign-customer-panel,
+.installment-form-panel,
+.installment-detail-panel,
+.audit-filter-panel,
+.upload-panel,
+.stacked-forms,
+.receipt-card,
+.invoice-preview-panel {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.customer-check-list,
+.tax-rate-list,
+.settings-list {
+  max-height: min(56vh, 520px);
+  overflow: auto;
+  padding-right: 6px;
+}
+
+.customer-check-list::-webkit-scrollbar,
+.tax-rate-list::-webkit-scrollbar,
+.settings-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.customer-check-list::-webkit-scrollbar-thumb,
+.tax-rate-list::-webkit-scrollbar-thumb,
+.settings-list::-webkit-scrollbar-thumb {
+  background: rgba(124,58,237,.22);
+  border-radius: 999px;
+}
+
+.check-label {
+  min-width: 0;
+}
+
+.check-label span,
+.check-label small,
+.check-label strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Installments */
+.installment-payment-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: end;
+}
+
+.installment-payment-bar > * {
+  flex: 1 1 180px;
+}
+
+.installment-preview {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+/* Audit log detail JSON cards */
+.audit-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.json-card,
+.json-card pre {
+  max-width: 100%;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.json-card pre {
+  max-height: 360px;
+  background: #0f172a;
+  color: #e5e7eb;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+/* Notifications */
+.notifications-page .two-col-page {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+  gap: 22px;
+}
+
+.notification-toolbar,
+.audit-toolbar,
+.statement-table-head {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.approval-filter-row {
+  display: flex;
+  gap: 10px;
+  align-items: end;
+}
+
+.approval-filter-row label {
+  flex: 1 1 160px;
+}
+
+.notification-settings-grid {
+  align-items: start;
+}
+
+.notification-settings-grid .setting-check {
+  min-height: 50px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fafafa;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+}
+
+/* Settings */
+.settings-page .settings-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.settings-page .span-two,
+.statements-page .span-two,
+.audit-page .span-two {
+  grid-column: 1 / -1;
+}
+
+.mini-invoice {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.mini-invoice-line,
+.mini-invoice-head {
+  min-width: 0;
+  gap: 10px;
+}
+
+/* Export center */
+.export-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.export-card {
+  min-width: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.report-filter-panel .form-grid.three {
+  align-items: end;
+}
+
+/* Statements */
+.statement-filter-panel,
+.statement-party-card {
+  min-width: 0;
+}
+
+.statement-stat-grid,
+.currency-stat-grid,
+.bank-recon-stat-grid,
+.fixed-asset-stat-grid,
+.installment-stat-grid,
+.campaign-stat-grid {
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+}
+
+/* Fixed assets, multi currency, bank recon */
+.fixed-assets-page .two-col-page,
+.multi-currency-page .currency-grid,
+.bank-recon-page .bank-recon-grid {
+  min-width: 0;
+}
+
+.fixed-assets-page .panel.form-grid,
+.multi-currency-page .panel.form-grid,
+.multi-currency-page .panel.stacked-forms,
+.bank-recon-page .panel.form-grid {
+  align-self: start;
+}
+
+.conversion-result {
+  overflow-wrap: anywhere;
+}
+
+.bank-recon-toolbar.panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  align-items: end;
+}
+
+.bank-recon-toolbar.panel label,
+.bank-recon-toolbar.panel button {
+  flex: 1 1 190px;
+}
+
+/* Ledger page */
+.ledger-summary-grid {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)) !important;
+}
+
+.receipt-box,
+.receipt-card {
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.receipt-line,
+.receipt-head {
+  min-width: 0;
+  gap: 8px;
+}
+
+/* Professional panel hierarchy */
+.campaigns-page .panel,
+.installments-page .panel,
+.audit-page .panel,
+.notifications-page .panel,
+.settings-page .panel,
+.export-center-page .panel,
+.statements-page .panel,
+.fixed-assets-page .panel,
+.multi-currency-page .panel,
+.bank-recon-page .panel,
+.ledgers-page .panel {
+  border-radius: 22px;
+  overflow: hidden;
+}
+
+.campaigns-page h2,
+.installments-page h2,
+.audit-page h2,
+.notifications-page h2,
+.settings-page h2,
+.export-center-page h2,
+.statements-page h2,
+.fixed-assets-page h2,
+.multi-currency-page h2,
+.bank-recon-page h2,
+.ledgers-page h2 {
+  line-height: 1.2;
+}
+
+/* Laptop/tablet: list area first, forms/details below if space is tight */
+@media (max-width: 1380px) {
+  .campaign-grid,
+  .campaign-detail-grid,
+  .campaign-lower-grid,
+  .installment-grid,
+  .audit-two-col,
+  .two-col-page.audit-two-col,
+  .fixed-asset-create-grid,
+  .fixed-asset-maintenance-grid,
+  .currency-grid,
+  .bank-recon-grid,
+  .ledger-layout,
+  .ledger-layout.small-side {
+    grid-template-columns: 1fr !important;
+  }
+
+  .campaign-form-panel,
+  .campaign-customer-panel,
+  .installment-form-panel,
+  .installment-detail-panel,
+  .audit-filter-panel,
+  .upload-panel,
+  .stacked-forms,
+  .receipt-card,
+  .invoice-preview-panel {
+    position: relative !important;
+    top: auto !important;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 900px) {
+  .page-head,
+  .page-header,
+  .ledger-toolbar,
+  .section-title-row,
+  .audit-detail-head,
+  .panel-head-inline {
+    display: grid !important;
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .head-actions,
+  .tab-actions,
+  .actions-row,
+  .approval-filter-row,
+  .statement-actions,
+  .statement-share-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .head-actions > *,
+  .tab-actions > *,
+  .actions-row > *,
+  .approval-filter-row > *,
+  .statement-actions > *,
+  .statement-share-actions > * {
+    width: 100%;
+  }
+
+  .data-table,
+  table {
+    min-width: 680px;
+  }
+}
+
+@media (max-width: 640px) {
+  .page {
+    gap: 16px;
+  }
+
+  .panel {
+    padding: 16px !important;
+    border-radius: 18px !important;
+  }
+
+  .head-actions,
+  .tab-actions,
+  .actions-row,
+  .approval-filter-row,
+  .statement-actions,
+  .statement-share-actions,
+  .bank-recon-toolbar.panel {
+    grid-template-columns: 1fr !important;
+  }
+
+  .primary-btn,
+  .secondary-btn,
+  .ghost-btn,
+  .mini-action,
+  .mini-danger,
+  .tab-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .form-grid.two,
+  .form-grid.three,
+  .form-grid.four,
+  .settings-grid,
+  .notification-settings-grid,
+  .statement-filter-grid,
+  .audit-filter-grid,
+  .fixed-asset-filter-grid,
+  .tax-form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .data-table,
+  table {
+    min-width: 620px;
+  }
+
+  .customer-check-list,
+  .tax-rate-list,
+  .settings-list {
+    max-height: 340px;
+  }
+}

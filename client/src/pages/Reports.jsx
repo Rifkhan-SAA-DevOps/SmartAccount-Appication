@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api } from '../api/http.js';
 import DataTable from '../components/ui/DataTable.jsx';
+import '../styles/stage13-registers-finance-polish.css';
 
 const tabs = [
   { key: 'overview', label: 'Overview' },
@@ -145,7 +146,7 @@ export default function Reports() {
           </div>
 
           {activeTab === 'overview' && (
-            <div className="report-grid two">
+            <div className="report-grid two stage13-report-stack">
               <section className="panel">
                 <div className="section-head"><div><h2>Daily Sales Trend</h2><p>Invoice totals for the selected period.</p></div></div>
                 <div className="trend-list">
@@ -177,7 +178,7 @@ export default function Reports() {
                   {(sales.productWise || []).slice(0, 8).map((row) => <div className="trend-row" key={row.productId || row.product}><span>{row.product}</span><MiniBar value={row.sales} max={topProductMax} /><b>{money(row.sales)}</b></div>)}
                 </div>
               </section>
-              <div className="report-grid two">
+              <div className="report-grid two stage13-report-stack">
                 <section className="panel"><h2>Customer-wise Sales</h2><DataTable columns={[{ key: 'customer', label: 'Customer' }, { key: 'invoices', label: 'Invoices' }, { key: 'sales', label: 'Sales', render: (r) => money(r.sales) }, { key: 'paid', label: 'Paid', render: (r) => money(r.paid) }, { key: 'balance', label: 'Balance', render: (r) => money(r.balance) }]} rows={sales.customerWise || []} /></section>
                 <section className="panel"><h2>Payment Methods</h2><DataTable columns={[{ key: 'method', label: 'Method' }, { key: 'count', label: 'Count' }, { key: 'amount', label: 'Amount', render: (r) => money(r.amount) }]} rows={sales.paymentMethods || []} /></section>
                 <section className="panel"><h2>Branch-wise Sales</h2><DataTable columns={[{ key: 'branch', label: 'Branch' }, { key: 'invoices', label: 'Invoices' }, { key: 'sales', label: 'Sales', render: (r) => money(r.sales) }, { key: 'paid', label: 'Paid', render: (r) => money(r.paid) }]} rows={sales.branchWise || []} /></section>
@@ -195,7 +196,7 @@ export default function Reports() {
                 <div className="stat-card tone-blue"><span>Stock Movements</span><strong>{inventory.summary.movements}</strong><small>During selected period</small></div>
               </div>
               <section className="panel"><div className="section-head"><div><h2>Stock Valuation</h2><p>Product quantity × cost price.</p></div><button className="secondary-btn no-print" onClick={() => downloadReport('stock', from, to)}>Export Stock CSV</button></div><DataTable columns={[{ key: 'name', label: 'Product' }, { key: 'sku', label: 'SKU' }, { key: 'stockQty', label: 'Stock', render: (r) => number(r.stockQty) }, { key: 'reorderLevel', label: 'Reorder', render: (r) => number(r.reorderLevel) }, { key: 'costPrice', label: 'Cost', render: (r) => money(r.costPrice) }, { key: 'salePrice', label: 'Sale', render: (r) => money(r.salePrice) }, { key: 'stockValue', label: 'Value', render: (r) => money(r.stockValue) }, { key: 'margin', label: 'Margin', render: (r) => money(r.margin) }]} rows={inventory.products || []} /></section>
-              <div className="report-grid two">
+              <div className="report-grid two stage13-report-stack">
                 <section className="panel"><h2>Warehouse-wise Stock</h2><DataTable columns={[{ key: 'warehouse', label: 'Warehouse' }, { key: 'branch', label: 'Branch' }, { key: 'products', label: 'Products' }, { key: 'quantity', label: 'Qty', render: (r) => number(r.quantity) }, { key: 'value', label: 'Value', render: (r) => money(r.value) }]} rows={inventory.warehouseWise || []} /></section>
                 <section className="panel"><h2>Fast Moving Products</h2><DataTable columns={[{ key: 'product', label: 'Product' }, { key: 'sku', label: 'SKU' }, { key: 'qtySold', label: 'Qty Sold', render: (r) => number(r.qtySold) }, { key: 'sales', label: 'Sales', render: (r) => money(r.sales) }]} rows={inventory.fastMoving || []} /></section>
                 <section className="panel span-report"><h2>Recent Stock Movements</h2><DataTable columns={[{ key: 'createdAt', label: 'Date', render: (r) => dateText(r.createdAt) }, { key: 'product', label: 'Product', render: (r) => r.product?.name || '-' }, { key: 'type', label: 'Type' }, { key: 'quantity', label: 'Qty', render: (r) => number(r.quantity) }, { key: 'unitCost', label: 'Unit Cost', render: (r) => money(r.unitCost) }, { key: 'refType', label: 'Ref' }]} rows={inventory.movements || []} /></section>
@@ -205,7 +206,7 @@ export default function Reports() {
 
           {activeTab === 'finance' && finance && (
             <div className="page">
-              <div className="report-grid two">
+              <div className="report-grid two stage13-report-stack">
                 <section className="panel report-statement">
                   <div className="section-head"><div><h2>Profit & Loss</h2><p>Simple management P&L for the selected period.</p></div><button className="secondary-btn no-print" onClick={() => downloadReport('profit-loss', from, to)}>Export P&L CSV</button></div>
                   {Object.entries(finance.profitLoss || {}).map(([key, value]) => <div className="statement-row" key={key}><span>{key.replace(/([A-Z])/g, ' $1')}</span><b>{money(value)}</b></div>)}

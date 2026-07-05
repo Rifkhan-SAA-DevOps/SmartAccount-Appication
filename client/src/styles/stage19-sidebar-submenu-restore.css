@@ -1,0 +1,180 @@
+/* --------------------------------------------------------------------------
+   SmartLedger Stage 19
+   Sidebar submenu restore after fixed-scroll patches
+
+   Problem:
+   Stage 18 correctly made the right-side page content scroll independently,
+   but its desktop sidebar overflow rule can clip/hide the fixed desktop flyout
+   submenu because the sidebar uses effects/stacking context.
+
+   Goal:
+   - Sidebar itself stays fixed while right-side content scrolls.
+   - Only the sidebar menu list scrolls inside the sidebar.
+   - Desktop hover submenu/flyout is visible again.
+   - Mobile hamburger inline submenu still opens normally.
+-------------------------------------------------------------------------- */
+
+@media (min-width: 901px) {
+  .smart-app-shell,
+  .app-shell {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    min-height: 0 !important;
+    display: flex !important;
+    overflow: hidden !important;
+  }
+
+  /* Important: do NOT clip the flyout at the sidebar edge. */
+  .smart-sidebar,
+  .sidebar {
+    position: sticky !important;
+    top: 0 !important;
+    height: 100vh !important;
+    min-height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: visible !important;
+    z-index: 1005 !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* The sidebar list is the scrollable part, not the whole sidebar. */
+  .sidebar-nav-shell {
+    position: relative !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: hidden !important;
+    border-radius: 18px !important;
+  }
+
+  .sidebar-main-nav {
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  .sidebar-main-nav::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
+
+  /* Main content remains the page scroll area. */
+  .smart-main-shell,
+  .main-shell {
+    height: 100vh !important;
+    max-height: 100vh !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+  }
+
+  /* Restore desktop submenu/flyout. */
+  .sidebar-flyout.desktop-flyout {
+    display: block !important;
+    position: fixed !important;
+    z-index: 2147483000 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+    opacity: 1;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    max-width: min(var(--smart-flyout-width, 348px), calc(100vw - 112px)) !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+    -webkit-mask-image: none !important;
+    mask-image: none !important;
+  }
+
+  .sidebar-flyout.desktop-flyout::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
+
+  .sidebar-flyout.desktop-flyout.is-positioning {
+    opacity: 0 !important;
+    transform: translateX(-4px) scale(.985) !important;
+  }
+
+  .sidebar-flyout.desktop-flyout.is-position-ready {
+    opacity: 1 !important;
+    transform: translateX(0) scale(1) !important;
+  }
+
+  /* Desktop should use flyout, not inline mobile submenu. */
+  .mobile-inline-flyout {
+    display: none !important;
+  }
+}
+
+@media (max-width: 900px) {
+  /* Mobile uses inline submenu inside the hamburger drawer. */
+  .desktop-flyout,
+  .sidebar-flyout.desktop-flyout {
+    display: none !important;
+  }
+
+  .smart-sidebar,
+  .sidebar,
+  .smart-sidebar.is-collapsed,
+  .sidebar.is-collapsed {
+    overflow: hidden !important;
+    z-index: 1301 !important;
+  }
+
+  .sidebar-nav-shell {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .sidebar-main-nav {
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  .sidebar-main-nav::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
+
+  .mobile-inline-flyout {
+    display: block !important;
+    width: 100% !important;
+    max-height: 0 !important;
+    overflow: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  .sidebar-menu-row.is-expanded > .mobile-inline-flyout {
+    max-height: min(72vh, 900px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    padding: 8px 0 10px 12px !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  .sidebar-menu-row.is-expanded > .mobile-inline-flyout::-webkit-scrollbar {
+    width: 0 !important;
+    height: 0 !important;
+    display: none !important;
+  }
+}
